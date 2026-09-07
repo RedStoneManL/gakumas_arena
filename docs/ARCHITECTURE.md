@@ -16,8 +16,8 @@
 ├──────────────────────────────────────────────────────────────┤
 │ engine/     课程/考试卡牌引擎：回合、手牌、效果 DSL 解释器、状态效果    │
 ├──────────────────────────────────────────────────────────────┤
-│ data/       结构化数据(JSON) + pydantic schema + loader            │
-│ tools/      抓取 / 解析 / 校验 pipeline，把 wiki 文本变成 data/     │
+│ masterdata/ 解包 master data(YAML→JSON缓存) 访问层；data/ 类型化视图 │
+│ tools/      拉取/转换 master data、校验、名称翻译映射               │
 └──────────────────────────────────────────────────────────────┘
 ```
 
@@ -39,33 +39,24 @@ tests/
 docs/          rules/ scenarios/ research/
 ```
 
-## 3. 效果 DSL（核心决定）
+## 3. 数据与效果表示（核心决定，2026-09-07 修订）
 
-卡牌、P道具、P饮料、剧本事件的效果统一用**结构化 JSON**表达，不用自然语言，不用 Python 代码：
+**唯一真源 = 解包 master data**（`vertesan/gakumasu-diff`，YAML，每表一文件，随游戏版本自动更新）。
+不再解析 wiki 文本；wiki/攻略站只用于**校验数值和补充语义**。
 
-```json
-{
-  "id": "sc_0001",
-  "name": "アピールの基本",
-  "plan": "free",            // free | sense | logic | anomaly
-  "type": "active",          // active | mental
-  "rarity": "N",
-  "cost": {"kind": "genki", "value": 4},   // genki | stamina_direct | none
-  "flags": ["once_per_stage"],             // once_per_stage, no_duplicate, hold, generated...
-  "conditions": [ {"stat": "focus", "op": ">=", "value": 3} ],
-  "effects": [
-    {"op": "score", "value": 9},
-    {"op": "buff", "stat": "focus", "value": 2},
-    {"op": "buff", "stat": "good_condition", "turns": 3},
-    {"op": "delayed", "after_turns": 2, "effects": [ {"op": "score", "value": 5} ]}
-  ],
-  "upgrade": { ...同结构，仅覆盖差异... }
-}
-```
-
-- `op` 词表由 `docs/rules/lesson_exam_engine.md` 调研后固定；解释器在 `engine/effects.py`，每个 op 一个 handler，缺失 op 直接抛错（不静默）。
-- P道具/饮料多一层 `trigger`（`turn_start` / `after_card_played` / `stage_start` / `when_stat_changes`...）+ `limit`（发动次数）。
-- 数据文件保留 `source_text`（原始日文效果文本）和 `source_url`，便于校验 DSL 翻译是否正确。
+- dump 不入库（版权原因）：`tools/masterdata/fetch.sh` 拉到 `data/raw/gakumasu-diff`（gitignore），
+  `tools/masterdata/build_cache.py` 一次性转 JSON 缓存（YAML 解析太慢）。
+- 访问层：`gakumas_arena/masterdata/store.py` 的 `MasterData.table()/by_id()/where()/enum_values()`；
+  其余代码只经过它读数据。
+- 关键联表：`ProduceCard.playEffects[].produceExamEffectId → ProduceExamEffect`，
+  `ProduceExamEffect.effectType`（`ProduceExamEffectType_*` 枚举，~100 个）+ `effectValue1/2/effectCount/effectTurn`
+  + `chainProduceExamEffectIds` + `produceExamStatusEnchantId`（状态附魔）+ `produceExamTriggerId`（触发条件）。
+  `ProduceItem/ProduceDrink` 同样引用效果与触发表；`Produce/ProduceStep*/ProduceStepAuditionDifficulty/ResultGradePattern`
+  描述培育外循环和评级；`ProduceExamAutoEvaluation*` 是官方自动出牌 AI 的权重表（可直接做 baseline 策略）。
+- **效果解释器 = 按 `ProduceExamEffectType` 分发**（`engine/effects.py`），每个枚举值一个 handler，未实现的枚举值
+  直接抛错。这样新卡随 dump 更新自动可用，不需要手写卡牌定义。
+- 之前设计的自研 JSON DSL 降级为「测试/自定义卡」用途，保留但不作为主路径。
+- 校验：`ProduceDescription*` 表把枚举映射到日文说明文案，是效果语义的官方文档；再叠加 seesaawiki 的取整/时序表。
 
 ## 4. 剧本配置（scenarios/*.yaml）
 
@@ -105,7 +96,7 @@ evaluate:
 | # | 内容 | 产出 |
 |---|------|------|
 | M0 | 调研 + 骨架（本轮） | docs/、包结构、DSL schema |
-| M1 | 数据导入：卡牌/P道具/饮料/偶像 全量 JSON + 校验 | data/*.json, tools/ |
+| M1 | master data 加载层 + 枚举图谱 + 类型化视图 | masterdata/, docs/research/master_data_*.md |
 | M2 | 卡牌引擎跑通 センス/ロジック；对拍开源引擎 | engine/, tests |
 | M3 | アノマリー + 全部状态效果 | engine/ |
 | M4 | 培育外循环：初(Hajime) 基线 | produce/, scenarios/hajime.yaml |
