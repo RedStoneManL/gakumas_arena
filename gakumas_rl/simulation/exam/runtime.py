@@ -1262,7 +1262,9 @@ class ExamRuntime:
             self._use_drink(int(action.payload['index']))
             self._consecutive_end_turns = 0
         elif action.kind == 'end_turn':
-            skipped_turn = self.turn_counters['play_count'] <= 0
+            # 仍有出牌次数时主动结束回合即为スキップ（gakumas-engine TurnManager.endTurn；本家录像里出过一张卡后
+            # 再スキップ也回复 2 体力）。出牌次数用尽时回合会自动结束，不会走到这里。
+            skipped_turn = self._has_remaining_play_window()
             self._consecutive_end_turns += 1
             if not self.terminated:
                 self._end_turn(skipped=skipped_turn)
@@ -2951,8 +2953,10 @@ class ExamRuntime:
                 if str(item.effect.get('effectType') or '') != ExamEffect.PLAYABLE_VALUE_ADD
             ]
             self._sync_effect_resources()
+        # スキップ（出牌次数未用完就结束回合）回复 examTurnEndRecoveryStamina（§3.3）；
+        # 考试并不会每回合自动回复（录像：最終試験 残り11→10 体力 31→26，只扣了卡费 5）。
         recovery = float(self.exam_setting.get('examTurnEndRecoveryStamina') or 0)
-        if self.battle_kind != 'lesson' or skipped:
+        if skipped:
             self.stamina = min(self.max_stamina, self.stamina + recovery)
         self.panic_cost_overrides = {}
         if self.terminated:
