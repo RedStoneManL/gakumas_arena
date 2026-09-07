@@ -30,23 +30,34 @@ import atlas_annotations_more as A2  # noqa: E402
 # --------------------------------------------------------------------------- proto parsing
 
 
-def parse_messages(path):
-    """{message: [(field, type, repeated)]}"""
-    out = {}
-    cur = None
+def parse_messages(path, prefix="", out=None):
+    """{message: [(field, type, repeated)]}; keys are registered as `prefix.Name`, `Outer.Inner`
+    and the bare name (bare name is only set if not already present, so load pmaster first)."""
+    out = {} if out is None else out
+    stack = []  # nested messages: `message Outer { message Inner {...} }`
     for line in open(path, encoding="utf-8"):
         m = re.match(r"\s*message\s+(\w+)\s*\{", line)
         if m:
-            cur = m.group(1)
-            out[cur] = []
+            name = m.group(1)
+            full = ".".join([s for s in stack] + [name])
+            stack.append(name)
+            out[full + "@" + prefix] = []
+            for key in ((prefix + "." + full) if prefix else None, full, name):
+                # top-level pmaster messages own the bare name (nested helpers like
+                # CharacterDearnessLevel.ProduceSkill must not shadow the real table)
+                if key and (key not in out or (key == name and len(stack) == 1 and prefix == "pmaster")):
+                    out[key] = out[full + "@" + prefix]
             continue
-        if cur and re.match(r"\s*\}", line):
-            cur = None
+        if re.match(r"\s*(enum|oneof)\s+\w+\s*\{", line):
+            stack.append("")  # ignore enum/oneof bodies but keep brace balance
             continue
-        if cur:
+        if stack and re.match(r"\s*\}", line):
+            stack.pop()
+            continue
+        if stack and stack[-1]:
             m = re.match(r"\s*(repeated\s+)?([\w.]+)\s+(\w+)\s*=\s*\d+", line)
             if m:
-                out[cur].append((m.group(3), m.group(2), bool(m.group(1))))
+                out[".".join(stack) + "@" + prefix].append((m.group(3), m.group(2), bool(m.group(1))))
     return out
 
 
@@ -143,7 +154,7 @@ class Builder:
             if i == len(parts) - 1:
                 short = ty.split(".")[-1]
                 return ("repeated " if rep else "") + short
-            msg = self.M.get(ty.split(".")[-1])
+            msg = self.M.get(ty) or self.M.get(ty.split(".")[-1])
         return "?"
 
     def annot(self, table):
@@ -592,7 +603,7 @@ def main():
     stats = ins.analyse(tables)
     msgs = {}
     for fn in ("pmaster.proto", "pcommon.proto"):
-        msgs.update(parse_messages(os.path.join(a.proto_dir, fn)))
+        parse_messages(os.path.join(a.proto_dir, fn), prefix=fn.split(".")[0], out=msgs)
     enums = parse_enums(os.path.join(a.proto_dir, "penum.proto"))
     fks = ins.infer_fks(tables, stats)
     b = Builder(tables, stats, msgs, enums, fks, a.dump_commit)

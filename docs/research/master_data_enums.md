@@ -3105,8 +3105,8 @@ dump 中形似枚举但 proto 未定义的前缀（多为 id 噪声）：Convert
 | `BlockReduce` | 6 | 91 | ProduceExamAutoGrowEffectEvaluation.growEffectType=70; ProduceCardGrowEffect.effectType=20; ProduceDescriptionProduceCardGrowEffect.type=1 | -v。 |
 | `FullPowerPointAdd` | 7 | 118 | ProduceExamAutoGrowEffectEvaluation.growEffectType=70; ProduceCardGrowEffect.effectType=20; ProduceExamStatusEnchant.produceDescriptions=4; ProduceExamStatusEnchant.produceDescriptions.produceCardGrowEffectType=4 | 全力値 +v。 |
 | `FullPowerPointReduce` | 8 | 91 | ProduceExamAutoGrowEffectEvaluation.growEffectType=70; ProduceCardGrowEffect.effectType=20; ProduceDescriptionProduceCardGrowEffect.type=1 | -v。 |
-| `CostBuffReduce` | 10 | 71 | ProduceExamAutoGrowEffectEvaluation.growEffectType=70; ProduceDescriptionProduceCardGrowEffect.type=1 |  |
-| `CostBuffAdd` | 11 | 71 | ProduceExamAutoGrowEffectEvaluation.growEffectType=70; ProduceDescriptionProduceCardGrowEffect.type=1 |  |
+| `CostBuffReduce` | 10 | 71 | ProduceExamAutoGrowEffectEvaluation.growEffectType=70; ProduceDescriptionProduceCardGrowEffect.type=1 | 强化状态费用 -v（未使用）。 |
+| `CostBuffAdd` | 11 | 71 | ProduceExamAutoGrowEffectEvaluation.growEffectType=70; ProduceDescriptionProduceCardGrowEffect.type=1 | 强化状态费用 +v（未使用）。 |
 | `CostReduce` | 12 | 118 | ProduceExamAutoGrowEffectEvaluation.growEffectType=70; ProduceCardGrowEffect.effectType=5; ProduceExamEffect.produceDescriptions=5; ProduceExamEffect.produceDescriptions.produceCardGrowEffectType=5 | -v。 |
 | `CostAdd` | 13 | 323 | ProduceExamAutoGrowEffectEvaluation.growEffectType=70; ProduceCard.produceDescriptions=33; ProduceCard.produceDescriptions.produceCardGrowEffectType=33; ProduceExamEffect.produceDescriptions=32 | 体力コスト +v。 |
 | `CostPenetrateReduce` | 14 | 96 | ProduceExamAutoGrowEffectEvaluation.growEffectType=70; ProduceCardGrowEffect.effectType=5; ProduceCard.produceDescriptions=4; ProduceCard.produceDescriptions.produceCardGrowEffectType=4 | -v。 |

@@ -1,0 +1,4559 @@
+{
+  "generated_at": "2026-09-07T07:05:11+00:00",
+  "dump": {
+    "path": "/home/user/gakumas_arena/data/raw/gakumasu-diff",
+    "commit": "5b8969e363ae60cd1d9bf64560783b4b445f7da6",
+    "commit_date": "2026-09-04T11:03:33+00:00"
+  },
+  "engine": {
+    "upstream": "upstream: https://github.com/skyfsj/gakumas-rl @ 40b8d8b19da8480ce8ffe393067442afd872e398 (2026-05-17 21:29:46 +0800)",
+    "import_errors": {}
+  },
+  "dimensions": {
+    "exam_effect_type": {
+      "title": "ProduceExamEffectType",
+      "source": "ProduceExamEffect.effectType",
+      "summary": {
+        "values": 107,
+        "handled": 101,
+        "referenced": 0,
+        "unhandled": 6,
+        "rows_unhandled": 15,
+        "rows_referenced": 0
+      },
+      "values": {
+        "ProduceExamEffectType_ExamAddGrowEffect": {
+          "status": "handled",
+          "reason": "registry exact",
+          "rows": 160,
+          "example_row_ids": [
+            "e_effect-exam_add_grow_effect-p_card_search-active_skill-deck_all-all-0_0-g_effect-lesson_add-10",
+            "e_effect-exam_add_grow_effect-p_card_search-active_skill-deck_all-all-0_0-g_effect-lesson_add-13-g_effect-cost_add-1",
+            "e_effect-exam_add_grow_effect-p_card_search-active_skill-deck_all-all-0_0-g_effect-lesson_add-14-g_effect-cost_add-1",
+            "e_effect-exam_add_grow_effect-p_card_search-active_skill-deck_all-all-0_0-g_effect-lesson_add-16-g_effect-cost_add-1",
+            "e_effect-exam_add_grow_effect-p_card_search-active_skill-deck_all-all-0_0-g_effect-lesson_add-18-g_effect-cost_add-1"
+          ],
+          "owners": [],
+          "owner_total": 0
+        },
+        "ProduceExamEffectType_ExamAggressiveAdditive": {
+          "status": "handled",
+          "reason": "registry exact",
+          "rows": 5,
+          "example_row_ids": [
+            "e_effect-exam_aggressive_additive-0250-03",
+            "e_effect-exam_aggressive_additive-0500-01",
+            "e_effect-exam_aggressive_additive-0500-02",
+            "e_effect-exam_aggressive_additive-0500-03",
+            "e_effect-exam_aggressive_additive-0750-01"
+          ],
+          "owners": [],
+          "owner_total": 0
+        },
+        "ProduceExamEffectType_ExamAggressiveAdditiveFix": {
+          "status": "unhandled",
+          "reason": "falls through to registry fallback (generic timed effect)",
+          "rows": 1,
+          "example_row_ids": [
+            "e_effect-exam_aggressive_additive_fix-0001-02"
+          ],
+          "owners": [
+            {
+              "id": "p_card-02-ido-3_201",
+              "table": "ProduceCard",
+              "name": "わたしを支える言葉+++",
+              "count": 1
+            }
+          ],
+          "owner_total": 1
+        },
+        "ProduceExamEffectType_ExamAggressiveReduce": {
+          "status": "handled",
+          "reason": "registry exact",
+          "rows": 3,
+          "example_row_ids": [
+            "e_effect-exam_aggressive_reduce-0001",
+            "e_effect-exam_aggressive_reduce-0002",
+            "e_effect-exam_aggressive_reduce-0003"
+          ],
+          "owners": [],
+          "owner_total": 0
+        },
+        "ProduceExamEffectType_ExamAggressiveValueMultiple": {
+          "status": "handled",
+          "reason": "registry exact",
+          "rows": 4,
+          "example_row_ids": [
+            "e_effect-exam_aggressive_value_multiple-0300",
+            "e_effect-exam_aggressive_value_multiple-0500",
+            "e_effect-exam_aggressive_value_multiple-1000",
+            "e_effect-exam_aggressive_value_multiple-1500"
+          ],
+          "owners": [],
+          "owner_total": 0
+        },
+        "ProduceExamEffectType_ExamAntiDebuff": {
+          "status": "handled",
+          "reason": "registry exact",
+          "rows": 4,
+          "example_row_ids": [
+            "e_effect-exam_anti_debuff-01",
+            "e_effect-exam_anti_debuff-02",
+            "e_effect-exam_anti_debuff-03",
+            "e_effect-exam_anti_debuff-05"
+          ],
+          "owners": [],
+          "owner_total": 0
+        },
+        "ProduceExamEffectType_ExamBlock": {
+          "status": "handled",
+          "reason": "registry exact",
+          "rows": 60,
+          "example_row_ids": [
+            "e_effect-exam_block-0001",
+            "e_effect-exam_block-0002",
+            "e_effect-exam_block-0003",
+            "e_effect-exam_block-0004",
+            "e_effect-exam_block-0005"
+          ],
+          "owners": [],
+          "owner_total": 0
+        },
+        "ProduceExamEffectType_ExamBlockAddDown": {
+          "status": "handled",
+          "reason": "registry exact",
+          "rows": 8,
+          "example_row_ids": [
+            "e_effect-exam_block_add_down-01",
+            "e_effect-exam_block_add_down-02",
+            "e_effect-exam_block_add_down-03",
+            "e_effect-exam_block_add_down-04",
+            "e_effect-exam_block_add_down-05"
+          ],
+          "owners": [],
+          "owner_total": 0
+        },
+        "ProduceExamEffectType_ExamBlockAddMultipleAggressive": {
+          "status": "handled",
+          "reason": "registry exact",
+          "rows": 23,
+          "example_row_ids": [
+            "e_effect-exam_block_add_multiple_aggressive-0001-0400-01",
+            "e_effect-exam_block_add_multiple_aggressive-0002-0300-01",
+            "e_effect-exam_block_add_multiple_aggressive-0002-0500-01",
+            "e_effect-exam_block_add_multiple_aggressive-0002-1200-01",
+            "e_effect-exam_block_add_multiple_aggressive-0002-1300-01"
+          ],
+          "owners": [],
+          "owner_total": 0
+        },
+        "ProduceExamEffectType_ExamBlockDependBlockConsumptionSum": {
+          "status": "handled",
+          "reason": "registry exact",
+          "rows": 3,
+          "example_row_ids": [
+            "e_effect-exam_block_depend_block_consumption_sum-0750-01",
+            "e_effect-exam_block_depend_block_consumption_sum-0800-01",
+            "e_effect-exam_block_depend_block_consumption_sum-1000-01"
+          ],
+          "owners": [],
+          "owner_total": 0
+        },
+        "ProduceExamEffectType_ExamBlockDependExamReview": {
+          "status": "handled",
+          "reason": "registry exact",
+          "rows": 2,
+          "example_row_ids": [
+            "e_effect-exam_block_depend_exam_review-1000-01",
+            "e_effect-exam_block_depend_exam_review-2500-01"
+          ],
+          "owners": [],
+          "owner_total": 0
+        },
+        "ProduceExamEffectType_ExamBlockDown": {
+          "status": "handled",
+          "reason": "registry exact",
+          "rows": 2,
+          "example_row_ids": [
+            "e_effect-exam_block_down-0500",
+            "e_effect-exam_block_down-1000"
+          ],
+          "owners": [],
+          "owner_total": 0
+        },
+        "ProduceExamEffectType_ExamBlockFix": {
+          "status": "handled",
+          "reason": "registry exact",
+          "rows": 16,
+          "example_row_ids": [
+            "e_effect-exam_block_fix-0001",
+            "e_effect-exam_block_fix-0002",
+            "e_effect-exam_block_fix-0003",
+            "e_effect-exam_block_fix-0004",
+            "e_effect-exam_block_fix-0005"
+          ],
+          "owners": [],
+          "owner_total": 0
+        },
+        "ProduceExamEffectType_ExamBlockPerUseCardCount": {
+          "status": "handled",
+          "reason": "registry exact",
+          "rows": 13,
+          "example_row_ids": [
+            "e_effect-exam_block_per_use_card_count-0002-0003",
+            "e_effect-exam_block_per_use_card_count-0002-0005",
+            "e_effect-exam_block_per_use_card_count-0002-0008",
+            "e_effect-exam_block_per_use_card_count-0002-0009",
+            "e_effect-exam_block_per_use_card_count-0002-0010"
+          ],
+          "owners": [],
+          "owner_total": 0
+        },
+        "ProduceExamEffectType_ExamBlockRestriction": {
+          "status": "handled",
+          "reason": "registry exact",
+          "rows": 5,
+          "example_row_ids": [
+            "e_effect-exam_block_restriction-01",
+            "e_effect-exam_block_restriction-02",
+            "e_effect-exam_block_restriction-03",
+            "e_effect-exam_block_restriction-07",
+            "e_effect-exam_block_restriction-inf"
+          ],
+          "owners": [],
+          "owner_total": 0
+        },
+        "ProduceExamEffectType_ExamBlockValueMultiple": {
+          "status": "handled",
+          "reason": "registry exact",
+          "rows": 8,
+          "example_row_ids": [
+            "e_effect-exam_block_value_multiple-0200",
+            "e_effect-exam_block_value_multiple-0300",
+            "e_effect-exam_block_value_multiple-0400",
+            "e_effect-exam_block_value_multiple-0500",
+            "e_effect-exam_block_value_multiple-0600"
+          ],
+          "owners": [],
+          "owner_total": 0
+        },
+        "ProduceExamEffectType_ExamCardCreateId": {
+          "status": "handled",
+          "reason": "registry exact",
+          "rows": 15,
+          "example_row_ids": [
+            "e_effect-exam_card_create_id-p_card-00-acc-0_002-0-deck_first-1_1",
+            "e_effect-exam_card_create_id-p_card-00-acc-0_002-0-deck_random-1_1",
+            "e_effect-exam_card_create_id-p_card-00-acc-0_002-0-deck_random-2_2",
+            "e_effect-exam_card_create_id-p_card-00-acc-0_002-0-grave-1_1",
+            "e_effect-exam_card_create_id-p_card-01-act-2_003-0-hand-1_1"
+          ],
+          "owners": [],
+          "owner_total": 0
+        },
+        "ProduceExamEffectType_ExamCardCreateSearch": {
+          "status": "handled",
+          "reason": "registry exact",
+          "rows": 8,
+          "example_row_ids": [
+            "e_effect-exam_card_create_search-0001-p_card_search-random-random_pool-p_random_pool-all-upgrade_1-1-hand-random-1_1",
+            "e_effect-exam_card_create_search-0001-p_card_search-random-random_pool-p_random_pool-produce_007-create_set-card_play_aggressive-p_card_search-deck-deck_random-random_shortage-22_22",
+            "e_effect-exam_card_create_search-0001-p_card_search-random-random_pool-p_random_pool-produce_007-create_set-concentration-p_card_search-deck-deck_random-random_shortage-22_22",
+            "e_effect-exam_card_create_search-0001-p_card_search-random-random_pool-p_random_pool-produce_007-create_set-lesson_buff-p_card_search-deck-deck_random-random_shortage-22_22",
+            "e_effect-exam_card_create_search-0001-p_card_search-random-random_pool-p_random_pool-produce_007-create_set-parameter_buff-p_card_search-deck-deck_random-random_shortage-22_22"
+          ],
+          "owners": [],
+          "owner_total": 0
+        },
+        "ProduceExamEffectType_ExamCardDraw": {
+          "status": "handled",
+          "reason": "registry exact",
+          "rows": 5,
+          "example_row_ids": [
+            "e_effect-exam_card_draw-0001",
+            "e_effect-exam_card_draw-0002",
+            "e_effect-exam_card_draw-0003",
+            "e_effect-exam_card_draw-0004",
+            "e_effect-exam_card_draw-0005"
+          ],
+          "owners": [],
+          "owner_total": 0
+        },
+        "ProduceExamEffectType_ExamCardDuplicate": {
+          "status": "handled",
+          "reason": "registry exact",
+          "rows": 1,
+          "example_row_ids": [
+            "e_effect-exam_card_duplicate-0001-p_card_search-hand-deck_last-select-0_1"
+          ],
+          "owners": [],
+          "owner_total": 0
+        },
+        "ProduceExamEffectType_ExamCardMove": {
+          "status": "handled",
+          "reason": "registry exact",
+          "rows": 44,
+          "example_row_ids": [
+            "e_effect-exam_card_move-p_card_search-active_skill-deck_grave-hand-random-1_1",
+            "e_effect-exam_card_move-p_card_search-active_skill-lost-deck_random-all-0_0",
+            "e_effect-exam_card_move-p_card_search-deck_all-hold-select-1_1",
+            "e_effect-exam_card_move-p_card_search-deck_all-hold-select-2_2",
+            "e_effect-exam_card_move-p_card_search-deck_all-idol-unique-deck_first-all-0_0"
+          ],
+          "owners": [],
+          "owner_total": 0
+        },
+        "ProduceExamEffectType_ExamCardPlayAggressive": {
+          "status": "handled",
+          "reason": "registry exact",
+          "rows": 16,
+          "example_row_ids": [
+            "e_effect-exam_card_play_aggressive-0001",
+            "e_effect-exam_card_play_aggressive-0002",
+            "e_effect-exam_card_play_aggressive-0003",
+            "e_effect-exam_card_play_aggressive-0004",
+            "e_effect-exam_card_play_aggressive-0005"
+          ],
+          "owners": [],
+          "owner_total": 0
+        },
+        "ProduceExamEffectType_ExamCardSearchEffectPlayCountBuff": {
+          "status": "handled",
+          "reason": "registry exact",
+          "rows": 8,
+          "example_row_ids": [
+            "e_effect-exam_card_search_effect_play_count_buff-0001-01-01-p_card_search-active_skill-deck_all-all-0_0",
+            "e_effect-exam_card_search_effect_play_count_buff-0001-01-01-p_card_search-active_skill-n-r-sr-ssr-playing-all-0_0",
+            "e_effect-exam_card_search_effect_play_count_buff-0001-01-01-p_card_search-active_skill-playing-all-0_0",
+            "e_effect-exam_card_search_effect_play_count_buff-0001-01-01-p_card_search-mental_skill-n-r-sr-ssr-playing-all-0_0",
+            "e_effect-exam_card_search_effect_play_count_buff-0001-01-01-p_card_search-mental_skill-playing-all-0_0"
+          ],
+          "owners": [],
+          "owner_total": 0
+        },
+        "ProduceExamEffectType_ExamCardUpgrade": {
+          "status": "handled",
+          "reason": "registry exact",
+          "rows": 13,
+          "example_row_ids": [
+            "e_effect-exam_card_upgrade-p_card_search-active_skill-deck_all-random-1_1",
+            "e_effect-exam_card_upgrade-p_card_search-active_skill-first-deck-3-all-0_0",
+            "e_effect-exam_card_upgrade-p_card_search-active_skill-hand-all-0_0",
+            "e_effect-exam_card_upgrade-p_card_search-active_skill-hand-random-1_1",
+            "e_effect-exam_card_upgrade-p_card_search-deck_all-random-2_2"
+          ],
+          "owners": [],
+          "owner_total": 0
+        },
+        "ProduceExamEffectType_ExamConcentration": {
+          "status": "handled",
+          "reason": "registry exact",
+          "rows": 2,
+          "example_row_ids": [
+            "e_effect-exam_concentration-0001",
+            "e_effect-exam_concentration-0002"
+          ],
+          "owners": [],
+          "owner_total": 0
+        },
+        "ProduceExamEffectType_ExamConcentrationLessonMultipleAdditive": {
+          "status": "unhandled",
+          "reason": "falls through to registry fallback (generic timed effect)",
+          "rows": 2,
+          "example_row_ids": [
+            "e_effect-exam_concentration_lesson_multiple_additive-0350-inf",
+            "e_effect-exam_concentration_lesson_multiple_additive-0600-inf"
+          ],
+          "owners": [
+            {
+              "id": "pitem_03-3-339-0",
+              "table": "ProduceItem",
+              "name": "夏を編んだ影",
+              "count": 1
+            },
+            {
+              "id": "pitem_03-3-339-1",
+              "table": "ProduceItem",
+              "name": "夏を編んだ影+",
+              "count": 1
+            }
+          ],
+          "owner_total": 2
+        },
+        "ProduceExamEffectType_ExamDebuffRecover": {
+          "status": "handled",
+          "reason": "registry exact",
+          "rows": 3,
+          "example_row_ids": [
+            "e_effect-exam_debuff_recover",
+            "e_effect-exam_debuff_recover-0001",
+            "e_effect-exam_debuff_recover-0002"
+          ],
+          "owners": [],
+          "owner_total": 0
+        },
+        "ProduceExamEffectType_ExamEffectTimer": {
+          "status": "handled",
+          "reason": "registry exact",
+          "rows": 138,
+          "example_row_ids": [
+            "e_effect-exam_effect_timer-0001-01-e_effect-exam_add_grow_effect-p_card_search-hand-all-0_0-g_effect-lesson_add-12",
+            "e_effect-exam_effect_timer-0001-01-e_effect-exam_add_grow_effect-p_card_search-hand-all-0_0-g_effect-lesson_add-15",
+            "e_effect-exam_effect_timer-0001-01-e_effect-exam_add_grow_effect-p_card_search-hand-all-0_0-g_effect-lesson_add-16-g_effect-cost_add-1",
+            "e_effect-exam_effect_timer-0001-01-e_effect-exam_add_grow_effect-p_card_search-hand-all-0_0-g_effect-lesson_add-18-g_effect-cost_add-1",
+            "e_effect-exam_effect_timer-0001-01-e_effect-exam_add_grow_effect-p_card_search-hand-all-0_0-g_effect-lesson_add-21-g_effect-cost_add-1"
+          ],
+          "owners": [],
+          "owner_total": 0
+        },
+        "ProduceExamEffectType_ExamEnthusiasticAdditive": {
+          "status": "handled",
+          "reason": "registry exact",
+          "rows": 31,
+          "example_row_ids": [
+            "e_effect-exam_enthusiastic_additive-0001-inf",
+            "e_effect-exam_enthusiastic_additive-0002-02",
+            "e_effect-exam_enthusiastic_additive-0002-inf",
+            "e_effect-exam_enthusiastic_additive-0003-01",
+            "e_effect-exam_enthusiastic_additive-0003-inf"
+          ],
+          "owners": [],
+          "owner_total": 0
+        },
+        "ProduceExamEffectType_ExamEnthusiasticMultiple": {
+          "status": "handled",
+          "reason": "registry exact",
+          "rows": 32,
+          "example_row_ids": [
+            "e_effect-exam_enthusiastic_multiple-0100-inf",
+            "e_effect-exam_enthusiastic_multiple-0200-inf",
+            "e_effect-exam_enthusiastic_multiple-0300-01",
+            "e_effect-exam_enthusiastic_multiple-0300-inf",
+            "e_effect-exam_enthusiastic_multiple-0400-01"
+          ],
+          "owners": [],
+          "owner_total": 0
+        },
+        "ProduceExamEffectType_ExamExtraTurn": {
+          "status": "handled",
+          "reason": "registry exact",
+          "rows": 1,
+          "example_row_ids": [
+            "e_effect-exam_extra_turn"
+          ],
+          "owners": [],
+          "owner_total": 0
+        },
+        "ProduceExamEffectType_ExamForcePlayCardSearch": {
+          "status": "handled",
+          "reason": "registry exact",
+          "rows": 8,
+          "example_row_ids": [
+            "e_effect-exam_force_play_card_search-p_card_search-active_skill-lost-random-1_1",
+            "e_effect-exam_force_play_card_search-p_card_search-deck_grave-select-1_1",
+            "e_effect-exam_force_play_card_search-p_card_search-hold-all-0_0",
+            "e_effect-exam_force_play_card_search-p_card_search-mental_skill-sr-random-hand-1-all-0_0",
+            "e_effect-exam_force_play_card_search-p_card_search-r-random-hand-2-all-0_0"
+          ],
+          "owners": [],
+          "owner_total": 0
+        },
+        "ProduceExamEffectType_ExamForcePlayCardSearchWithCost": {
+          "status": "unhandled",
+          "reason": "falls through to registry fallback (generic timed effect)",
+          "rows": 1,
+          "example_row_ids": [
+            "e_effect-exam_force_play_card_search_with_cost-p_card_search-not_lost-select-1_1"
+          ],
+          "owners": [
+            {
+              "id": "p_card-03-ido-100_038",
+              "table": "ProduceCard",
+              "name": "高みへ羽ばたく一番星",
+              "count": 1
+            }
+          ],
+          "owner_total": 1
+        },
+        "ProduceExamEffectType_ExamFullPower": {
+          "status": "handled",
+          "reason": "registry exact",
+          "rows": 1,
+          "example_row_ids": [
+            "e_effect-exam_full_power"
+          ],
+          "owners": [],
+          "owner_total": 0
+        },
+        "ProduceExamEffectType_ExamFullPowerLessonMultipleAdditive": {
+          "status": "unhandled",
+          "reason": "falls through to registry fallback (generic timed effect)",
+          "rows": 3,
+          "example_row_ids": [
+            "e_effect-exam_full_power_lesson_multiple_additive-0200-04",
+            "e_effect-exam_full_power_lesson_multiple_additive-0250-inf",
+            "e_effect-exam_full_power_lesson_multiple_additive-0350-inf"
+          ],
+          "owners": [
+            {
+              "id": "p_exam_gimmick-tour-season_006-stage_3",
+              "table": "ProduceExamGimmickEffectGroup",
+              "name": null,
+              "count": 1
+            },
+            {
+              "id": "pitem_03-0-007-0-014",
+              "table": "ProduceItem",
+              "name": "初星フラッグ（紫）",
+              "count": 1
+            },
+            {
+              "id": "pitem_03-3-317-0",
+              "table": "ProduceItem",
+              "name": "あこがれチャージャー",
+              "count": 1
+            },
+            {
+              "id": "pitem_03-3-317-1",
+              "table": "ProduceItem",
+              "name": "あこがれチャージャー+",
+              "count": 1
+            }
+          ],
+          "owner_total": 4
+        },
+        "ProduceExamEffectType_ExamFullPowerPoint": {
+          "status": "handled",
+          "reason": "registry exact",
+          "rows": 11,
+          "example_row_ids": [
+            "e_effect-exam_full_power_point-0001",
+            "e_effect-exam_full_power_point-0002",
+            "e_effect-exam_full_power_point-0003",
+            "e_effect-exam_full_power_point-0004",
+            "e_effect-exam_full_power_point-0005"
+          ],
+          "owners": [],
+          "owner_total": 0
+        },
+        "ProduceExamEffectType_ExamFullPowerPointAdditive": {
+          "status": "handled",
+          "reason": "registry exact",
+          "rows": 5,
+          "example_row_ids": [
+            "e_effect-exam_full_power_point_additive-0250-01",
+            "e_effect-exam_full_power_point_additive-0250-03",
+            "e_effect-exam_full_power_point_additive-0500-01",
+            "e_effect-exam_full_power_point_additive-0500-03",
+            "e_effect-exam_full_power_point_additive-0500-04"
+          ],
+          "owners": [],
+          "owner_total": 0
+        },
+        "ProduceExamEffectType_ExamFullPowerPointReduce": {
+          "status": "handled",
+          "reason": "registry exact",
+          "rows": 3,
+          "example_row_ids": [
+            "e_effect-exam_full_power_point_reduce-0001",
+            "e_effect-exam_full_power_point_reduce-0002",
+            "e_effect-exam_full_power_point_reduce-0003"
+          ],
+          "owners": [],
+          "owner_total": 0
+        },
+        "ProduceExamEffectType_ExamGimmickLessonDebuff": {
+          "status": "handled",
+          "reason": "registry exact",
+          "rows": 4,
+          "example_row_ids": [
+            "e_effect-exam_gimmick_lesson_debuff-0005-inf",
+            "e_effect-exam_gimmick_lesson_debuff-0006-inf",
+            "e_effect-exam_gimmick_lesson_debuff-0007-inf",
+            "e_effect-exam_gimmick_lesson_debuff-0010-inf"
+          ],
+          "owners": [],
+          "owner_total": 0
+        },
+        "ProduceExamEffectType_ExamGimmickParameterDebuff": {
+          "status": "handled",
+          "reason": "registry exact",
+          "rows": 10,
+          "example_row_ids": [
+            "e_effect-exam_gimmick_parameter_debuff-01",
+            "e_effect-exam_gimmick_parameter_debuff-02",
+            "e_effect-exam_gimmick_parameter_debuff-03",
+            "e_effect-exam_gimmick_parameter_debuff-04",
+            "e_effect-exam_gimmick_parameter_debuff-05"
+          ],
+          "owners": [],
+          "owner_total": 0
+        },
+        "ProduceExamEffectType_ExamGimmickPlayCardLimit": {
+          "status": "handled",
+          "reason": "registry exact",
+          "rows": 26,
+          "example_row_ids": [
+            "e_effect-exam_gimmick_play_card_limit-01-p_card_search-active_skill-deck_all",
+            "e_effect-exam_gimmick_play_card_limit-01-p_card_search-active_skill-deck_all-all-0_0",
+            "e_effect-exam_gimmick_play_card_limit-01-p_card_search-deck_all",
+            "e_effect-exam_gimmick_play_card_limit-01-p_card_search-deck_all-all-0_0",
+            "e_effect-exam_gimmick_play_card_limit-01-p_card_search-mental_skill-deck_all"
+          ],
+          "owners": [],
+          "owner_total": 0
+        },
+        "ProduceExamEffectType_ExamGimmickSleepy": {
+          "status": "handled",
+          "reason": "registry exact",
+          "rows": 5,
+          "example_row_ids": [
+            "e_effect-exam_gimmick_sleepy-0001-inf",
+            "e_effect-exam_gimmick_sleepy-0002-inf",
+            "e_effect-exam_gimmick_sleepy-0003-inf",
+            "e_effect-exam_gimmick_sleepy-0004-inf",
+            "e_effect-exam_gimmick_sleepy-0010-inf"
+          ],
+          "owners": [],
+          "owner_total": 0
+        },
+        "ProduceExamEffectType_ExamGimmickSlump": {
+          "status": "handled",
+          "reason": "registry exact",
+          "rows": 4,
+          "example_row_ids": [
+            "e_effect-exam_gimmick_slump-01",
+            "e_effect-exam_gimmick_slump-02",
+            "e_effect-exam_gimmick_slump-03",
+            "e_effect-exam_gimmick_slump-inf"
+          ],
+          "owners": [],
+          "owner_total": 0
+        },
+        "ProduceExamEffectType_ExamGimmickStartTurnCardDrawDown": {
+          "status": "handled",
+          "reason": "registry exact",
+          "rows": 3,
+          "example_row_ids": [
+            "e_effect-exam_gimmick_start_turn_card_draw_down-0001-03",
+            "e_effect-exam_gimmick_start_turn_card_draw_down-0001-inf",
+            "e_effect-exam_gimmick_start_turn_card_draw_down-0002-01"
+          ],
+          "owners": [],
+          "owner_total": 0
+        },
+        "ProduceExamEffectType_ExamHandGraveCountCardDraw": {
+          "status": "handled",
+          "reason": "registry exact",
+          "rows": 1,
+          "example_row_ids": [
+            "e_effect-exam_hand_grave_count_card_draw"
+          ],
+          "owners": [],
+          "owner_total": 0
+        },
+        "ProduceExamEffectType_ExamItemFireLimitAdd": {
+          "status": "handled",
+          "reason": "registry exact",
+          "rows": 1,
+          "example_row_ids": [
+            "e_effect-exam_item_fire_limit_add-0001"
+          ],
+          "owners": [],
+          "owner_total": 0
+        },
+        "ProduceExamEffectType_ExamLesson": {
+          "status": "handled",
+          "reason": "registry prefix ProduceExamEffectType_ExamLesson",
+          "rows": 122,
+          "example_row_ids": [
+            "e_effect-exam_lesson-0001-01",
+            "e_effect-exam_lesson-0001-02",
+            "e_effect-exam_lesson-0001-03",
+            "e_effect-exam_lesson-0002-01",
+            "e_effect-exam_lesson-0002-02"
+          ],
+          "owners": [],
+          "owner_total": 0
+        },
+        "ProduceExamEffectType_ExamLessonAddMultipleLessonBuff": {
+          "status": "handled",
+          "reason": "registry prefix ProduceExamEffectType_ExamLesson",
+          "rows": 8,
+          "example_row_ids": [
+            "e_effect-exam_lesson_add_multiple_lesson_buff-0200",
+            "e_effect-exam_lesson_add_multiple_lesson_buff-0300",
+            "e_effect-exam_lesson_add_multiple_lesson_buff-0400",
+            "e_effect-exam_lesson_add_multiple_lesson_buff-0500",
+            "e_effect-exam_lesson_add_multiple_lesson_buff-0700"
+          ],
+          "owners": [],
+          "owner_total": 0
+        },
+        "ProduceExamEffectType_ExamLessonAddMultipleParameterBuff": {
+          "status": "handled",
+          "reason": "registry prefix ProduceExamEffectType_ExamLesson",
+          "rows": 41,
+          "example_row_ids": [
+            "e_effect-exam_lesson_add_multiple_parameter_buff-0004-1000-01",
+            "e_effect-exam_lesson_add_multiple_parameter_buff-0007-0700-01",
+            "e_effect-exam_lesson_add_multiple_parameter_buff-0008-1000-01",
+            "e_effect-exam_lesson_add_multiple_parameter_buff-0009-1000-01",
+            "e_effect-exam_lesson_add_multiple_parameter_buff-0010-1000-01"
+          ],
+          "owners": [],
+          "owner_total": 0
+        },
+        "ProduceExamEffectType_ExamLessonBuff": {
+          "status": "handled",
+          "reason": "registry exact",
+          "rows": 20,
+          "example_row_ids": [
+            "e_effect-exam_lesson_buff-0001",
+            "e_effect-exam_lesson_buff-0002",
+            "e_effect-exam_lesson_buff-0003",
+            "e_effect-exam_lesson_buff-0004",
+            "e_effect-exam_lesson_buff-0005"
+          ],
+          "owners": [],
+          "owner_total": 0
+        },
+        "ProduceExamEffectType_ExamLessonBuffAdditive": {
+          "status": "handled",
+          "reason": "registry exact",
+          "rows": 11,
+          "example_row_ids": [
+            "e_effect-exam_lesson_buff_additive-0100-inf",
+            "e_effect-exam_lesson_buff_additive-0250-02",
+            "e_effect-exam_lesson_buff_additive-0250-03",
+            "e_effect-exam_lesson_buff_additive-0250-05",
+            "e_effect-exam_lesson_buff_additive-0250-06"
+          ],
+          "owners": [],
+          "owner_total": 0
+        },
+        "ProduceExamEffectType_ExamLessonBuffAdditiveFix": {
+          "status": "handled",
+          "reason": "registry prefix ProduceExamEffectType_ExamLesson",
+          "rows": 2,
+          "example_row_ids": [
+            "e_effect-exam_lesson_buff_additive_fix-0001-04",
+            "e_effect-exam_lesson_buff_additive_fix-0002-02"
+          ],
+          "owners": [],
+          "owner_total": 0
+        },
+        "ProduceExamEffectType_ExamLessonBuffDependParameterBuff": {
+          "status": "handled",
+          "reason": "registry exact",
+          "rows": 11,
+          "example_row_ids": [
+            "e_effect-exam_lesson_buff_depend_parameter_buff-0150-01",
+            "e_effect-exam_lesson_buff_depend_parameter_buff-0200-01",
+            "e_effect-exam_lesson_buff_depend_parameter_buff-0300-01",
+            "e_effect-exam_lesson_buff_depend_parameter_buff-0400-01",
+            "e_effect-exam_lesson_buff_depend_parameter_buff-0500-01"
+          ],
+          "owners": [],
+          "owner_total": 0
+        },
+        "ProduceExamEffectType_ExamLessonBuffMultiple": {
+          "status": "handled",
+          "reason": "registry exact",
+          "rows": 15,
+          "example_row_ids": [
+            "e_effect-exam_lesson_buff_multiple-0050-01",
+            "e_effect-exam_lesson_buff_multiple-0050-inf",
+            "e_effect-exam_lesson_buff_multiple-0150-03",
+            "e_effect-exam_lesson_buff_multiple-0150-inf",
+            "e_effect-exam_lesson_buff_multiple-0200-03"
+          ],
+          "owners": [],
+          "owner_total": 0
+        },
+        "ProduceExamEffectType_ExamLessonBuffPerSearchCount": {
+          "status": "handled",
+          "reason": "registry exact",
+          "rows": 1,
+          "example_row_ids": [
+            "e_effect-exam_lesson_buff_per_search_count-0500-p_card_search-lost-all-0_0"
+          ],
+          "owners": [],
+          "owner_total": 0
+        },
+        "ProduceExamEffectType_ExamLessonBuffReduce": {
+          "status": "handled",
+          "reason": "registry exact",
+          "rows": 1,
+          "example_row_ids": [
+            "e_effect-exam_lesson_buff_reduce-0001"
+          ],
+          "owners": [],
+          "owner_total": 0
+        },
+        "ProduceExamEffectType_ExamLessonDependBlock": {
+          "status": "handled",
+          "reason": "registry prefix ProduceExamEffectType_ExamLesson",
+          "rows": 83,
+          "example_row_ids": [
+            "e_effect-exam_lesson_depend_block-0200-01",
+            "e_effect-exam_lesson_depend_block-0250-01",
+            "e_effect-exam_lesson_depend_block-0300-01",
+            "e_effect-exam_lesson_depend_block-0350-01",
+            "e_effect-exam_lesson_depend_block-0400-01"
+          ],
+          "owners": [],
+          "owner_total": 0
+        },
+        "ProduceExamEffectType_ExamLessonDependBlockAndSearchCount": {
+          "status": "handled",
+          "reason": "registry prefix ProduceExamEffectType_ExamLesson",
+          "rows": 2,
+          "example_row_ids": [
+            "e_effect-exam_lesson_depend_block_and_search_count-0200-01-p_card_search-lost-p_card-02-ido-3_190-all-0_0",
+            "e_effect-exam_lesson_depend_block_and_search_count-0250-01-p_card_search-lost-p_card-02-ido-3_190-all-0_0"
+          ],
+          "owners": [],
+          "owner_total": 0
+        },
+        "ProduceExamEffectType_ExamLessonDependBlockConsumptionSum": {
+          "status": "handled",
+          "reason": "registry prefix ProduceExamEffectType_ExamLesson",
+          "rows": 7,
+          "example_row_ids": [
+            "e_effect-exam_lesson_depend_block_consumption_sum-0900-01",
+            "e_effect-exam_lesson_depend_block_consumption_sum-1000-01",
+            "e_effect-exam_lesson_depend_block_consumption_sum-1200-01",
+            "e_effect-exam_lesson_depend_block_consumption_sum-1500-01",
+            "e_effect-exam_lesson_depend_block_consumption_sum-1700-01"
+          ],
+          "owners": [],
+          "owner_total": 0
+        },
+        "ProduceExamEffectType_ExamLessonDependExamCardPlayAggressive": {
+          "status": "handled",
+          "reason": "registry prefix ProduceExamEffectType_ExamLesson",
+          "rows": 25,
+          "example_row_ids": [
+            "e_effect-exam_lesson_depend_exam_card_play_aggressive-0500-01",
+            "e_effect-exam_lesson_depend_exam_card_play_aggressive-0700-01",
+            "e_effect-exam_lesson_depend_exam_card_play_aggressive-0800-01",
+            "e_effect-exam_lesson_depend_exam_card_play_aggressive-0900-01",
+            "e_effect-exam_lesson_depend_exam_card_play_aggressive-1000-01"
+          ],
+          "owners": [],
+          "owner_total": 0
+        },
+        "ProduceExamEffectType_ExamLessonDependExamReview": {
+          "status": "handled",
+          "reason": "registry prefix ProduceExamEffectType_ExamLesson",
+          "rows": 47,
+          "example_row_ids": [
+            "e_effect-exam_lesson_depend_exam_review-0100-01",
+            "e_effect-exam_lesson_depend_exam_review-0200-01",
+            "e_effect-exam_lesson_depend_exam_review-0300-01",
+            "e_effect-exam_lesson_depend_exam_review-0400-01",
+            "e_effect-exam_lesson_depend_exam_review-0500-01"
+          ],
+          "owners": [],
+          "owner_total": 0
+        },
+        "ProduceExamEffectType_ExamLessonDependParameterBuff": {
+          "status": "handled",
+          "reason": "registry prefix ProduceExamEffectType_ExamLesson",
+          "rows": 20,
+          "example_row_ids": [
+            "e_effect-exam_lesson_depend_parameter_buff-0300-01",
+            "e_effect-exam_lesson_depend_parameter_buff-0700-01",
+            "e_effect-exam_lesson_depend_parameter_buff-0800-01",
+            "e_effect-exam_lesson_depend_parameter_buff-0900-01",
+            "e_effect-exam_lesson_depend_parameter_buff-1000-01"
+          ],
+          "owners": [],
+          "owner_total": 0
+        },
+        "ProduceExamEffectType_ExamLessonDependPlayCardCountSum": {
+          "status": "handled",
+          "reason": "registry prefix ProduceExamEffectType_ExamLesson",
+          "rows": 11,
+          "example_row_ids": [
+            "e_effect-exam_lesson_depend_play_card_count_sum-0002-0001-01",
+            "e_effect-exam_lesson_depend_play_card_count_sum-0002-0009-01",
+            "e_effect-exam_lesson_depend_play_card_count_sum-0002-0014-01",
+            "e_effect-exam_lesson_depend_play_card_count_sum-0002-01",
+            "e_effect-exam_lesson_depend_play_card_count_sum-0003-0003-01"
+          ],
+          "owners": [],
+          "owner_total": 0
+        },
+        "ProduceExamEffectType_ExamLessonDependStamina": {
+          "status": "handled",
+          "reason": "registry prefix ProduceExamEffectType_ExamLesson",
+          "rows": 3,
+          "example_row_ids": [
+            "e_effect-exam_lesson_depend_stamina-10000-01",
+            "e_effect-exam_lesson_depend_stamina-12000-01",
+            "e_effect-exam_lesson_depend_stamina-8000-01"
+          ],
+          "owners": [],
+          "owner_total": 0
+        },
+        "ProduceExamEffectType_ExamLessonDependStaminaConsumptionSum": {
+          "status": "handled",
+          "reason": "registry prefix ProduceExamEffectType_ExamLesson",
+          "rows": 7,
+          "example_row_ids": [
+            "e_effect-exam_lesson_depend_stamina_consumption_sum-10000-01",
+            "e_effect-exam_lesson_depend_stamina_consumption_sum-1500-01",
+            "e_effect-exam_lesson_depend_stamina_consumption_sum-15000-01",
+            "e_effect-exam_lesson_depend_stamina_consumption_sum-1800-01",
+            "e_effect-exam_lesson_depend_stamina_consumption_sum-2200-01"
+          ],
+          "owners": [],
+          "owner_total": 0
+        },
+        "ProduceExamEffectType_ExamLessonFix": {
+          "status": "handled",
+          "reason": "registry prefix ProduceExamEffectType_ExamLesson",
+          "rows": 14,
+          "example_row_ids": [
+            "e_effect-exam_lesson_fix-0001-01",
+            "e_effect-exam_lesson_fix-0002-01",
+            "e_effect-exam_lesson_fix-0003-01",
+            "e_effect-exam_lesson_fix-0004-01",
+            "e_effect-exam_lesson_fix-0005-01"
+          ],
+          "owners": [],
+          "owner_total": 0
+        },
+        "ProduceExamEffectType_ExamLessonFullPowerPoint": {
+          "status": "handled",
+          "reason": "registry prefix ProduceExamEffectType_ExamLesson",
+          "rows": 55,
+          "example_row_ids": [
+            "e_effect-exam_lesson_full_power_point-0002-1000-01",
+            "e_effect-exam_lesson_full_power_point-0002-4000-01",
+            "e_effect-exam_lesson_full_power_point-0003-0500-02",
+            "e_effect-exam_lesson_full_power_point-0003-1500-01",
+            "e_effect-exam_lesson_full_power_point-0004-1000-01"
+          ],
+          "owners": [],
+          "owner_total": 0
+        },
+        "ProduceExamEffectType_ExamLessonPerSearchCount": {
+          "status": "handled",
+          "reason": "registry prefix ProduceExamEffectType_ExamLesson",
+          "rows": 4,
+          "example_row_ids": [
+            "e_effect-exam_lesson_per_search_count-0009-0001-01-p_card_search-active_skill-deck_all",
+            "e_effect-exam_lesson_per_search_count-0015-0001-01-p_card_search-active_skill-deck_all",
+            "e_effect-exam_lesson_per_search_count-0019-0001-01-p_card_search-active_skill-deck_all",
+            "e_effect-exam_lesson_per_search_count-0023-0001-01-p_card_search-active_skill-deck_all"
+          ],
+          "owners": [],
+          "owner_total": 0
+        },
+        "ProduceExamEffectType_ExamLessonValueMultiple": {
+          "status": "handled",
+          "reason": "registry exact",
+          "rows": 62,
+          "example_row_ids": [
+            "e_effect-exam_lesson_value_multiple-0020-inf",
+            "e_effect-exam_lesson_value_multiple-0030-inf",
+            "e_effect-exam_lesson_value_multiple-0050-inf",
+            "e_effect-exam_lesson_value_multiple-0100-05",
+            "e_effect-exam_lesson_value_multiple-0100-inf"
+          ],
+          "owners": [],
+          "owner_total": 0
+        },
+        "ProduceExamEffectType_ExamLessonValueMultipleDependReviewOrAggressive": {
+          "status": "handled",
+          "reason": "registry exact",
+          "rows": 3,
+          "example_row_ids": [
+            "e_effect-exam_lesson_value_multiple_depend_review_or_aggressive-02",
+            "e_effect-exam_lesson_value_multiple_depend_review_or_aggressive-03",
+            "e_effect-exam_lesson_value_multiple_depend_review_or_aggressive-05"
+          ],
+          "owners": [],
+          "owner_total": 0
+        },
+        "ProduceExamEffectType_ExamLessonValueMultipleDown": {
+          "status": "handled",
+          "reason": "registry exact",
+          "rows": 10,
+          "example_row_ids": [
+            "e_effect-exam_lesson_value_multiple_down-0200-04",
+            "e_effect-exam_lesson_value_multiple_down-0200-05",
+            "e_effect-exam_lesson_value_multiple_down-0200-inf",
+            "e_effect-exam_lesson_value_multiple_down-0500-02",
+            "e_effect-exam_lesson_value_multiple_down-0600-02"
+          ],
+          "owners": [],
+          "owner_total": 0
+        },
+        "ProduceExamEffectType_ExamMultipleEnthusiasticLesson": {
+          "status": "unhandled",
+          "reason": "falls through to registry fallback (generic timed effect)",
+          "rows": 3,
+          "example_row_ids": [
+            "e_effect-exam_multiple_enthusiastic_lesson-0001-1000-01",
+            "e_effect-exam_multiple_enthusiastic_lesson-0003-1000-01",
+            "e_effect-exam_multiple_enthusiastic_lesson-0005-1000-01"
+          ],
+          "owners": [
+            {
+              "id": "p_card-03-ido-3_197",
+              "table": "ProduceCard",
+              "name": "手を伸ばした先に+++",
+              "count": 3
+            }
+          ],
+          "owner_total": 1
+        },
+        "ProduceExamEffectType_ExamMultipleLessonBuffLesson": {
+          "status": "handled",
+          "reason": "registry exact",
+          "rows": 104,
+          "example_row_ids": [
+            "e_effect-exam_multiple_lesson_buff_lesson-0002-0500-01",
+            "e_effect-exam_multiple_lesson_buff_lesson-0002-1000-01",
+            "e_effect-exam_multiple_lesson_buff_lesson-0002-2000-01",
+            "e_effect-exam_multiple_lesson_buff_lesson-0002-2500-01",
+            "e_effect-exam_multiple_lesson_buff_lesson-0003-0500-01"
+          ],
+          "owners": [],
+          "owner_total": 0
+        },
+        "ProduceExamEffectType_ExamOverPreservation": {
+          "status": "handled",
+          "reason": "registry exact",
+          "rows": 1,
+          "example_row_ids": [
+            "e_effect-exam_over_preservation"
+          ],
+          "owners": [],
+          "owner_total": 0
+        },
+        "ProduceExamEffectType_ExamPanic": {
+          "status": "handled",
+          "reason": "registry exact",
+          "rows": 3,
+          "example_row_ids": [
+            "e_effect-exam_panic-01",
+            "e_effect-exam_panic-03",
+            "e_effect-exam_panic-04"
+          ],
+          "owners": [],
+          "owner_total": 0
+        },
+        "ProduceExamEffectType_ExamParameterBuff": {
+          "status": "handled",
+          "reason": "registry exact",
+          "rows": 17,
+          "example_row_ids": [
+            "e_effect-exam_parameter_buff-01",
+            "e_effect-exam_parameter_buff-02",
+            "e_effect-exam_parameter_buff-03",
+            "e_effect-exam_parameter_buff-04",
+            "e_effect-exam_parameter_buff-05"
+          ],
+          "owners": [],
+          "owner_total": 0
+        },
+        "ProduceExamEffectType_ExamParameterBuffAdditive": {
+          "status": "handled",
+          "reason": "registry exact",
+          "rows": 7,
+          "example_row_ids": [
+            "e_effect-exam_parameter_buff_additive-0250-03",
+            "e_effect-exam_parameter_buff_additive-0250-inf",
+            "e_effect-exam_parameter_buff_additive-0500-03",
+            "e_effect-exam_parameter_buff_additive-0500-04",
+            "e_effect-exam_parameter_buff_additive-0500-05"
+          ],
+          "owners": [],
+          "owner_total": 0
+        },
+        "ProduceExamEffectType_ExamParameterBuffDependLessonBuff": {
+          "status": "handled",
+          "reason": "registry exact",
+          "rows": 4,
+          "example_row_ids": [
+            "e_effect-exam_parameter_buff_depend_lesson_buff-0500-01",
+            "e_effect-exam_parameter_buff_depend_lesson_buff-0750-0500-01",
+            "e_effect-exam_parameter_buff_depend_lesson_buff-1000-0500-01",
+            "e_effect-exam_parameter_buff_depend_lesson_buff-2000-1000-01"
+          ],
+          "owners": [],
+          "owner_total": 0
+        },
+        "ProduceExamEffectType_ExamParameterBuffMultiplePerTurn": {
+          "status": "handled",
+          "reason": "registry exact",
+          "rows": 12,
+          "example_row_ids": [
+            "e_effect-exam_parameter_buff_multiple_per_turn-01",
+            "e_effect-exam_parameter_buff_multiple_per_turn-02",
+            "e_effect-exam_parameter_buff_multiple_per_turn-03",
+            "e_effect-exam_parameter_buff_multiple_per_turn-04",
+            "e_effect-exam_parameter_buff_multiple_per_turn-05"
+          ],
+          "owners": [],
+          "owner_total": 0
+        },
+        "ProduceExamEffectType_ExamParameterBuffMultiplePerTurnReduce": {
+          "status": "handled",
+          "reason": "registry exact",
+          "rows": 1,
+          "example_row_ids": [
+            "e_effect-exam_parameter_buff_multiple_per_turn_reduce-0001"
+          ],
+          "owners": [],
+          "owner_total": 0
+        },
+        "ProduceExamEffectType_ExamParameterBuffReduce": {
+          "status": "handled",
+          "reason": "registry exact",
+          "rows": 2,
+          "example_row_ids": [
+            "e_effect-exam_parameter_buff_reduce-0001",
+            "e_effect-exam_parameter_buff_reduce-0003"
+          ],
+          "owners": [],
+          "owner_total": 0
+        },
+        "ProduceExamEffectType_ExamPlayableValueAdd": {
+          "status": "handled",
+          "reason": "registry exact",
+          "rows": 3,
+          "example_row_ids": [
+            "e_effect-exam_playable_value_add-01",
+            "e_effect-exam_playable_value_add-02",
+            "e_effect-exam_playable_value_add-03"
+          ],
+          "owners": [],
+          "owner_total": 0
+        },
+        "ProduceExamEffectType_ExamPreservation": {
+          "status": "handled",
+          "reason": "registry exact",
+          "rows": 2,
+          "example_row_ids": [
+            "e_effect-exam_preservation-0001",
+            "e_effect-exam_preservation-0002"
+          ],
+          "owners": [],
+          "owner_total": 0
+        },
+        "ProduceExamEffectType_ExamReview": {
+          "status": "handled",
+          "reason": "registry exact",
+          "rows": 18,
+          "example_row_ids": [
+            "e_effect-exam_review-0001",
+            "e_effect-exam_review-0002",
+            "e_effect-exam_review-0003",
+            "e_effect-exam_review-0004",
+            "e_effect-exam_review-0005"
+          ],
+          "owners": [],
+          "owner_total": 0
+        },
+        "ProduceExamEffectType_ExamReviewAdditive": {
+          "status": "handled",
+          "reason": "registry exact",
+          "rows": 7,
+          "example_row_ids": [
+            "e_effect-exam_review_additive-0250-03",
+            "e_effect-exam_review_additive-0500-01",
+            "e_effect-exam_review_additive-0500-02",
+            "e_effect-exam_review_additive-0500-05",
+            "e_effect-exam_review_additive-0500-inf"
+          ],
+          "owners": [],
+          "owner_total": 0
+        },
+        "ProduceExamEffectType_ExamReviewCountAdd": {
+          "status": "handled",
+          "reason": "registry exact",
+          "rows": 1,
+          "example_row_ids": [
+            "e_effect-exam_review_count_add-0001-03"
+          ],
+          "owners": [],
+          "owner_total": 0
+        },
+        "ProduceExamEffectType_ExamReviewDependExamBlock": {
+          "status": "handled",
+          "reason": "registry exact",
+          "rows": 8,
+          "example_row_ids": [
+            "e_effect-exam_review_depend_exam_block-0500-01",
+            "e_effect-exam_review_depend_exam_block-0500-1000-01",
+            "e_effect-exam_review_depend_exam_block-0600-1000-01",
+            "e_effect-exam_review_depend_exam_block-0700-1000-01",
+            "e_effect-exam_review_depend_exam_block-0750-01"
+          ],
+          "owners": [],
+          "owner_total": 0
+        },
+        "ProduceExamEffectType_ExamReviewDependExamCardPlayAggressive": {
+          "status": "handled",
+          "reason": "registry exact",
+          "rows": 1,
+          "example_row_ids": [
+            "e_effect-exam_review_depend_exam_card_play_aggressive-3000-01"
+          ],
+          "owners": [],
+          "owner_total": 0
+        },
+        "ProduceExamEffectType_ExamReviewMultiple": {
+          "status": "handled",
+          "reason": "registry exact",
+          "rows": 18,
+          "example_row_ids": [
+            "e_effect-exam_review_multiple-0100-inf",
+            "e_effect-exam_review_multiple-0200-03",
+            "e_effect-exam_review_multiple-0200-04",
+            "e_effect-exam_review_multiple-0200-inf",
+            "e_effect-exam_review_multiple-0250-inf"
+          ],
+          "owners": [],
+          "owner_total": 0
+        },
+        "ProduceExamEffectType_ExamReviewPerSearchCount": {
+          "status": "handled",
+          "reason": "registry exact",
+          "rows": 4,
+          "example_row_ids": [
+            "e_effect-exam_review_per_search_count-1000-p_card_search-deck_grave",
+            "e_effect-exam_review_per_search_count-1000-p_card_search-deck_grave-all-0_0",
+            "e_effect-exam_review_per_search_count-2000-p_card_search-deck_grave",
+            "e_effect-exam_review_per_search_count-2000-p_card_search-deck_grave-all-0_0"
+          ],
+          "owners": [],
+          "owner_total": 0
+        },
+        "ProduceExamEffectType_ExamReviewReduce": {
+          "status": "handled",
+          "reason": "registry exact",
+          "rows": 2,
+          "example_row_ids": [
+            "e_effect-exam_review_reduce-0001",
+            "e_effect-exam_review_reduce-0002"
+          ],
+          "owners": [],
+          "owner_total": 0
+        },
+        "ProduceExamEffectType_ExamReviewValueMultiple": {
+          "status": "handled",
+          "reason": "registry exact",
+          "rows": 8,
+          "example_row_ids": [
+            "e_effect-exam_review_value_multiple-0100",
+            "e_effect-exam_review_value_multiple-0200",
+            "e_effect-exam_review_value_multiple-0300",
+            "e_effect-exam_review_value_multiple-0500",
+            "e_effect-exam_review_value_multiple-0700"
+          ],
+          "owners": [],
+          "owner_total": 0
+        },
+        "ProduceExamEffectType_ExamSearchPlayCardStaminaConsumptionChange": {
+          "status": "handled",
+          "reason": "registry exact",
+          "rows": 5,
+          "example_row_ids": [
+            "e_effect-exam_search_play_card_stamina_consumption_change-01-inf-p_card_search-active_skill-deck_all-all-0_0",
+            "e_effect-exam_search_play_card_stamina_consumption_change-01-inf-p_card_search-deck_all-all-0_0",
+            "e_effect-exam_search_play_card_stamina_consumption_change-02-inf-p_card_search-deck_all-all-0_0",
+            "e_effect-exam_search_play_card_stamina_consumption_change-03-inf-p_card_search-deck_all-all-0_0",
+            "e_effect-exam_search_play_card_stamina_consumption_change-05-inf-p_card_search-deck_all-p_card-03-ido-3_135-all-0_0"
+          ],
+          "owners": [],
+          "owner_total": 0
+        },
+        "ProduceExamEffectType_ExamStaminaConsumptionAdd": {
+          "status": "handled",
+          "reason": "registry exact",
+          "rows": 7,
+          "example_row_ids": [
+            "e_effect-exam_stamina_consumption_add-01",
+            "e_effect-exam_stamina_consumption_add-02",
+            "e_effect-exam_stamina_consumption_add-03",
+            "e_effect-exam_stamina_consumption_add-04",
+            "e_effect-exam_stamina_consumption_add-05"
+          ],
+          "owners": [],
+          "owner_total": 0
+        },
+        "ProduceExamEffectType_ExamStaminaConsumptionAddFix": {
+          "status": "handled",
+          "reason": "registry exact",
+          "rows": 4,
+          "example_row_ids": [
+            "e_effect-exam_stamina_consumption_add_fix-0001-inf",
+            "e_effect-exam_stamina_consumption_add_fix-0002-inf",
+            "e_effect-exam_stamina_consumption_add_fix-0003-inf",
+            "e_effect-exam_stamina_consumption_add_fix-0004-inf"
+          ],
+          "owners": [],
+          "owner_total": 0
+        },
+        "ProduceExamEffectType_ExamStaminaConsumptionDown": {
+          "status": "handled",
+          "reason": "registry exact",
+          "rows": 8,
+          "example_row_ids": [
+            "e_effect-exam_stamina_consumption_down-01",
+            "e_effect-exam_stamina_consumption_down-02",
+            "e_effect-exam_stamina_consumption_down-03",
+            "e_effect-exam_stamina_consumption_down-04",
+            "e_effect-exam_stamina_consumption_down-05"
+          ],
+          "owners": [],
+          "owner_total": 0
+        },
+        "ProduceExamEffectType_ExamStaminaConsumptionDownFix": {
+          "status": "handled",
+          "reason": "registry exact",
+          "rows": 4,
+          "example_row_ids": [
+            "e_effect-exam_stamina_consumption_down_fix-0001-inf",
+            "e_effect-exam_stamina_consumption_down_fix-0002-inf",
+            "e_effect-exam_stamina_consumption_down_fix-0003-inf",
+            "e_effect-exam_stamina_consumption_down_fix-0004-inf"
+          ],
+          "owners": [],
+          "owner_total": 0
+        },
+        "ProduceExamEffectType_ExamStaminaDamage": {
+          "status": "handled",
+          "reason": "registry exact",
+          "rows": 11,
+          "example_row_ids": [
+            "e_effect-exam_stamina_damage-0001",
+            "e_effect-exam_stamina_damage-0002",
+            "e_effect-exam_stamina_damage-0003",
+            "e_effect-exam_stamina_damage-0004",
+            "e_effect-exam_stamina_damage-0005"
+          ],
+          "owners": [],
+          "owner_total": 0
+        },
+        "ProduceExamEffectType_ExamStaminaRecoverFix": {
+          "status": "handled",
+          "reason": "registry exact",
+          "rows": 25,
+          "example_row_ids": [
+            "e_effect-exam_stamina_recover_fix-0001",
+            "e_effect-exam_stamina_recover_fix-0002",
+            "e_effect-exam_stamina_recover_fix-0003",
+            "e_effect-exam_stamina_recover_fix-0004",
+            "e_effect-exam_stamina_recover_fix-0005"
+          ],
+          "owners": [],
+          "owner_total": 0
+        },
+        "ProduceExamEffectType_ExamStaminaRecoverMultiple": {
+          "status": "handled",
+          "reason": "registry exact",
+          "rows": 4,
+          "example_row_ids": [
+            "e_effect-exam_stamina_recover_multiple-0050",
+            "e_effect-exam_stamina_recover_multiple-0100",
+            "e_effect-exam_stamina_recover_multiple-0150",
+            "e_effect-exam_stamina_recover_multiple-0200"
+          ],
+          "owners": [],
+          "owner_total": 0
+        },
+        "ProduceExamEffectType_ExamStaminaRecoverRestriction": {
+          "status": "handled",
+          "reason": "registry exact",
+          "rows": 1,
+          "example_row_ids": [
+            "e_effect-exam_stamina_recover_restriction-inf"
+          ],
+          "owners": [],
+          "owner_total": 0
+        },
+        "ProduceExamEffectType_ExamStaminaReduce": {
+          "status": "handled",
+          "reason": "registry exact",
+          "rows": 5,
+          "example_row_ids": [
+            "e_effect-exam_stamina_reduce--0030",
+            "e_effect-exam_stamina_reduce-0100",
+            "e_effect-exam_stamina_reduce-0150",
+            "e_effect-exam_stamina_reduce-0800",
+            "e_effect-exam_stamina_reduce-1000"
+          ],
+          "owners": [],
+          "owner_total": 0
+        },
+        "ProduceExamEffectType_ExamStaminaReduceFix": {
+          "status": "handled",
+          "reason": "registry exact",
+          "rows": 7,
+          "example_row_ids": [
+            "e_effect-exam_stamina_reduce_fix-0001",
+            "e_effect-exam_stamina_reduce_fix-0002",
+            "e_effect-exam_stamina_reduce_fix-0003",
+            "e_effect-exam_stamina_reduce_fix-0004",
+            "e_effect-exam_stamina_reduce_fix-0005"
+          ],
+          "owners": [],
+          "owner_total": 0
+        },
+        "ProduceExamEffectType_ExamStanceReset": {
+          "status": "handled",
+          "reason": "registry exact",
+          "rows": 1,
+          "example_row_ids": [
+            "e_effect-exam_stance_reset"
+          ],
+          "owners": [],
+          "owner_total": 0
+        },
+        "ProduceExamEffectType_ExamStatusEnchant": {
+          "status": "handled",
+          "reason": "registry exact",
+          "rows": 448,
+          "example_row_ids": [
+            "e_effect-exam_status_enchant",
+            "e_effect-exam_status_enchant-0005-02-inf-enchant-tower_001-exam_lesson_buff-0002-stage_004-enc01",
+            "e_effect-exam_status_enchant-0020-02-inf-enchant-tower_001-exam_lesson_buff-0002-stage_005-enc01",
+            "e_effect-exam_status_enchant-01-01-enchant-bullet_point-p_card-01-men-100_005-enc01",
+            "e_effect-exam_status_enchant-01-inf"
+          ],
+          "owners": [],
+          "owner_total": 0
+        },
+        "ProduceExamEffectType_ExamStatusEnchantEncore": {
+          "status": "unhandled",
+          "reason": "falls through to registry fallback (generic timed effect)",
+          "rows": 5,
+          "example_row_ids": [
+            "e_effect-exam_status_enchant_encore-0001-02-inf-enchant-p_card-01-ido-3_202-enc02",
+            "e_effect-exam_status_enchant_encore-0001-02-inf-enchant-p_card-02-ido-3_198-enc01",
+            "e_effect-exam_status_enchant_encore-0001-02-inf-enchant-p_card-02-ido-3_201-enc01",
+            "e_effect-exam_status_enchant_encore-0001-03-inf-enchant-p_card-03-ido-3_197-enc01",
+            "e_effect-exam_status_enchant_encore-0001-04-inf-enchant-p_card-01-ido-3_200-enc01"
+          ],
+          "owners": [
+            {
+              "id": "p_card-01-ido-3_202",
+              "table": "ProduceCard",
+              "name": "わたしだけの思い出+++",
+              "count": 1
+            },
+            {
+              "id": "p_card-02-ido-3_198",
+              "table": "ProduceCard",
+              "name": "クールすぎるアイドル+++",
+              "count": 1
+            },
+            {
+              "id": "p_card-02-ido-3_201",
+              "table": "ProduceCard",
+              "name": "わたしを支える言葉+++",
+              "count": 1
+            },
+            {
+              "id": "p_card-03-ido-3_197",
+              "table": "ProduceCard",
+              "name": "手を伸ばした先に+++",
+              "count": 1
+            },
+            {
+              "id": "p_card-01-ido-3_200",
+              "table": "ProduceCard",
+              "name": "お姉さんの感覚+++",
+              "count": 1
+            }
+          ],
+          "owner_total": 5
+        },
+        "ProduceExamEffectType_StanceLock": {
+          "status": "handled",
+          "reason": "registry exact",
+          "rows": 2,
+          "example_row_ids": [
+            "e_effect-stance_lock-01",
+            "e_effect-stance_lock-02"
+          ],
+          "owners": [],
+          "owner_total": 0
+        }
+      }
+    },
+    "produce_effect_type": {
+      "title": "ProduceEffectType",
+      "source": "ProduceEffect.produceEffectType",
+      "summary": {
+        "values": 66,
+        "handled": 57,
+        "referenced": 0,
+        "unhandled": 9,
+        "rows_unhandled": 50,
+        "rows_referenced": 0
+      },
+      "values": {
+        "ProduceEffectType_AuditionNpcEnhance": {
+          "status": "handled",
+          "reason": "_apply_produce_effect",
+          "rows": 8,
+          "example_row_ids": [
+            "p_effect-audition_npc_enhance-0020_0020",
+            "p_effect-audition_npc_enhance-0030_0030",
+            "p_effect-audition_npc_enhance-0050_0050",
+            "p_effect-audition_npc_enhance-0080_0080",
+            "p_effect-audition_npc_enhance-0100_0100"
+          ],
+          "owners": [],
+          "owner_total": 0
+        },
+        "ProduceEffectType_AuditionNpcWeaken": {
+          "status": "handled",
+          "reason": "_apply_produce_effect",
+          "rows": 2,
+          "example_row_ids": [
+            "p_effect-audition_npc_weaken-0500_0500",
+            "p_effect-audition_npc_weaken-0800_0800"
+          ],
+          "owners": [],
+          "owner_total": 0
+        },
+        "ProduceEffectType_AuditionParameterBonusMultiple": {
+          "status": "handled",
+          "reason": "_apply_produce_effect",
+          "rows": 7,
+          "example_row_ids": [
+            "p_effect-audition_parameter_bonus_multiple-0050_0050",
+            "p_effect-audition_parameter_bonus_multiple-0100_0100",
+            "p_effect-audition_parameter_bonus_multiple-0150_0150",
+            "p_effect-audition_parameter_bonus_multiple-0200_0200",
+            "p_effect-audition_parameter_bonus_multiple-0300_0300"
+          ],
+          "owners": [],
+          "owner_total": 0
+        },
+        "ProduceEffectType_AuditionVoteCountUp": {
+          "status": "handled",
+          "reason": "_apply_produce_effect",
+          "rows": 9,
+          "example_row_ids": [
+            "p_effect-audition_vote_count_up-0050_0050",
+            "p_effect-audition_vote_count_up-0100_0100",
+            "p_effect-audition_vote_count_up-0150_0150",
+            "p_effect-audition_vote_count_up-0200_0200",
+            "p_effect-audition_vote_count_up-0250_0250"
+          ],
+          "owners": [],
+          "owner_total": 0
+        },
+        "ProduceEffectType_BeforeAuditionRefreshStaminaDown": {
+          "status": "handled",
+          "reason": "_apply_produce_effect",
+          "rows": 2,
+          "example_row_ids": [
+            "p_effect-before_audition_refresh_stamina_down-0250_0250",
+            "p_effect-before_audition_refresh_stamina_down-0750_0750"
+          ],
+          "owners": [],
+          "owner_total": 0
+        },
+        "ProduceEffectType_BeforeAuditionRefreshStaminaUp": {
+          "status": "handled",
+          "reason": "_apply_produce_effect",
+          "rows": 6,
+          "example_row_ids": [
+            "p_effect-before_audition_refresh_stamina_up-0050_0050",
+            "p_effect-before_audition_refresh_stamina_up-0070_0070",
+            "p_effect-before_audition_refresh_stamina_up-0090_0090",
+            "p_effect-before_audition_refresh_stamina_up-0110_0110",
+            "p_effect-before_audition_refresh_stamina_up-0130_0130"
+          ],
+          "owners": [],
+          "owner_total": 0
+        },
+        "ProduceEffectType_CustomizeProduceCardProducePointDownMultiple": {
+          "status": "unhandled",
+          "reason": "not in _apply_produce_effect",
+          "rows": 2,
+          "example_row_ids": [
+            "p_effect-customize_produce_card_produce_point_down_multiple-0200_0200",
+            "p_effect-customize_produce_card_produce_point_down_multiple-0500_0500"
+          ],
+          "owners": [
+            {
+              "id": "pitem_03-3-350-0",
+              "table": "ProduceItem",
+              "name": "大満足レポート♪",
+              "count": 1
+            }
+          ],
+          "owner_total": 1
+        },
+        "ProduceEffectType_DanceAddition": {
+          "status": "handled",
+          "reason": "_apply_produce_effect",
+          "rows": 200,
+          "example_row_ids": [
+            "p_effect-dance_addition-0001_0001",
+            "p_effect-dance_addition-0002_0002",
+            "p_effect-dance_addition-0003_0003",
+            "p_effect-dance_addition-0004_0004",
+            "p_effect-dance_addition-0005_0005"
+          ],
+          "owners": [],
+          "owner_total": 0
+        },
+        "ProduceEffectType_DanceGrowthRateAddition": {
+          "status": "handled",
+          "reason": "_apply_produce_effect",
+          "rows": 86,
+          "example_row_ids": [
+            "p_effect-dance_growth_rate_addition-0001_0001",
+            "p_effect-dance_growth_rate_addition-0002_0002",
+            "p_effect-dance_growth_rate_addition-0003_0003",
+            "p_effect-dance_growth_rate_addition-0004_0004",
+            "p_effect-dance_growth_rate_addition-0005_0005"
+          ],
+          "owners": [],
+          "owner_total": 0
+        },
+        "ProduceEffectType_EventActivityProducePointDown": {
+          "status": "unhandled",
+          "reason": "not in _apply_produce_effect",
+          "rows": 1,
+          "example_row_ids": [
+            "p_effect-event_activity_produce_point_down-0500_0500"
+          ],
+          "owners": [],
+          "owner_total": 0
+        },
+        "ProduceEffectType_EventActivityProducePointUp": {
+          "status": "handled",
+          "reason": "_apply_produce_effect",
+          "rows": 1,
+          "example_row_ids": [
+            "p_effect-event_activity_produce_point_up-0250_0250"
+          ],
+          "owners": [],
+          "owner_total": 0
+        },
+        "ProduceEffectType_EventBusinessVoteCountUp": {
+          "status": "handled",
+          "reason": "_apply_produce_effect",
+          "rows": 9,
+          "example_row_ids": [
+            "p_effect-event_business_vote_count_up-0050_0050",
+            "p_effect-event_business_vote_count_up-0100_0100",
+            "p_effect-event_business_vote_count_up-0150_0150",
+            "p_effect-event_business_vote_count_up-0200_0200",
+            "p_effect-event_business_vote_count_up-0250_0250"
+          ],
+          "owners": [],
+          "owner_total": 0
+        },
+        "ProduceEffectType_EventSchoolStaminaDown": {
+          "status": "handled",
+          "reason": "_apply_produce_effect",
+          "rows": 1,
+          "example_row_ids": [
+            "p_effect-event_school_stamina_down-0500_0500"
+          ],
+          "owners": [],
+          "owner_total": 0
+        },
+        "ProduceEffectType_EventSchoolStaminaUp": {
+          "status": "handled",
+          "reason": "_apply_produce_effect",
+          "rows": 5,
+          "example_row_ids": [
+            "p_effect-event_school_stamina_up-0100_0100",
+            "p_effect-event_school_stamina_up-0200_0200",
+            "p_effect-event_school_stamina_up-0250_0250",
+            "p_effect-event_school_stamina_up-0300_0300",
+            "p_effect-event_school_stamina_up-0500_0500"
+          ],
+          "owners": [],
+          "owner_total": 0
+        },
+        "ProduceEffectType_ExamPermanentAuditionStatusEnchant": {
+          "status": "handled",
+          "reason": "_apply_produce_effect",
+          "rows": 51,
+          "example_row_ids": [
+            "p_effect-exam_permanent_audition_status_enchant-enchant-customize_pitem-01-04-3-001_00-04-2-001_01-01-1-001_00-04-4-001-enc01",
+            "p_effect-exam_permanent_audition_status_enchant-enchant-customize_pitem-01-04-3-001_00-04-2-001_01-01-1-001_00-04-4-002-enc01",
+            "p_effect-exam_permanent_audition_status_enchant-enchant-customize_pitem-01-04-3-001_00-04-2-004_01-01-1-001_00-04-4-001-enc01",
+            "p_effect-exam_permanent_audition_status_enchant-enchant-customize_pitem-02-04-3-001_00-04-2-001_02-02-1-001_00-04-4-001-enc01",
+            "p_effect-exam_permanent_audition_status_enchant-enchant-customize_pitem-02-04-3-001_00-04-2-001_02-02-1-001_00-04-4-002-enc01"
+          ],
+          "owners": [],
+          "owner_total": 0
+        },
+        "ProduceEffectType_ExamPermanentLessonStatusEnchant": {
+          "status": "handled",
+          "reason": "_apply_produce_effect",
+          "rows": 7,
+          "example_row_ids": [
+            "p_effect-exam_permanent_lesson_status_enchant-enchant-pitem_00-1-048-challenge-enc01",
+            "p_effect-exam_permanent_lesson_status_enchant-enchant-pitem_01-1-063-challenge-enc01",
+            "p_effect-exam_permanent_lesson_status_enchant-enchant-pitem_01-1-064-challenge-enc01",
+            "p_effect-exam_permanent_lesson_status_enchant-enchant-pitem_02-1-065-challenge-enc01",
+            "p_effect-exam_permanent_lesson_status_enchant-enchant-pitem_02-1-066-challenge-enc01"
+          ],
+          "owners": [],
+          "owner_total": 0
+        },
+        "ProduceEffectType_ExamStatusEnchant": {
+          "status": "handled",
+          "reason": "_apply_produce_effect",
+          "rows": 201,
+          "example_row_ids": [
+            "p_effect-exam_status_enchant-enchant-customize_pitem-01-04-3-001_00-04-2-001_01-01-1-001-enc01",
+            "p_effect-exam_status_enchant-enchant-customize_pitem-01-04-3-001_00-04-2-002_01-01-1-001-enc01",
+            "p_effect-exam_status_enchant-enchant-customize_pitem-01-04-3-001-enc01",
+            "p_effect-exam_status_enchant-enchant-customize_pitem-02-04-3-001_00-04-2-001_02-02-1-001-enc01",
+            "p_effect-exam_status_enchant-enchant-customize_pitem-02-04-3-001_00-04-2-002_02-02-1-001-enc01"
+          ],
+          "owners": [],
+          "owner_total": 0
+        },
+        "ProduceEffectType_ExamTurnDown": {
+          "status": "handled",
+          "reason": "_apply_produce_effect",
+          "rows": 1,
+          "example_row_ids": [
+            "p_effect-exam_turn_down-0001_0001"
+          ],
+          "owners": [],
+          "owner_total": 0
+        },
+        "ProduceEffectType_HighScoreGoldAddition": {
+          "status": "handled",
+          "reason": "_apply_produce_effect",
+          "rows": 6,
+          "example_row_ids": [
+            "p_effect-high_score_gold_addition-0020_0020",
+            "p_effect-high_score_gold_addition-0025_0025",
+            "p_effect-high_score_gold_addition-0030_0030",
+            "p_effect-high_score_gold_addition-0035_0035",
+            "p_effect-high_score_gold_addition-0050_0050"
+          ],
+          "owners": [],
+          "owner_total": 0
+        },
+        "ProduceEffectType_IdolCardProduceCardCustomizeEnable": {
+          "status": "handled",
+          "reason": "_apply_produce_effect",
+          "rows": 1,
+          "example_row_ids": [
+            "p_effect-idol_card_produce_card_customize_enable"
+          ],
+          "owners": [],
+          "owner_total": 0
+        },
+        "ProduceEffectType_LessonDanceSpChangeRatePermilAddition": {
+          "status": "handled",
+          "reason": "_apply_produce_effect",
+          "rows": 6,
+          "example_row_ids": [
+            "p_effect-lesson_dance_sp_change_rate_permil_addition-0070_0070",
+            "p_effect-lesson_dance_sp_change_rate_permil_addition-0105_0105",
+            "p_effect-lesson_dance_sp_change_rate_permil_addition-0140_0140",
+            "p_effect-lesson_dance_sp_change_rate_permil_addition-0150_0150",
+            "p_effect-lesson_dance_sp_change_rate_permil_addition-0210_0210"
+          ],
+          "owners": [],
+          "owner_total": 0
+        },
+        "ProduceEffectType_LessonPresentProduceCardRewardCountUp": {
+          "status": "handled",
+          "reason": "_apply_produce_effect",
+          "rows": 1,
+          "example_row_ids": [
+            "p_effect-lesson_present_produce_card_reward_count_up-0001_0001"
+          ],
+          "owners": [],
+          "owner_total": 0
+        },
+        "ProduceEffectType_LessonPresentProducePointUp": {
+          "status": "handled",
+          "reason": "_apply_produce_effect",
+          "rows": 6,
+          "example_row_ids": [
+            "p_effect-lesson_present_produce_point_up-0083_0083",
+            "p_effect-lesson_present_produce_point_up-0110_0110",
+            "p_effect-lesson_present_produce_point_up-0165_0165",
+            "p_effect-lesson_present_produce_point_up-0220_0220",
+            "p_effect-lesson_present_produce_point_up-0330_0330"
+          ],
+          "owners": [],
+          "owner_total": 0
+        },
+        "ProduceEffectType_LessonSpChangeRatePermilAddition": {
+          "status": "handled",
+          "reason": "_apply_produce_effect",
+          "rows": 24,
+          "example_row_ids": [
+            "p_effect-lesson_sp_change_rate_permil_addition-0010_0010",
+            "p_effect-lesson_sp_change_rate_permil_addition-0020_0020",
+            "p_effect-lesson_sp_change_rate_permil_addition-0030_0030",
+            "p_effect-lesson_sp_change_rate_permil_addition-0040_0040",
+            "p_effect-lesson_sp_change_rate_permil_addition-0050_0050"
+          ],
+          "owners": [],
+          "owner_total": 0
+        },
+        "ProduceEffectType_LessonVisualSpChangeRatePermilAddition": {
+          "status": "handled",
+          "reason": "_apply_produce_effect",
+          "rows": 6,
+          "example_row_ids": [
+            "p_effect-lesson_visual_sp_change_rate_permil_addition-0070_0070",
+            "p_effect-lesson_visual_sp_change_rate_permil_addition-0105_0105",
+            "p_effect-lesson_visual_sp_change_rate_permil_addition-0140_0140",
+            "p_effect-lesson_visual_sp_change_rate_permil_addition-0150_0150",
+            "p_effect-lesson_visual_sp_change_rate_permil_addition-0210_0210"
+          ],
+          "owners": [],
+          "owner_total": 0
+        },
+        "ProduceEffectType_LessonVocalSpChangeRatePermilAddition": {
+          "status": "handled",
+          "reason": "_apply_produce_effect",
+          "rows": 6,
+          "example_row_ids": [
+            "p_effect-lesson_vocal_sp_change_rate_permil_addition-0070_0070",
+            "p_effect-lesson_vocal_sp_change_rate_permil_addition-0105_0105",
+            "p_effect-lesson_vocal_sp_change_rate_permil_addition-0140_0140",
+            "p_effect-lesson_vocal_sp_change_rate_permil_addition-0150_0150",
+            "p_effect-lesson_vocal_sp_change_rate_permil_addition-0210_0210"
+          ],
+          "owners": [],
+          "owner_total": 0
+        },
+        "ProduceEffectType_MaxStaminaAddition": {
+          "status": "handled",
+          "reason": "_apply_produce_effect",
+          "rows": 9,
+          "example_row_ids": [
+            "p_effect-max_stamina_addition-0001_0001",
+            "p_effect-max_stamina_addition-0002_0002",
+            "p_effect-max_stamina_addition-0003_0003",
+            "p_effect-max_stamina_addition-0004_0004",
+            "p_effect-max_stamina_addition-0005_0005"
+          ],
+          "owners": [],
+          "owner_total": 0
+        },
+        "ProduceEffectType_MaxStaminaReduceFix": {
+          "status": "handled",
+          "reason": "_apply_produce_effect",
+          "rows": 6,
+          "example_row_ids": [
+            "p_effect-max_stamina_reduce_fix-0001_0001",
+            "p_effect-max_stamina_reduce_fix-0002_0002",
+            "p_effect-max_stamina_reduce_fix-0003_0003",
+            "p_effect-max_stamina_reduce_fix-0004_0004",
+            "p_effect-max_stamina_reduce_fix-0005_0005"
+          ],
+          "owners": [],
+          "owner_total": 0
+        },
+        "ProduceEffectType_ParameterLimitUp": {
+          "status": "unhandled",
+          "reason": "not in _apply_produce_effect",
+          "rows": 6,
+          "example_row_ids": [
+            "p_effect-parameter_limit_up-0050_0050",
+            "p_effect-parameter_limit_up-0080_0080",
+            "p_effect-parameter_limit_up-0110_0110",
+            "p_effect-parameter_limit_up-0140_0140",
+            "p_effect-parameter_limit_up-0170_0170"
+          ],
+          "owners": [
+            {
+              "id": "produce_growth_panel_sheet-hif-06",
+              "table": "ProduceGrowthPanel",
+              "name": null,
+              "count": 6
+            }
+          ],
+          "owner_total": 1
+        },
+        "ProduceEffectType_ProduceCardChange": {
+          "status": "handled",
+          "reason": "_apply_produce_effect",
+          "rows": 37,
+          "example_row_ids": [
+            "p_effect-produce_card_change-0001_0001-p_rd-card_set-ssr-upgrade_0-p_card_search-deck_all-select-01_01",
+            "p_effect-produce_card_change-0001_0001-p_rd-produce_007-customizeitem-ssr-upgrade_0-p_card_search-deck_all-select-01_01",
+            "p_effect-produce_card_change-0001_0001-p_rd-produce-004-event_activity-exam_card_play_aggressive-upgrade_0-p_card_search-deck_all-select-01_01",
+            "p_effect-produce_card_change-0001_0001-p_rd-produce-004-event_activity-exam_concentration-upgrade_0-p_card_search-deck_all-select-01_01",
+            "p_effect-produce_card_change-0001_0001-p_rd-produce-004-event_activity-exam_full_power-upgrade_0-p_card_search-deck_all-select-01_01"
+          ],
+          "owners": [],
+          "owner_total": 0
+        },
+        "ProduceEffectType_ProduceCardChangeSelect": {
+          "status": "unhandled",
+          "reason": "not in _apply_produce_effect",
+          "rows": 23,
+          "example_row_ids": [
+            "p_effect-produce_card_change_select-0001_0001-p_rd-produce_007-customizeitem-p_card_search-active_skill-mental_skill-deck_all-select-01_01",
+            "p_effect-produce_card_change_select-0001_0001-p_rd-produce_007-customizeitem-p_card_search-deck_all-select-01_01",
+            "p_effect-produce_card_change_select-0001_0001-p_rd-produce_007-customizeitem-ssr-upgrade_0-p_card_search-active_skill-mental_skill-deck_all-select-01_01",
+            "p_effect-produce_card_change_select-0001_0001-p_rd-produce_007-customizeitem-ssr-upgrade_0-p_card_search-deck_all-select-01_01",
+            "p_effect-produce_card_change_select-0001_0001-p_rd-produce_007-event_activity-before_2nd-p_card_search-active_skill-mental_skill-deck_all-select-01_01"
+          ],
+          "owners": [
+            {
+              "id": "customize_pitem-01-04-3-001_00-04-2-001_01-01-1-001_00-04-4-002",
+              "table": "ProduceCustomizeItem",
+              "name": "リボンくま（赤）",
+              "count": 1
+            },
+            {
+              "id": "customize_pitem-01-04-3-001_00-04-2-003_01-01-1-001",
+              "table": "ProduceCustomizeItem",
+              "name": "ロボ（赤）",
+              "count": 1
+            },
+            {
+              "id": "customize_pitem-01-04-3-002_00-04-2-001_01-01-1-001",
+              "table": "ProduceCustomizeItem",
+              "name": "くま（緑）",
+              "count": 1
+            },
+            {
+              "id": "customize_pitem-01-04-3-002_00-04-2-005_01-01-1-001_00-04-4-002",
+              "table": "ProduceCustomizeItem",
+              "name": "リボンインコ（緑）",
+              "count": 1
+            },
+            {
+              "id": "customize_pitem-01-04-3-003_00-04-2-003_01-01-1-001_00-04-4-002",
+              "table": "ProduceCustomizeItem",
+              "name": "リボンロボ（黄）",
+              "count": 1
+            },
+            {
+              "id": "customize_pitem-01-04-3-003_00-04-2-005_01-01-1-001",
+              "table": "ProduceCustomizeItem",
+              "name": "インコ（黄）",
+              "count": 1
+            },
+            {
+              "id": "customize_pitem-02-04-3-001_00-04-2-001_02-02-1-001_00-04-4-002",
+              "table": "ProduceCustomizeItem",
+              "name": "リボンくま（赤）",
+              "count": 1
+            },
+            {
+              "id": "customize_pitem-02-04-3-001_00-04-2-003_02-02-1-001",
+              "table": "ProduceCustomizeItem",
+              "name": "ロボ（赤）",
+              "count": 1
+            }
+          ],
+          "owner_total": 45
+        },
+        "ProduceEffectType_ProduceCardChangeUpgrade": {
+          "status": "handled",
+          "reason": "_apply_produce_effect",
+          "rows": 35,
+          "example_row_ids": [
+            "p_effect-produce_card_change_upgrade-0001_0001-p_rd-p_ability-p_idol_skill-cidol-shro-3-007-p_card_search-deck_all-1-p_card-00-act-0_001-all-00_00",
+            "p_effect-produce_card_change_upgrade-0001_0001-p_rd-p_ability-p_idol_skill-cidol-shro-3-007-p_card_search-deck_all-1-p_card-00-act-0_001-p_card-02-men-0_039-i_card-shro-3-007-all-00_00",
+            "p_effect-produce_card_change_upgrade-0001_0001-p_rd-p_ability-p_idol_skill-i_card-amao-3-007-p_card_search-deck_all-1-p_card-00-act-0_001-all-00_00",
+            "p_effect-produce_card_change_upgrade-0001_0001-p_rd-p_ability-p_idol_skill-i_card-amao-3-007-p_card_search-deck_all-1-p_card-00-act-0_001-p_card-03-act-0_043-i_card-amao-3-007-all-00_00",
+            "p_effect-produce_card_change_upgrade-0001_0001-p_rd-p_ability-p_idol_skill-i_card-atbm-3-012-p_card_search-deck_all-1-p_card-00-men-0_003-p_card-01-act-0_023-i_card-atbm-3-012-all-00_00"
+          ],
+          "owners": [],
+          "owner_total": 0
+        },
+        "ProduceEffectType_ProduceCardDelete": {
+          "status": "handled",
+          "reason": "_apply_produce_effect",
+          "rows": 6,
+          "example_row_ids": [
+            "p_effect-produce_card_delete-0001_0001-p_card_search-deck_all-starter-random-01_01",
+            "p_effect-produce_card_delete-p_card_search-deck_all-select-01_01",
+            "p_effect-produce_card_delete-p_card_search-deck_all-starter-random-01_01",
+            "p_effect-produce_card_delete-p_card_search-deck_all-starter-random-02_02",
+            "p_effect-produce_card_delete-p_card_search-trouble-deck_all-random-01_01"
+          ],
+          "owners": [],
+          "owner_total": 0
+        },
+        "ProduceEffectType_ProduceCardDuplicate": {
+          "status": "handled",
+          "reason": "_apply_produce_effect",
+          "rows": 7,
+          "example_row_ids": [
+            "p_effect-produce_card_duplicate-0001_0001-p_card_search-deck_all-effect_group-visible-exam_card_play_aggressive-000-select-01_01",
+            "p_effect-produce_card_duplicate-0001_0001-p_card_search-deck_all-effect_group-visible-exam_concentration-000-select-01_01",
+            "p_effect-produce_card_duplicate-0001_0001-p_card_search-deck_all-effect_group-visible-exam_full_power-000-select-01_01",
+            "p_effect-produce_card_duplicate-0001_0001-p_card_search-deck_all-effect_group-visible-exam_lesson_buff-000-select-01_01",
+            "p_effect-produce_card_duplicate-0001_0001-p_card_search-deck_all-effect_group-visible-exam_parameter_buff-000-select-01_01"
+          ],
+          "owners": [],
+          "owner_total": 0
+        },
+        "ProduceEffectType_ProduceCardExcludeCountUp": {
+          "status": "handled",
+          "reason": "_apply_produce_effect",
+          "rows": 2,
+          "example_row_ids": [
+            "p_effect-produce_card_exclude_count_up-0001_0001",
+            "p_effect-produce_card_exclude_count_up-0002_0002"
+          ],
+          "owners": [],
+          "owner_total": 0
+        },
+        "ProduceEffectType_ProduceCardSelectRerollCountUp": {
+          "status": "handled",
+          "reason": "_apply_produce_effect",
+          "rows": 3,
+          "example_row_ids": [
+            "p_effect-produce_card_select_reroll_count_up-0001_0001",
+            "p_effect-produce_card_select_reroll_count_up-0002_0002",
+            "p_effect-produce_card_select_reroll_count_up-0003_0003"
+          ],
+          "owners": [],
+          "owner_total": 0
+        },
+        "ProduceEffectType_ProduceCardUpgrade": {
+          "status": "handled",
+          "reason": "_apply_produce_effect",
+          "rows": 9,
+          "example_row_ids": [
+            "p_effect-produce_card_upgrade-0001_0001-p_card_search-active_skill-deck_all-random-01_01",
+            "p_effect-produce_card_upgrade-0001_0001-p_card_search-deck_all-random-01_01",
+            "p_effect-produce_card_upgrade-0001_0001-p_card_search-deck_all-random-02_02",
+            "p_effect-produce_card_upgrade-0001_0001-p_card_search-deck_all-random-03_03",
+            "p_effect-produce_card_upgrade-0001_0001-p_card_search-deck_all-select-00_02"
+          ],
+          "owners": [],
+          "owner_total": 0
+        },
+        "ProduceEffectType_ProduceCustomizeItemUpgrade": {
+          "status": "unhandled",
+          "reason": "not in _apply_produce_effect",
+          "rows": 1,
+          "example_row_ids": [
+            "p_effect-produce_customize_item_upgrade-select-01_01"
+          ],
+          "owners": [
+            {
+              "id": "event-detail-p_story-003-produce-007-after_audition_final-1",
+              "table": "ProduceStepEventDetail",
+              "name": null,
+              "count": 1
+            },
+            {
+              "id": "event-detail-p_story-003-produce-007-after_audition_mid2-1",
+              "table": "ProduceStepEventDetail",
+              "name": null,
+              "count": 1
+            }
+          ],
+          "owner_total": 2
+        },
+        "ProduceEffectType_ProduceDrinkPossessLimitUp": {
+          "status": "unhandled",
+          "reason": "not in _apply_produce_effect",
+          "rows": 1,
+          "example_row_ids": [
+            "p_effect-produce_drink_possess_limit_up-0001_0001"
+          ],
+          "owners": [
+            {
+              "id": "p_dearness_skill-common-p_trigger-produce_start-no_description-produce_drink_possess_limit_up-03-001",
+              "table": "ProduceSkill",
+              "name": null,
+              "count": 1
+            }
+          ],
+          "owner_total": 1
+        },
+        "ProduceEffectType_ProducePointAddition": {
+          "status": "handled",
+          "reason": "_apply_produce_effect",
+          "rows": 41,
+          "example_row_ids": [
+            "p_effect-produce_point_addition-0010_0010",
+            "p_effect-produce_point_addition-0015_0015",
+            "p_effect-produce_point_addition-0020_0020",
+            "p_effect-produce_point_addition-0025_0025",
+            "p_effect-produce_point_addition-0030_0030"
+          ],
+          "owners": [],
+          "owner_total": 0
+        },
+        "ProduceEffectType_ProducePointAdditionDisableTrigger": {
+          "status": "handled",
+          "reason": "_apply_produce_effect",
+          "rows": 20,
+          "example_row_ids": [
+            "p_effect-produce_point_addition_disable_trigger-0010_0010",
+            "p_effect-produce_point_addition_disable_trigger-0015_0015",
+            "p_effect-produce_point_addition_disable_trigger-0020_0020",
+            "p_effect-produce_point_addition_disable_trigger-0030_0030",
+            "p_effect-produce_point_addition_disable_trigger-0034_0034"
+          ],
+          "owners": [],
+          "owner_total": 0
+        },
+        "ProduceEffectType_ProducePointReduceFix": {
+          "status": "handled",
+          "reason": "_apply_produce_effect",
+          "rows": 15,
+          "example_row_ids": [
+            "p_effect-produce_point_reduce_fix-0010_0010",
+            "p_effect-produce_point_reduce_fix-0020_0020",
+            "p_effect-produce_point_reduce_fix-0030_0030",
+            "p_effect-produce_point_reduce_fix-0040_0040",
+            "p_effect-produce_point_reduce_fix-0050_0050"
+          ],
+          "owners": [],
+          "owner_total": 0
+        },
+        "ProduceEffectType_ProduceReward": {
+          "status": "handled",
+          "reason": "_apply_produce_effect",
+          "rows": 207,
+          "example_row_ids": [
+            "p_effect-produce_reward-0001_0001-produce_card-p_card-00-acc-0_002-0",
+            "p_effect-produce_reward-0001_0001-produce_card-p_card-00-sup-2_025-0",
+            "p_effect-produce_reward-0001_0001-produce_card-p_card-00-sup-2_026-0",
+            "p_effect-produce_reward-0001_0001-produce_card-p_card-00-sup-2_027-0",
+            "p_effect-produce_reward-0001_0001-produce_card-p_card-00-sup-2_028-0"
+          ],
+          "owners": [],
+          "owner_total": 0
+        },
+        "ProduceEffectType_ProduceRewardSet": {
+          "status": "handled",
+          "reason": "_apply_produce_effect",
+          "rows": 204,
+          "example_row_ids": [
+            "p_effect-produce_reward_set-p_rd-card_set-card_play_aggressive_ssr_set-exam_card_play_aggressive-ssr-upgrade_0-select-01_01",
+            "p_effect-produce_reward_set-p_rd-card_set-concentration_ssr_set-exam_concentration-ssr-upgrade_0-select-01_01",
+            "p_effect-produce_reward_set-p_rd-card_set-full_power_ssr_set-exam_full_power-ssr-upgrade_0-select-01_01",
+            "p_effect-produce_reward_set-p_rd-card_set-lesson_buff_ssr_set-exam_lesson_buff-ssr-upgrade_0-select-01_01",
+            "p_effect-produce_reward_set-p_rd-card_set-parameter_buff_ssr_set-exam_parameter_buff-ssr-upgrade_0-select-01_01"
+          ],
+          "owners": [],
+          "owner_total": 0
+        },
+        "ProduceEffectType_ShopPriceDiscountMultiple": {
+          "status": "handled",
+          "reason": "_apply_produce_effect",
+          "rows": 2,
+          "example_row_ids": [
+            "p_effect-shop_price_discount_multiple-0200_0200",
+            "p_effect-shop_price_discount_multiple-0500_0500"
+          ],
+          "owners": [],
+          "owner_total": 0
+        },
+        "ProduceEffectType_ShopPriceUpMultiple": {
+          "status": "handled",
+          "reason": "_apply_produce_effect",
+          "rows": 1,
+          "example_row_ids": [
+            "p_effect-shop_price_up_multiple-0050_0050"
+          ],
+          "owners": [],
+          "owner_total": 0
+        },
+        "ProduceEffectType_ShopProduceCardDeletePriceDiscountMultiple": {
+          "status": "handled",
+          "reason": "_apply_produce_effect",
+          "rows": 5,
+          "example_row_ids": [
+            "p_effect-shop_produce_card_delete_price_discount_multiple-0072_0072",
+            "p_effect-shop_produce_card_delete_price_discount_multiple-0095_0095",
+            "p_effect-shop_produce_card_delete_price_discount_multiple-0143_0143",
+            "p_effect-shop_produce_card_delete_price_discount_multiple-0190_0190",
+            "p_effect-shop_produce_card_delete_price_discount_multiple-0500_0500"
+          ],
+          "owners": [],
+          "owner_total": 0
+        },
+        "ProduceEffectType_ShopProduceCardPriceDiscountMultiple": {
+          "status": "handled",
+          "reason": "_apply_produce_effect",
+          "rows": 10,
+          "example_row_ids": [
+            "p_effect-shop_produce_card_price_discount_multiple-0050_0050-p_card_search-deck_all",
+            "p_effect-shop_produce_card_price_discount_multiple-0100_0100-p_card_search-deck_all",
+            "p_effect-shop_produce_card_price_discount_multiple-0105_0105-p_card_search-deck_all",
+            "p_effect-shop_produce_card_price_discount_multiple-0140_0140-p_card_search-deck_all",
+            "p_effect-shop_produce_card_price_discount_multiple-0150_0150-p_card_search-deck_all"
+          ],
+          "owners": [],
+          "owner_total": 0
+        },
+        "ProduceEffectType_ShopProduceCardPriceDiscountMultiplePermanent": {
+          "status": "unhandled",
+          "reason": "not in _apply_produce_effect",
+          "rows": 6,
+          "example_row_ids": [
+            "p_effect-shop_produce_card_price_discount_multiple_permanent-0050_0050-p_card_search-deck_all",
+            "p_effect-shop_produce_card_price_discount_multiple_permanent-0100_0100-p_card_search-deck_all",
+            "p_effect-shop_produce_card_price_discount_multiple_permanent-0150_0150-p_card_search-deck_all",
+            "p_effect-shop_produce_card_price_discount_multiple_permanent-0200_0200-p_card_search-deck_all",
+            "p_effect-shop_produce_card_price_discount_multiple_permanent-0250_0250-p_card_search-deck_all"
+          ],
+          "owners": [
+            {
+              "id": "produce_growth_panel_sheet-hif-09",
+              "table": "ProduceGrowthPanel",
+              "name": null,
+              "count": 6
+            }
+          ],
+          "owner_total": 1
+        },
+        "ProduceEffectType_ShopProduceCardUpgradePriceDiscountMultiple": {
+          "status": "handled",
+          "reason": "_apply_produce_effect",
+          "rows": 5,
+          "example_row_ids": [
+            "p_effect-shop_produce_card_upgrade_price_discount_multiple-0042_0042",
+            "p_effect-shop_produce_card_upgrade_price_discount_multiple-0055_0055",
+            "p_effect-shop_produce_card_upgrade_price_discount_multiple-0083_0083",
+            "p_effect-shop_produce_card_upgrade_price_discount_multiple-0110_0110",
+            "p_effect-shop_produce_card_upgrade_price_discount_multiple-0500_0500"
+          ],
+          "owners": [],
+          "owner_total": 0
+        },
+        "ProduceEffectType_ShopProduceDrinkPriceDiscountMultiple": {
+          "status": "handled",
+          "reason": "_apply_produce_effect",
+          "rows": 5,
+          "example_row_ids": [
+            "p_effect-shop_produce_drink_price_discount_multiple-0079_0079",
+            "p_effect-shop_produce_drink_price_discount_multiple-0105_0105",
+            "p_effect-shop_produce_drink_price_discount_multiple-0158_0158",
+            "p_effect-shop_produce_drink_price_discount_multiple-0210_0210",
+            "p_effect-shop_produce_drink_price_discount_multiple-0500_0500"
+          ],
+          "owners": [],
+          "owner_total": 0
+        },
+        "ProduceEffectType_ShopRerollCountUp": {
+          "status": "handled",
+          "reason": "_apply_produce_effect",
+          "rows": 1,
+          "example_row_ids": [
+            "p_effect-shop_reroll_count_up-0001_0001"
+          ],
+          "owners": [],
+          "owner_total": 0
+        },
+        "ProduceEffectType_StaminaRecoverFix": {
+          "status": "handled",
+          "reason": "_apply_produce_effect",
+          "rows": 11,
+          "example_row_ids": [
+            "p_effect-stamina_recover_fix-0001_0001",
+            "p_effect-stamina_recover_fix-0002_0002",
+            "p_effect-stamina_recover_fix-0003_0003",
+            "p_effect-stamina_recover_fix-0004_0004",
+            "p_effect-stamina_recover_fix-0005_0005"
+          ],
+          "owners": [],
+          "owner_total": 0
+        },
+        "ProduceEffectType_StaminaRecoverMultiple": {
+          "status": "handled",
+          "reason": "_apply_produce_effect",
+          "rows": 12,
+          "example_row_ids": [
+            "p_effect-stamina_recover_multiple-0050_0050",
+            "p_effect-stamina_recover_multiple-0070_0070",
+            "p_effect-stamina_recover_multiple-0075_0075",
+            "p_effect-stamina_recover_multiple-0100_0100",
+            "p_effect-stamina_recover_multiple-0105_0105"
+          ],
+          "owners": [],
+          "owner_total": 0
+        },
+        "ProduceEffectType_StaminaReduceFix": {
+          "status": "handled",
+          "reason": "_apply_produce_effect",
+          "rows": 10,
+          "example_row_ids": [
+            "p_effect-stamina_reduce_fix-0001_0001",
+            "p_effect-stamina_reduce_fix-0002_0002",
+            "p_effect-stamina_reduce_fix-0003_0003",
+            "p_effect-stamina_reduce_fix-0004_0004",
+            "p_effect-stamina_reduce_fix-0005_0005"
+          ],
+          "owners": [],
+          "owner_total": 0
+        },
+        "ProduceEffectType_StarAddition": {
+          "status": "unhandled",
+          "reason": "not in _apply_produce_effect",
+          "rows": 1,
+          "example_row_ids": [
+            "p_effect-star_addition-0010_0010"
+          ],
+          "owners": [
+            {
+              "id": "pitem_00-3-265-0",
+              "table": "ProduceItem",
+              "name": "H.I.Fワッペン",
+              "count": 1
+            }
+          ],
+          "owner_total": 1
+        },
+        "ProduceEffectType_StarPermilUp": {
+          "status": "unhandled",
+          "reason": "not in _apply_produce_effect",
+          "rows": 9,
+          "example_row_ids": [
+            "p_effect-star_permil_up-0050_0050",
+            "p_effect-star_permil_up-0100_0100",
+            "p_effect-star_permil_up-0150_0150",
+            "p_effect-star_permil_up-0200_0200",
+            "p_effect-star_permil_up-0250_0250"
+          ],
+          "owners": [
+            {
+              "id": "p_dearness_skill-common-p_trigger-produce_start-no_description-star_permil_up-03-001",
+              "table": "ProduceSkill",
+              "name": null,
+              "count": 9
+            }
+          ],
+          "owner_total": 1
+        },
+        "ProduceEffectType_SupportCardEventParameterAdditionValueUp": {
+          "status": "handled",
+          "reason": "_apply_produce_effect",
+          "rows": 3,
+          "example_row_ids": [
+            "p_effect-support_card_event_parameter_addition_value_up-0500_0500",
+            "p_effect-support_card_event_parameter_addition_value_up-0750_0750",
+            "p_effect-support_card_event_parameter_addition_value_up-1000_1000"
+          ],
+          "owners": [],
+          "owner_total": 0
+        },
+        "ProduceEffectType_SupportCardEventProducePointAdditionValueUp": {
+          "status": "handled",
+          "reason": "_apply_produce_effect",
+          "rows": 3,
+          "example_row_ids": [
+            "p_effect-support_card_event_produce_point_addition_value_up-0500_0500",
+            "p_effect-support_card_event_produce_point_addition_value_up-0750_0750",
+            "p_effect-support_card_event_produce_point_addition_value_up-1000_1000"
+          ],
+          "owners": [],
+          "owner_total": 0
+        },
+        "ProduceEffectType_SupportCardEventStaminaRecoverUp": {
+          "status": "handled",
+          "reason": "_apply_produce_effect",
+          "rows": 3,
+          "example_row_ids": [
+            "p_effect-support_card_event_stamina_recover_up-0500_0500",
+            "p_effect-support_card_event_stamina_recover_up-0750_0750",
+            "p_effect-support_card_event_stamina_recover_up-1000_1000"
+          ],
+          "owners": [],
+          "owner_total": 0
+        },
+        "ProduceEffectType_SupportCardProduceCardUpgradeProbabilityUp": {
+          "status": "handled",
+          "reason": "_apply_produce_effect",
+          "rows": 141,
+          "example_row_ids": [
+            "p_effect-support_card_produce_card_upgrade_probability_up-0017_0017",
+            "p_effect-support_card_produce_card_upgrade_probability_up-0020_0020",
+            "p_effect-support_card_produce_card_upgrade_probability_up-0026_0026",
+            "p_effect-support_card_produce_card_upgrade_probability_up-0034_0034",
+            "p_effect-support_card_produce_card_upgrade_probability_up-0041_0041"
+          ],
+          "owners": [],
+          "owner_total": 0
+        },
+        "ProduceEffectType_VisualAddition": {
+          "status": "handled",
+          "reason": "_apply_produce_effect",
+          "rows": 200,
+          "example_row_ids": [
+            "p_effect-visual_addition-0001_0001",
+            "p_effect-visual_addition-0002_0002",
+            "p_effect-visual_addition-0003_0003",
+            "p_effect-visual_addition-0004_0004",
+            "p_effect-visual_addition-0005_0005"
+          ],
+          "owners": [],
+          "owner_total": 0
+        },
+        "ProduceEffectType_VisualGrowthRateAddition": {
+          "status": "handled",
+          "reason": "_apply_produce_effect",
+          "rows": 86,
+          "example_row_ids": [
+            "p_effect-visual_growth_rate_addition-0001_0001",
+            "p_effect-visual_growth_rate_addition-0002_0002",
+            "p_effect-visual_growth_rate_addition-0003_0003",
+            "p_effect-visual_growth_rate_addition-0004_0004",
+            "p_effect-visual_growth_rate_addition-0005_0005"
+          ],
+          "owners": [],
+          "owner_total": 0
+        },
+        "ProduceEffectType_VocalAddition": {
+          "status": "handled",
+          "reason": "_apply_produce_effect",
+          "rows": 200,
+          "example_row_ids": [
+            "p_effect-vocal_addition-0001_0001",
+            "p_effect-vocal_addition-0002_0002",
+            "p_effect-vocal_addition-0003_0003",
+            "p_effect-vocal_addition-0004_0004",
+            "p_effect-vocal_addition-0005_0005"
+          ],
+          "owners": [],
+          "owner_total": 0
+        },
+        "ProduceEffectType_VocalGrowthRateAddition": {
+          "status": "handled",
+          "reason": "_apply_produce_effect",
+          "rows": 86,
+          "example_row_ids": [
+            "p_effect-vocal_growth_rate_addition-0001_0001",
+            "p_effect-vocal_growth_rate_addition-0002_0002",
+            "p_effect-vocal_growth_rate_addition-0003_0003",
+            "p_effect-vocal_growth_rate_addition-0004_0004",
+            "p_effect-vocal_growth_rate_addition-0005_0005"
+          ],
+          "owners": [],
+          "owner_total": 0
+        },
+        "ProduceEffectType_VoteCountAddition": {
+          "status": "handled",
+          "reason": "_apply_produce_effect",
+          "rows": 27,
+          "example_row_ids": [
+            "p_effect-vote_count_addition-0800_0800",
+            "p_effect-vote_count_addition-1150_1150",
+            "p_effect-vote_count_addition-1500_1500",
+            "p_effect-vote_count_addition-1700_1700",
+            "p_effect-vote_count_addition-1900_1900"
+          ],
+          "owners": [],
+          "owner_total": 0
+        }
+      }
+    },
+    "trigger_phase_type": {
+      "title": "ProduceExamPhaseType",
+      "source": "ProduceExamTrigger.phaseTypes[]",
+      "summary": {
+        "values": 29,
+        "handled": 28,
+        "referenced": 0,
+        "unhandled": 1,
+        "rows_unhandled": 1,
+        "rows_referenced": 0
+      },
+      "values": {
+        "ProduceExamPhaseType_ExamAggressiveUpInterval": {
+          "status": "unhandled",
+          "reason": "never dispatched by ExamRuntime",
+          "rows": 1,
+          "example_row_ids": [
+            "e_trigger-exam_aggressive_up_interval-5-exam_card_play_aggressive"
+          ],
+          "owners": [
+            {
+              "id": "p_card-02-ido-3_201",
+              "table": "ProduceCard",
+              "name": "わたしを支える言葉+++",
+              "count": 1
+            },
+            {
+              "id": "pitem_02-0-006-0-030",
+              "table": "ProduceItem",
+              "name": "初星ライト（紫）",
+              "count": 1
+            },
+            {
+              "id": "pitem_02-0-006-0-032",
+              "table": "ProduceItem",
+              "name": "初星ライト（紫）",
+              "count": 1
+            },
+            {
+              "id": "pitem_02-3-314-0",
+              "table": "ProduceItem",
+              "name": "強い意志の輝き",
+              "count": 1
+            },
+            {
+              "id": "pitem_02-3-314-1",
+              "table": "ProduceItem",
+              "name": "強い意志の輝き+",
+              "count": 1
+            }
+          ],
+          "owner_total": 5
+        },
+        "ProduceExamPhaseType_ExamBuffConsume": {
+          "status": "handled",
+          "reason": "dispatched in simulation/exam",
+          "rows": 7,
+          "example_row_ids": [
+            "e_trigger-exam_buff_consume",
+            "e_trigger-exam_buff_consume-lesson_buff_up-13",
+            "e_trigger-exam_buff_consume-parameter_buff_up-3",
+            "e_trigger-exam_buff_consume-parameter_buff_up-6",
+            "e_trigger-exam_buff_consume-parameter_buff_up-8"
+          ],
+          "owners": [],
+          "owner_total": 0
+        },
+        "ProduceExamPhaseType_ExamCardMoveGrave": {
+          "status": "handled",
+          "reason": "dispatched in simulation/exam",
+          "rows": 1,
+          "example_row_ids": [
+            "e_trigger-exam_card_move_grave-p_card_search-target_is_self"
+          ],
+          "owners": [],
+          "owner_total": 0
+        },
+        "ProduceExamPhaseType_ExamCardMoveHand": {
+          "status": "handled",
+          "reason": "dispatched in simulation/exam",
+          "rows": 1,
+          "example_row_ids": [
+            "e_trigger-exam_card_move_hand-p_card_search-target_is_self"
+          ],
+          "owners": [],
+          "owner_total": 0
+        },
+        "ProduceExamPhaseType_ExamCardMoveLost": {
+          "status": "handled",
+          "reason": "dispatched in simulation/exam",
+          "rows": 2,
+          "example_row_ids": [
+            "e_trigger-exam_card_move_lost-p_card_search-target",
+            "e_trigger-exam_card_move_lost-p_card_search-target-_"
+          ],
+          "owners": [],
+          "owner_total": 0
+        },
+        "ProduceExamPhaseType_ExamCardPlay": {
+          "status": "handled",
+          "reason": "dispatched in simulation/exam",
+          "rows": 82,
+          "example_row_ids": [
+            "e_trigger-exam_card_play-block_up-15-p_card_search-active_skill-playing-0_1",
+            "e_trigger-exam_card_play-block_up-15-p_card_search-playing-idol-unique-0_1",
+            "e_trigger-exam_card_play-block_up-30-p_card_search-playing-idol-unique-0_1",
+            "e_trigger-exam_card_play-block_up-7-p_card_search-active_skill-playing-0_1",
+            "e_trigger-exam_card_play-card_play_aggressive_up-12-p_card_search-playing-idol-unique-0_1"
+          ],
+          "owners": [],
+          "owner_total": 0
+        },
+        "ProduceExamPhaseType_ExamCardPlayAfter": {
+          "status": "handled",
+          "reason": "dispatched in simulation/exam",
+          "rows": 194,
+          "example_row_ids": [
+            "e_trigger-exam_card_play_after",
+            "e_trigger-exam_card_play_after-block_up-30-p_card_search-mental_skill-playing-0_1",
+            "e_trigger-exam_card_play_after-block_up-30-p_card_search-mental_skill-target-0_1",
+            "e_trigger-exam_card_play_after-block_up-7-p_card_search-playing-1-p_card-02-men-1_030-0_1",
+            "e_trigger-exam_card_play_after-block_up-7-p_card_search-target-1-p_card-02-men-1_030-0_1"
+          ],
+          "owners": [],
+          "owner_total": 0
+        },
+        "ProduceExamPhaseType_ExamEndTurn": {
+          "status": "handled",
+          "reason": "dispatched in simulation/exam",
+          "rows": 65,
+          "example_row_ids": [
+            "e_trigger-exam_end_turn",
+            "e_trigger-exam_end_turn-block_up-12",
+            "e_trigger-exam_end_turn-block_up-15",
+            "e_trigger-exam_end_turn-block_up-230",
+            "e_trigger-exam_end_turn-block_up-30"
+          ],
+          "owners": [],
+          "owner_total": 0
+        },
+        "ProduceExamPhaseType_ExamEndTurnInterval": {
+          "status": "handled",
+          "reason": "dispatched in simulation/exam",
+          "rows": 2,
+          "example_row_ids": [
+            "e_trigger-exam_end_turn_interval-2-not-card_search_count_up-9-p_card_search-lost",
+            "e_trigger-exam_end_turn_interval-3"
+          ],
+          "owners": [],
+          "owner_total": 0
+        },
+        "ProduceExamPhaseType_ExamPlayCountInterval": {
+          "status": "handled",
+          "reason": "dispatched in simulation/exam",
+          "rows": 26,
+          "example_row_ids": [
+            "e_trigger-exam_play_count_interval-2",
+            "e_trigger-exam_play_count_interval-2-card_play_aggressive_up-6-p_card_search-active_skill-target",
+            "e_trigger-exam_play_count_interval-2-lesson_buff_up-3",
+            "e_trigger-exam_play_count_interval-2-lesson_buff_up-8",
+            "e_trigger-exam_play_count_interval-2-p_card_search-active_skill-target"
+          ],
+          "owners": [],
+          "owner_total": 0
+        },
+        "ProduceExamPhaseType_ExamPlayCountIntervalAfter": {
+          "status": "handled",
+          "reason": "dispatched in simulation/exam",
+          "rows": 5,
+          "example_row_ids": [
+            "e_trigger-exam_play_count_interval_after-2-not-parameter_buff_up-21",
+            "e_trigger-exam_play_count_interval_after-2-p_card_search-active_skill-target",
+            "e_trigger-exam_play_count_interval_after-3-not-no_stance-p_card_search-target-effect_group-visible-exam_concentration-000",
+            "e_trigger-exam_play_count_interval_after-3-parameter_buff_up-5-p_card_search-mental_skill-target",
+            "e_trigger-exam_play_count_interval_after-4-not-no_stance-p_card_search-target-effect_group-visible-exam_concentration-000"
+          ],
+          "owners": [],
+          "owner_total": 0
+        },
+        "ProduceExamPhaseType_ExamPlayTurnCountInterval": {
+          "status": "handled",
+          "reason": "dispatched in simulation/exam",
+          "rows": 8,
+          "example_row_ids": [
+            "e_trigger-exam_play_turn_count_interval-2-p_card_search-mental_skill-target",
+            "e_trigger-exam_play_turn_count_interval-2-p_card_search-mental_skill-target-_",
+            "e_trigger-exam_play_turn_count_interval-2-p_card_search-target",
+            "e_trigger-exam_play_turn_count_interval-2-p_card_search-target-_",
+            "e_trigger-exam_play_turn_count_interval-2-p_card_search-target-lesson_visual"
+          ],
+          "owners": [],
+          "owner_total": 0
+        },
+        "ProduceExamPhaseType_ExamSearchCardPlay": {
+          "status": "handled",
+          "reason": "dispatched in simulation/exam",
+          "rows": 2,
+          "example_row_ids": [
+            "e_trigger-exam_search_card_play-full_power_up-p_card_search-target_is_self-0_1",
+            "e_trigger-exam_search_card_play-p_card_search-target_is_self-0_1"
+          ],
+          "owners": [],
+          "owner_total": 0
+        },
+        "ProduceExamPhaseType_ExamStaminaReduce": {
+          "status": "handled",
+          "reason": "dispatched in simulation/exam",
+          "rows": 1,
+          "example_row_ids": [
+            "e_trigger-exam_stamina_reduce"
+          ],
+          "owners": [],
+          "owner_total": 0
+        },
+        "ProduceExamPhaseType_ExamStaminaReduceCard": {
+          "status": "handled",
+          "reason": "dispatched in simulation/exam",
+          "rows": 2,
+          "example_row_ids": [
+            "e_trigger-exam_stamina_reduce_card",
+            "e_trigger-exam_stamina_reduce_card-lesson_visual"
+          ],
+          "owners": [],
+          "owner_total": 0
+        },
+        "ProduceExamPhaseType_ExamStanceChangeConcentration": {
+          "status": "handled",
+          "reason": "dispatched in simulation/exam",
+          "rows": 6,
+          "example_row_ids": [
+            "e_trigger-exam_stance_change_concentration",
+            "e_trigger-exam_stance_change_concentration-2",
+            "e_trigger-exam_stance_change_concentration-block_up-50",
+            "e_trigger-exam_stance_change_concentration-full_power_point_get_sum_up-5",
+            "e_trigger-exam_stance_change_concentration-full_power_point_up-5"
+          ],
+          "owners": [],
+          "owner_total": 0
+        },
+        "ProduceExamPhaseType_ExamStanceChangeCountInterval": {
+          "status": "handled",
+          "reason": "dispatched in simulation/exam",
+          "rows": 3,
+          "example_row_ids": [
+            "e_trigger-exam_stance_change_count_interval-1",
+            "e_trigger-exam_stance_change_count_interval-2",
+            "e_trigger-exam_stance_change_count_interval-3"
+          ],
+          "owners": [],
+          "owner_total": 0
+        },
+        "ProduceExamPhaseType_ExamStanceChangeFromConcentration": {
+          "status": "handled",
+          "reason": "dispatched in simulation/exam",
+          "rows": 1,
+          "example_row_ids": [
+            "e_trigger-exam_stance_change_from_concentration-full_power_up"
+          ],
+          "owners": [],
+          "owner_total": 0
+        },
+        "ProduceExamPhaseType_ExamStanceChangeFromFullPower": {
+          "status": "handled",
+          "reason": "dispatched in simulation/exam",
+          "rows": 5,
+          "example_row_ids": [
+            "e_trigger-exam_stance_change_from_full_power",
+            "e_trigger-exam_stance_change_from_full_power-card_search_count_up-1-p_card_search-lost-p_card-03-ido-3_144",
+            "e_trigger-exam_stance_change_from_full_power-full_power_up",
+            "e_trigger-exam_stance_change_from_full_power-not-full_power_point_up-10",
+            "e_trigger-exam_stance_change_from_full_power-not-full_power_up"
+          ],
+          "owners": [],
+          "owner_total": 0
+        },
+        "ProduceExamPhaseType_ExamStanceChangeFullPower": {
+          "status": "handled",
+          "reason": "dispatched in simulation/exam",
+          "rows": 6,
+          "example_row_ids": [
+            "e_trigger-exam_stance_change_full_power",
+            "e_trigger-exam_stance_change_full_power-block_up-30",
+            "e_trigger-exam_stance_change_full_power-concentration_change_count_up-1",
+            "e_trigger-exam_stance_change_full_power-full_power_change_count_up-2",
+            "e_trigger-exam_stance_change_full_power-full_power_point_up-10"
+          ],
+          "owners": [],
+          "owner_total": 0
+        },
+        "ProduceExamPhaseType_ExamStanceChangePreservation": {
+          "status": "handled",
+          "reason": "dispatched in simulation/exam",
+          "rows": 1,
+          "example_row_ids": [
+            "e_trigger-exam_stance_change_preservation"
+          ],
+          "owners": [],
+          "owner_total": 0
+        },
+        "ProduceExamPhaseType_ExamStartExam": {
+          "status": "handled",
+          "reason": "dispatched in simulation/exam",
+          "rows": 12,
+          "example_row_ids": [
+            "e_trigger-exam_start_exam",
+            "e_trigger-exam_start_exam-card_search_count_up-21-p_card_search-r-sr-ssr-legend-deck_all",
+            "e_trigger-exam_start_exam-for_hajime_legend",
+            "e_trigger-exam_start_exam-for_hajime_legend_lesson",
+            "e_trigger-exam_start_exam-for_hif"
+          ],
+          "owners": [],
+          "owner_total": 0
+        },
+        "ProduceExamPhaseType_ExamStartTurn": {
+          "status": "handled",
+          "reason": "dispatched in simulation/exam",
+          "rows": 95,
+          "example_row_ids": [
+            "e_trigger-exam_start_turn",
+            "e_trigger-exam_start_turn-block_up-14",
+            "e_trigger-exam_start_turn-block_up-15",
+            "e_trigger-exam_start_turn-block_up-30",
+            "e_trigger-exam_start_turn-block_up-30-lesson_vocal"
+          ],
+          "owners": [],
+          "owner_total": 0
+        },
+        "ProduceExamPhaseType_ExamStatusChange": {
+          "status": "handled",
+          "reason": "dispatched in simulation/exam",
+          "rows": 28,
+          "example_row_ids": [
+            "e_trigger-exam_status_change-30-exam_block",
+            "e_trigger-exam_status_change-6-exam_review",
+            "e_trigger-exam_status_change-7-block_up-30-exam_review",
+            "e_trigger-exam_status_change-7-exam_lesson_buff",
+            "e_trigger-exam_status_change-7-lesson_buff_up-13-exam_parameter_buff"
+          ],
+          "owners": [],
+          "owner_total": 0
+        },
+        "ProduceExamPhaseType_ExamTurnInterval": {
+          "status": "handled",
+          "reason": "dispatched in simulation/exam",
+          "rows": 12,
+          "example_row_ids": [
+            "e_trigger-exam_turn_interval-2",
+            "e_trigger-exam_turn_interval-2-block_up-30",
+            "e_trigger-exam_turn_interval-2-parameter_buff",
+            "e_trigger-exam_turn_interval-2-review_up-3",
+            "e_trigger-exam_turn_interval-2-stamina_up_multiple-500"
+          ],
+          "owners": [],
+          "owner_total": 0
+        },
+        "ProduceExamPhaseType_ExamTurnSkip": {
+          "status": "handled",
+          "reason": "dispatched in simulation/exam",
+          "rows": 2,
+          "example_row_ids": [
+            "e_trigger-exam_turn_skip",
+            "e_trigger-exam_turn_skip-parameter_buff_multiple_per_turn_up-1"
+          ],
+          "owners": [],
+          "owner_total": 0
+        },
+        "ProduceExamPhaseType_ExamTurnTimer": {
+          "status": "handled",
+          "reason": "dispatched in simulation/exam",
+          "rows": 19,
+          "example_row_ids": [
+            "e_trigger-exam_turn_timer-1",
+            "e_trigger-exam_turn_timer-1-description",
+            "e_trigger-exam_turn_timer-1-for_nia_master",
+            "e_trigger-exam_turn_timer-10",
+            "e_trigger-exam_turn_timer-10-parameter_buff_up-10"
+          ],
+          "owners": [],
+          "owner_total": 0
+        },
+        "ProduceExamPhaseType_StartExamPlay": {
+          "status": "handled",
+          "reason": "dispatched in simulation/exam",
+          "rows": 1,
+          "example_row_ids": [
+            "e_trigger-start_exam_play"
+          ],
+          "owners": [],
+          "owner_total": 0
+        },
+        "ProduceExamPhaseType_StartPlay": {
+          "status": "handled",
+          "reason": "dispatched in simulation/exam",
+          "rows": 23,
+          "example_row_ids": [
+            "e_trigger-start_play",
+            "e_trigger-start_play-card_play_aggressive_up-5",
+            "e_trigger-start_play-card_search_count_up-1-p_card_search-r-hand",
+            "e_trigger-start_play-card_search_count_up-12-p_card_search-deck_grave",
+            "e_trigger-start_play-card_search_count_up-18-p_card_search-deck_grave"
+          ],
+          "owners": [],
+          "owner_total": 0
+        }
+      }
+    },
+    "status_enchant": {
+      "title": "ProduceExamStatusEnchant (derived)",
+      "source": "ProduceExamStatusEnchant.produceExamEffectIds[].effectType + produceExamTriggerId.phaseTypes[]",
+      "summary": {
+        "values": 5,
+        "handled": 1,
+        "referenced": 0,
+        "unhandled": 4,
+        "rows_unhandled": 12,
+        "rows_referenced": 0
+      },
+      "values": {
+        "effect:ProduceExamEffectType_ExamConcentrationLessonMultipleAdditive": {
+          "status": "unhandled",
+          "reason": "contains unhandled component(s)",
+          "rows": 2,
+          "example_row_ids": [
+            "enchant-p_item_effect_03-3-339-0-enc01",
+            "enchant-p_item_effect_03-3-339-1-enc01"
+          ],
+          "owners": [
+            {
+              "id": "pitem_03-3-339-0",
+              "table": "ProduceItem",
+              "name": "夏を編んだ影",
+              "count": 1
+            },
+            {
+              "id": "pitem_03-3-339-1",
+              "table": "ProduceItem",
+              "name": "夏を編んだ影+",
+              "count": 1
+            }
+          ],
+          "owner_total": 2
+        },
+        "effect:ProduceExamEffectType_ExamForcePlayCardSearchWithCost": {
+          "status": "unhandled",
+          "reason": "contains unhandled component(s)",
+          "rows": 1,
+          "example_row_ids": [
+            "enchant-p_card-03-ido-100_038-enc01"
+          ],
+          "owners": [
+            {
+              "id": "p_card-03-ido-100_038",
+              "table": "ProduceCard",
+              "name": "高みへ羽ばたく一番星",
+              "count": 1
+            }
+          ],
+          "owner_total": 1
+        },
+        "effect:ProduceExamEffectType_ExamFullPowerLessonMultipleAdditive": {
+          "status": "unhandled",
+          "reason": "contains unhandled component(s)",
+          "rows": 4,
+          "example_row_ids": [
+            "enchant-bullet_point-p_exam_gimmick-tour-006-stage-03-enc01",
+            "enchant-p_item_effect_03-0-007-0-014-enc01",
+            "enchant-p_item_effect_03-3-317-0-enc01",
+            "enchant-p_item_effect_03-3-317-1-enc01"
+          ],
+          "owners": [
+            {
+              "id": "p_exam_gimmick-tour-season_006-stage_3",
+              "table": "ProduceExamGimmickEffectGroup",
+              "name": null,
+              "count": 1
+            },
+            {
+              "id": "pitem_03-0-007-0-014",
+              "table": "ProduceItem",
+              "name": "初星フラッグ（紫）",
+              "count": 1
+            },
+            {
+              "id": "pitem_03-3-317-0",
+              "table": "ProduceItem",
+              "name": "あこがれチャージャー",
+              "count": 1
+            },
+            {
+              "id": "pitem_03-3-317-1",
+              "table": "ProduceItem",
+              "name": "あこがれチャージャー+",
+              "count": 1
+            }
+          ],
+          "owner_total": 4
+        },
+        "handled": {
+          "status": "handled",
+          "reason": "all components handled",
+          "rows": 1991,
+          "example_row_ids": [
+            "enchant-bullet_point-p_card-01-men-100_005-enc01",
+            "enchant-bullet_point-p_exam_gimmick-tour-006-stage-01-enc01",
+            "enchant-bullet_point-p_exam_gimmick-tour-006-stage-02-enc01",
+            "enchant-bullet_point-pitem_02-3-293-0-enc01",
+            "enchant-bullet_point-pitem_02-3-293-1-enc01"
+          ],
+          "owners": [],
+          "owner_total": 0
+        },
+        "phase:ProduceExamPhaseType_ExamAggressiveUpInterval": {
+          "status": "unhandled",
+          "reason": "contains unhandled component(s)",
+          "rows": 5,
+          "example_row_ids": [
+            "enchant-p_card-02-ido-3_201-enc01",
+            "enchant-p_item_effect_02-0-006-0-030-enc01",
+            "enchant-p_item_effect_02-0-006-0-032-enc01",
+            "enchant-p_item_effect_02-3-314-0-enc01",
+            "enchant-p_item_effect_02-3-314-1-enc01"
+          ],
+          "owners": [
+            {
+              "id": "p_card-02-ido-3_201",
+              "table": "ProduceCard",
+              "name": "わたしを支える言葉+++",
+              "count": 1
+            },
+            {
+              "id": "pitem_02-0-006-0-030",
+              "table": "ProduceItem",
+              "name": "初星ライト（紫）",
+              "count": 1
+            },
+            {
+              "id": "pitem_02-0-006-0-032",
+              "table": "ProduceItem",
+              "name": "初星ライト（紫）",
+              "count": 1
+            },
+            {
+              "id": "pitem_02-3-314-0",
+              "table": "ProduceItem",
+              "name": "強い意志の輝き",
+              "count": 1
+            },
+            {
+              "id": "pitem_02-3-314-1",
+              "table": "ProduceItem",
+              "name": "強い意志の輝き+",
+              "count": 1
+            }
+          ],
+          "owner_total": 5
+        }
+      }
+    },
+    "grow_effect_type": {
+      "title": "ProduceCardGrowEffectType",
+      "source": "ProduceCardGrowEffect.effectType",
+      "summary": {
+        "values": 39,
+        "handled": 39,
+        "referenced": 0,
+        "unhandled": 0,
+        "rows_unhandled": 0,
+        "rows_referenced": 0
+      },
+      "values": {
+        "ProduceCardGrowEffectType_AggressiveAdd": {
+          "status": "handled",
+          "reason": "ids.GrowEffect / simulation/exam",
+          "rows": 5,
+          "example_row_ids": [
+            "g_effect-aggressive_add-1",
+            "g_effect-aggressive_add-2",
+            "g_effect-aggressive_add-3",
+            "g_effect-aggressive_add-4",
+            "g_effect-aggressive_add-5"
+          ],
+          "owners": [],
+          "owner_total": 0
+        },
+        "ProduceCardGrowEffectType_BlockAdd": {
+          "status": "handled",
+          "reason": "ids.GrowEffect / simulation/exam",
+          "rows": 20,
+          "example_row_ids": [
+            "g_effect-block_add-1",
+            "g_effect-block_add-10",
+            "g_effect-block_add-11",
+            "g_effect-block_add-12",
+            "g_effect-block_add-13"
+          ],
+          "owners": [],
+          "owner_total": 0
+        },
+        "ProduceCardGrowEffectType_BlockReduce": {
+          "status": "handled",
+          "reason": "ids.GrowEffect / simulation/exam",
+          "rows": 20,
+          "example_row_ids": [
+            "g_effect-block_reduce-1",
+            "g_effect-block_reduce-10",
+            "g_effect-block_reduce-11",
+            "g_effect-block_reduce-12",
+            "g_effect-block_reduce-13"
+          ],
+          "owners": [],
+          "owner_total": 0
+        },
+        "ProduceCardGrowEffectType_CardStatusEnchantChange": {
+          "status": "handled",
+          "reason": "ids.GrowEffect / simulation/exam",
+          "rows": 16,
+          "example_row_ids": [
+            "g_effect-card_status_enchant_change-card_enchant-e_trigger-exam_card_play_after-p_card_search-target-effect_group-visible-exam_concentration-000-0_1-2-g_effect-lesson_add-15-g_effect-lesson_count_add-1",
+            "g_effect-card_status_enchant_change-card_enchant-e_trigger-exam_stance_change_concentration-g_effect-lesson_add-1",
+            "g_effect-card_status_enchant_change-card_enchant-e_trigger-exam_stance_change_concentration-g_effect-lesson_add-2",
+            "g_effect-card_status_enchant_change-card_enchant-e_trigger-exam_stance_change_concentration-g_effect-lesson_add-3",
+            "g_effect-card_status_enchant_change-card_enchant-e_trigger-exam_stance_change_concentration-g_effect-lesson_add-4"
+          ],
+          "owners": [],
+          "owner_total": 0
+        },
+        "ProduceCardGrowEffectType_CostAdd": {
+          "status": "handled",
+          "reason": "ids.GrowEffect / simulation/exam",
+          "rows": 10,
+          "example_row_ids": [
+            "g_effect-cost_add-1",
+            "g_effect-cost_add-10",
+            "g_effect-cost_add-2",
+            "g_effect-cost_add-3",
+            "g_effect-cost_add-4"
+          ],
+          "owners": [],
+          "owner_total": 0
+        },
+        "ProduceCardGrowEffectType_CostAggressiveAdd": {
+          "status": "handled",
+          "reason": "ids.GrowEffect / simulation/exam",
+          "rows": 1,
+          "example_row_ids": [
+            "g_effect-cost_aggressive_add-1"
+          ],
+          "owners": [],
+          "owner_total": 0
+        },
+        "ProduceCardGrowEffectType_CostAggressiveReduce": {
+          "status": "handled",
+          "reason": "ids.GrowEffect / simulation/exam",
+          "rows": 1,
+          "example_row_ids": [
+            "g_effect-cost_aggressive_reduce-1"
+          ],
+          "owners": [],
+          "owner_total": 0
+        },
+        "ProduceCardGrowEffectType_CostFullPowerPointAdd": {
+          "status": "handled",
+          "reason": "ids.GrowEffect / simulation/exam",
+          "rows": 1,
+          "example_row_ids": [
+            "g_effect-cost_full_power_point_add-1"
+          ],
+          "owners": [],
+          "owner_total": 0
+        },
+        "ProduceCardGrowEffectType_CostFullPowerPointReduce": {
+          "status": "handled",
+          "reason": "ids.GrowEffect / simulation/exam",
+          "rows": 1,
+          "example_row_ids": [
+            "g_effect-cost_full_power_point_reduce-1"
+          ],
+          "owners": [],
+          "owner_total": 0
+        },
+        "ProduceCardGrowEffectType_CostLessonBuffAdd": {
+          "status": "handled",
+          "reason": "ids.GrowEffect / simulation/exam",
+          "rows": 1,
+          "example_row_ids": [
+            "g_effect-cost_lesson_buff_add-1"
+          ],
+          "owners": [],
+          "owner_total": 0
+        },
+        "ProduceCardGrowEffectType_CostLessonBuffReduce": {
+          "status": "handled",
+          "reason": "ids.GrowEffect / simulation/exam",
+          "rows": 1,
+          "example_row_ids": [
+            "g_effect-cost_lesson_buff_reduce-1"
+          ],
+          "owners": [],
+          "owner_total": 0
+        },
+        "ProduceCardGrowEffectType_CostParameterBuffAdd": {
+          "status": "handled",
+          "reason": "ids.GrowEffect / simulation/exam",
+          "rows": 1,
+          "example_row_ids": [
+            "g_effect-cost_parameter_buff_add-1"
+          ],
+          "owners": [],
+          "owner_total": 0
+        },
+        "ProduceCardGrowEffectType_CostParameterBuffMultiplePerTurnReduce": {
+          "status": "handled",
+          "reason": "ids.GrowEffect / simulation/exam",
+          "rows": 1,
+          "example_row_ids": [
+            "g_effect-cost_parameter_buff_multiple_per_turn_reduce-1"
+          ],
+          "owners": [],
+          "owner_total": 0
+        },
+        "ProduceCardGrowEffectType_CostParameterBuffReduce": {
+          "status": "handled",
+          "reason": "ids.GrowEffect / simulation/exam",
+          "rows": 1,
+          "example_row_ids": [
+            "g_effect-cost_parameter_buff_reduce-1"
+          ],
+          "owners": [],
+          "owner_total": 0
+        },
+        "ProduceCardGrowEffectType_CostPenetrateAdd": {
+          "status": "handled",
+          "reason": "ids.GrowEffect / simulation/exam",
+          "rows": 5,
+          "example_row_ids": [
+            "g_effect-cost_penetrate_add-1",
+            "g_effect-cost_penetrate_add-2",
+            "g_effect-cost_penetrate_add-3",
+            "g_effect-cost_penetrate_add-4",
+            "g_effect-cost_penetrate_add-5"
+          ],
+          "owners": [],
+          "owner_total": 0
+        },
+        "ProduceCardGrowEffectType_CostPenetrateReduce": {
+          "status": "handled",
+          "reason": "ids.GrowEffect / simulation/exam",
+          "rows": 5,
+          "example_row_ids": [
+            "g_effect-cost_penetrate_reduce-1",
+            "g_effect-cost_penetrate_reduce-2",
+            "g_effect-cost_penetrate_reduce-3",
+            "g_effect-cost_penetrate_reduce-4",
+            "g_effect-cost_penetrate_reduce-5"
+          ],
+          "owners": [],
+          "owner_total": 0
+        },
+        "ProduceCardGrowEffectType_CostReduce": {
+          "status": "handled",
+          "reason": "ids.GrowEffect / simulation/exam",
+          "rows": 5,
+          "example_row_ids": [
+            "g_effect-cost_reduce-1",
+            "g_effect-cost_reduce-2",
+            "g_effect-cost_reduce-3",
+            "g_effect-cost_reduce-4",
+            "g_effect-cost_reduce-5"
+          ],
+          "owners": [],
+          "owner_total": 0
+        },
+        "ProduceCardGrowEffectType_CostReviewAdd": {
+          "status": "handled",
+          "reason": "ids.GrowEffect / simulation/exam",
+          "rows": 1,
+          "example_row_ids": [
+            "g_effect-cost_review_add-1"
+          ],
+          "owners": [],
+          "owner_total": 0
+        },
+        "ProduceCardGrowEffectType_CostReviewReduce": {
+          "status": "handled",
+          "reason": "ids.GrowEffect / simulation/exam",
+          "rows": 1,
+          "example_row_ids": [
+            "g_effect-cost_review_reduce-1"
+          ],
+          "owners": [],
+          "owner_total": 0
+        },
+        "ProduceCardGrowEffectType_EffectAdd": {
+          "status": "handled",
+          "reason": "ids.GrowEffect / simulation/exam",
+          "rows": 52,
+          "example_row_ids": [
+            "g_effect-effect_add-e_effect-exam_add_grow_effect-p_card_search-deck_all-all-0_0-g_effect-lesson_add-1",
+            "g_effect-effect_add-e_effect-exam_add_grow_effect-p_card_search-deck_all-all-0_0-g_effect-lesson_add-2",
+            "g_effect-effect_add-e_effect-exam_add_grow_effect-p_card_search-deck_all-all-0_0-g_effect-lesson_add-3",
+            "g_effect-effect_add-e_effect-exam_add_grow_effect-p_card_search-deck_all-all-0_0-g_effect-lesson_add-4",
+            "g_effect-effect_add-e_effect-exam_add_grow_effect-p_card_search-deck_all-all-0_0-g_effect-lesson_add-5"
+          ],
+          "owners": [],
+          "owner_total": 0
+        },
+        "ProduceCardGrowEffectType_EffectChange": {
+          "status": "handled",
+          "reason": "ids.GrowEffect / simulation/exam",
+          "rows": 24,
+          "example_row_ids": [
+            "g_effect-effect_change-e_effect-exam_block_per_use_card_count-0002-0008-e_effect-exam_status_enchant-02-inf-enchant-p_card-02-ido-3_067-enc01",
+            "g_effect-effect_change-e_effect-exam_block_per_use_card_count-0002-0009-e_effect-exam_status_enchant-02-inf-enchant-p_card-02-ido-3_067-enc02",
+            "g_effect-effect_change-e_effect-exam_block_per_use_card_count-0002-0010-e_effect-exam_status_enchant-02-inf-enchant-p_card-02-ido-3_067-enc03",
+            "g_effect-effect_change-e_effect-exam_card_play_aggressive-0005-e_effect-exam_status_enchant-05-inf-enchant-p_card-02-ido-3_069-enc01",
+            "g_effect-effect_change-e_effect-exam_card_play_aggressive-0006-e_effect-exam_status_enchant-05-inf-enchant-p_card-02-ido-3_069-enc01"
+          ],
+          "owners": [],
+          "owner_total": 0
+        },
+        "ProduceCardGrowEffectType_FullPowerPointAdd": {
+          "status": "handled",
+          "reason": "ids.GrowEffect / simulation/exam",
+          "rows": 20,
+          "example_row_ids": [
+            "g_effect-full_power_point_add-1",
+            "g_effect-full_power_point_add-10",
+            "g_effect-full_power_point_add-11",
+            "g_effect-full_power_point_add-12",
+            "g_effect-full_power_point_add-13"
+          ],
+          "owners": [],
+          "owner_total": 0
+        },
+        "ProduceCardGrowEffectType_FullPowerPointReduce": {
+          "status": "handled",
+          "reason": "ids.GrowEffect / simulation/exam",
+          "rows": 20,
+          "example_row_ids": [
+            "g_effect-full_power_point_reduce-1",
+            "g_effect-full_power_point_reduce-10",
+            "g_effect-full_power_point_reduce-11",
+            "g_effect-full_power_point_reduce-12",
+            "g_effect-full_power_point_reduce-13"
+          ],
+          "owners": [],
+          "owner_total": 0
+        },
+        "ProduceCardGrowEffectType_InitialAdd": {
+          "status": "handled",
+          "reason": "ids.GrowEffect / simulation/exam",
+          "rows": 1,
+          "example_row_ids": [
+            "g_effect-initial_add"
+          ],
+          "owners": [],
+          "owner_total": 0
+        },
+        "ProduceCardGrowEffectType_LessonAdd": {
+          "status": "handled",
+          "reason": "ids.GrowEffect / simulation/exam",
+          "rows": 61,
+          "example_row_ids": [
+            "g_effect-lesson_add-1",
+            "g_effect-lesson_add-10",
+            "g_effect-lesson_add-100",
+            "g_effect-lesson_add-11",
+            "g_effect-lesson_add-12"
+          ],
+          "owners": [],
+          "owner_total": 0
+        },
+        "ProduceCardGrowEffectType_LessonBuffAdd": {
+          "status": "handled",
+          "reason": "ids.GrowEffect / simulation/exam",
+          "rows": 5,
+          "example_row_ids": [
+            "g_effect-lesson_buff_add-1",
+            "g_effect-lesson_buff_add-2",
+            "g_effect-lesson_buff_add-3",
+            "g_effect-lesson_buff_add-4",
+            "g_effect-lesson_buff_add-5"
+          ],
+          "owners": [],
+          "owner_total": 0
+        },
+        "ProduceCardGrowEffectType_LessonCountAdd": {
+          "status": "handled",
+          "reason": "ids.GrowEffect / simulation/exam",
+          "rows": 10,
+          "example_row_ids": [
+            "g_effect-lesson_count_add-1",
+            "g_effect-lesson_count_add-10",
+            "g_effect-lesson_count_add-2",
+            "g_effect-lesson_count_add-3",
+            "g_effect-lesson_count_add-4"
+          ],
+          "owners": [],
+          "owner_total": 0
+        },
+        "ProduceCardGrowEffectType_LessonCountReduce": {
+          "status": "handled",
+          "reason": "ids.GrowEffect / simulation/exam",
+          "rows": 10,
+          "example_row_ids": [
+            "g_effect-lesson_count_reduce-1",
+            "g_effect-lesson_count_reduce-10",
+            "g_effect-lesson_count_reduce-2",
+            "g_effect-lesson_count_reduce-3",
+            "g_effect-lesson_count_reduce-4"
+          ],
+          "owners": [],
+          "owner_total": 0
+        },
+        "ProduceCardGrowEffectType_LessonDependBlockAdd": {
+          "status": "handled",
+          "reason": "ids.GrowEffect / simulation/exam",
+          "rows": 19,
+          "example_row_ids": [
+            "g_effect-lesson_depend_block_add-100",
+            "g_effect-lesson_depend_block_add-1000",
+            "g_effect-lesson_depend_block_add-150",
+            "g_effect-lesson_depend_block_add-200",
+            "g_effect-lesson_depend_block_add-250"
+          ],
+          "owners": [],
+          "owner_total": 0
+        },
+        "ProduceCardGrowEffectType_LessonDependExamCardPlayAggressiveAdd": {
+          "status": "handled",
+          "reason": "ids.GrowEffect / simulation/exam",
+          "rows": 47,
+          "example_row_ids": [
+            "g_effect-lesson_depend_exam_card_play_aggressive_add-1000",
+            "g_effect-lesson_depend_exam_card_play_aggressive_add-1050",
+            "g_effect-lesson_depend_exam_card_play_aggressive_add-1100",
+            "g_effect-lesson_depend_exam_card_play_aggressive_add-1150",
+            "g_effect-lesson_depend_exam_card_play_aggressive_add-1200"
+          ],
+          "owners": [],
+          "owner_total": 0
+        },
+        "ProduceCardGrowEffectType_LessonDependExamReviewAdd": {
+          "status": "handled",
+          "reason": "ids.GrowEffect / simulation/exam",
+          "rows": 37,
+          "example_row_ids": [
+            "g_effect-lesson_depend_exam_review_add-1000",
+            "g_effect-lesson_depend_exam_review_add-1050",
+            "g_effect-lesson_depend_exam_review_add-1100",
+            "g_effect-lesson_depend_exam_review_add-1150",
+            "g_effect-lesson_depend_exam_review_add-1200"
+          ],
+          "owners": [],
+          "owner_total": 0
+        },
+        "ProduceCardGrowEffectType_LessonReduce": {
+          "status": "handled",
+          "reason": "ids.GrowEffect / simulation/exam",
+          "rows": 20,
+          "example_row_ids": [
+            "g_effect-lesson_reduce-1",
+            "g_effect-lesson_reduce-10",
+            "g_effect-lesson_reduce-11",
+            "g_effect-lesson_reduce-12",
+            "g_effect-lesson_reduce-13"
+          ],
+          "owners": [],
+          "owner_total": 0
+        },
+        "ProduceCardGrowEffectType_ParameterBuffMultiplePerTurnAdd": {
+          "status": "handled",
+          "reason": "ids.GrowEffect / simulation/exam",
+          "rows": 5,
+          "example_row_ids": [
+            "g_effect-parameter_buff_multiple_per_turn_add-1",
+            "g_effect-parameter_buff_multiple_per_turn_add-2",
+            "g_effect-parameter_buff_multiple_per_turn_add-3",
+            "g_effect-parameter_buff_multiple_per_turn_add-4",
+            "g_effect-parameter_buff_multiple_per_turn_add-5"
+          ],
+          "owners": [],
+          "owner_total": 0
+        },
+        "ProduceCardGrowEffectType_ParameterBuffTurnAdd": {
+          "status": "handled",
+          "reason": "ids.GrowEffect / simulation/exam",
+          "rows": 5,
+          "example_row_ids": [
+            "g_effect-parameter_buff_turn_add-1",
+            "g_effect-parameter_buff_turn_add-2",
+            "g_effect-parameter_buff_turn_add-3",
+            "g_effect-parameter_buff_turn_add-4",
+            "g_effect-parameter_buff_turn_add-5"
+          ],
+          "owners": [],
+          "owner_total": 0
+        },
+        "ProduceCardGrowEffectType_PlayEffectTriggerChange": {
+          "status": "handled",
+          "reason": "ids.GrowEffect / simulation/exam",
+          "rows": 4,
+          "example_row_ids": [
+            "g_effect-play_effect_trigger_change-e_trigger-exam_card_play-card_play_aggressive_up-3",
+            "g_effect-play_effect_trigger_change-e_trigger-none-lesson_buff_up-15-e_trigger-none-lesson_buff_up-10",
+            "g_effect-play_effect_trigger_change-e_trigger-none-parameter_buff_up-12-e_trigger-none-parameter_buff_up-8",
+            "g_effect-play_effect_trigger_change-e_trigger-none-review_up-15-e_trigger-none-review_up-10"
+          ],
+          "owners": [],
+          "owner_total": 0
+        },
+        "ProduceCardGrowEffectType_PlayMovePositionTypeChange": {
+          "status": "handled",
+          "reason": "ids.GrowEffect / simulation/exam",
+          "rows": 1,
+          "example_row_ids": [
+            "g_effect-play_move_position_type_change-grave"
+          ],
+          "owners": [],
+          "owner_total": 0
+        },
+        "ProduceCardGrowEffectType_PlayTriggerChange": {
+          "status": "handled",
+          "reason": "ids.GrowEffect / simulation/exam",
+          "rows": 4,
+          "example_row_ids": [
+            "g_effect-play_trigger_change-e_trigger-none-block_up-30-e_trigger-none-block_up-15",
+            "g_effect-play_trigger_change-e_trigger-none-parameter_buff_up-8-e_trigger-none-parameter_buff_up-4",
+            "g_effect-play_trigger_change-e_trigger-none-preservation_change_count_up-2-e_trigger-none-preservation_change_count_up-1",
+            "g_effect-play_trigger_change-e_trigger-none-review_up-10-e_trigger-none-review_up-6"
+          ],
+          "owners": [],
+          "owner_total": 0
+        },
+        "ProduceCardGrowEffectType_ReviewAdd": {
+          "status": "handled",
+          "reason": "ids.GrowEffect / simulation/exam",
+          "rows": 6,
+          "example_row_ids": [
+            "g_effect-review_add-1",
+            "g_effect-review_add-2",
+            "g_effect-review_add-3",
+            "g_effect-review_add-4",
+            "g_effect-review_add-5"
+          ],
+          "owners": [],
+          "owner_total": 0
+        },
+        "ProduceCardGrowEffectType_StaminaConsumptionDownTurnAdd": {
+          "status": "handled",
+          "reason": "ids.GrowEffect / simulation/exam",
+          "rows": 5,
+          "example_row_ids": [
+            "g_effect-stamina_consumption_down_turn_add-1",
+            "g_effect-stamina_consumption_down_turn_add-2",
+            "g_effect-stamina_consumption_down_turn_add-3",
+            "g_effect-stamina_consumption_down_turn_add-4",
+            "g_effect-stamina_consumption_down_turn_add-5"
+          ],
+          "owners": [],
+          "owner_total": 0
+        }
+      }
+    },
+    "produce_step_type": {
+      "title": "ProduceStepType",
+      "source": "stepType fields of Produce / ProduceStep* tables",
+      "summary": {
+        "values": 33,
+        "handled": 20,
+        "referenced": 0,
+        "unhandled": 13,
+        "rows_unhandled": 1198,
+        "rows_referenced": 0
+      },
+      "values": {
+        "ProduceStepType_AuditionFinal": {
+          "status": "handled",
+          "reason": "ProduceRuntime / ScenarioSpec literal",
+          "rows": 1865,
+          "example_row_ids": [],
+          "owners": [],
+          "owner_total": 0,
+          "tables": {
+            "ProduceStepAuditionDifficulty": 1810,
+            "ProduceStepAuditionCharacter": 52,
+            "TutorialProduceStep": 3
+          }
+        },
+        "ProduceStepType_AuditionMid1": {
+          "status": "handled",
+          "reason": "ProduceRuntime / ScenarioSpec literal",
+          "rows": 1583,
+          "example_row_ids": [],
+          "owners": [],
+          "owner_total": 0,
+          "tables": {
+            "ProduceStepAuditionDifficulty": 1544,
+            "ProduceStepAuditionCharacter": 39
+          }
+        },
+        "ProduceStepType_AuditionMid2": {
+          "status": "handled",
+          "reason": "ProduceRuntime / ScenarioSpec literal",
+          "rows": 944,
+          "example_row_ids": [],
+          "owners": [],
+          "owner_total": 0,
+          "tables": {
+            "ProduceStepAuditionDifficulty": 905,
+            "ProduceStepAuditionCharacter": 39
+          }
+        },
+        "ProduceStepType_Business": {
+          "status": "handled",
+          "reason": "ProduceRuntime action `business`",
+          "rows": 104,
+          "example_row_ids": [],
+          "owners": [],
+          "owner_total": 0,
+          "tables": {
+            "ProduceStepTransition": 104
+          }
+        },
+        "ProduceStepType_EventActivity": {
+          "status": "handled",
+          "reason": "ProduceRuntime action `activity / activity_supply`",
+          "rows": 192,
+          "example_row_ids": [],
+          "owners": [],
+          "owner_total": 0,
+          "tables": {
+            "ProduceStepTransition": 164,
+            "ProduceStepEventSuggestion": 28
+          }
+        },
+        "ProduceStepType_EventSchool": {
+          "status": "handled",
+          "reason": "ProduceRuntime action `school_class`",
+          "rows": 104,
+          "example_row_ids": [],
+          "owners": [],
+          "owner_total": 0,
+          "tables": {
+            "ProduceStepTransition": 104
+          }
+        },
+        "ProduceStepType_FanPresent": {
+          "status": "unhandled",
+          "reason": "no ProduceRuntime action",
+          "rows": 46,
+          "example_row_ids": [],
+          "owners": [
+            {
+              "id": "Produce:produce-007",
+              "table": "Produce",
+              "name": null,
+              "count": 20
+            },
+            {
+              "id": "Produce:produce-008",
+              "table": "Produce",
+              "name": null,
+              "count": 20
+            },
+            {
+              "id": "ProduceStepTransition:amao",
+              "table": "ProduceStepTransition",
+              "name": null,
+              "count": 4
+            },
+            {
+              "id": "ProduceStepTransition:hmsz",
+              "table": "ProduceStepTransition",
+              "name": null,
+              "count": 4
+            },
+            {
+              "id": "ProduceStepTransition:hrnm",
+              "table": "ProduceStepTransition",
+              "name": null,
+              "count": 4
+            },
+            {
+              "id": "ProduceStepTransition:hski",
+              "table": "ProduceStepTransition",
+              "name": null,
+              "count": 4
+            },
+            {
+              "id": "ProduceStepTransition:hume",
+              "table": "ProduceStepTransition",
+              "name": null,
+              "count": 4
+            },
+            {
+              "id": "ProduceStepTransition:kcna",
+              "table": "ProduceStepTransition",
+              "name": null,
+              "count": 4
+            }
+          ],
+          "owner_total": 15,
+          "tables": {
+            "ProduceStepTransition": 46
+          }
+        },
+        "ProduceStepType_LessonDanceNormal": {
+          "status": "handled",
+          "reason": "ProduceRuntime / ScenarioSpec literal",
+          "rows": 316,
+          "example_row_ids": [],
+          "owners": [],
+          "owner_total": 0,
+          "tables": {
+            "ProduceStepTransition": 182,
+            "ProduceStepEventSuggestion": 131,
+            "TutorialProduceStep": 3
+          }
+        },
+        "ProduceStepType_LessonDanceSp": {
+          "status": "handled",
+          "reason": "ProduceRuntime action `lesson_dance_sp`",
+          "rows": 182,
+          "example_row_ids": [],
+          "owners": [],
+          "owner_total": 0,
+          "tables": {
+            "ProduceStepTransition": 182
+          }
+        },
+        "ProduceStepType_LessonVisualNormal": {
+          "status": "handled",
+          "reason": "ProduceRuntime / ScenarioSpec literal",
+          "rows": 315,
+          "example_row_ids": [],
+          "owners": [],
+          "owner_total": 0,
+          "tables": {
+            "ProduceStepTransition": 182,
+            "ProduceStepEventSuggestion": 131,
+            "TutorialProduceStep": 2
+          }
+        },
+        "ProduceStepType_LessonVisualSp": {
+          "status": "handled",
+          "reason": "ProduceRuntime action `lesson_visual_sp`",
+          "rows": 182,
+          "example_row_ids": [],
+          "owners": [],
+          "owner_total": 0,
+          "tables": {
+            "ProduceStepTransition": 182
+          }
+        },
+        "ProduceStepType_LessonVocalNormal": {
+          "status": "handled",
+          "reason": "ProduceRuntime / ScenarioSpec literal",
+          "rows": 314,
+          "example_row_ids": [],
+          "owners": [],
+          "owner_total": 0,
+          "tables": {
+            "ProduceStepTransition": 182,
+            "ProduceStepEventSuggestion": 131,
+            "TutorialProduceStep": 1
+          }
+        },
+        "ProduceStepType_LessonVocalSp": {
+          "status": "handled",
+          "reason": "ProduceRuntime action `lesson_vocal_sp`",
+          "rows": 182,
+          "example_row_ids": [],
+          "owners": [],
+          "owner_total": 0,
+          "tables": {
+            "ProduceStepTransition": 182
+          }
+        },
+        "ProduceStepType_OpenLessonDanceNormal": {
+          "status": "unhandled",
+          "reason": "no ProduceRuntime action",
+          "rows": 112,
+          "example_row_ids": [],
+          "owners": [
+            {
+              "id": "Produce:produce-007",
+              "table": "Produce",
+              "name": null,
+              "count": 112
+            },
+            {
+              "id": "Produce:produce-008",
+              "table": "Produce",
+              "name": null,
+              "count": 112
+            },
+            {
+              "id": "ProduceStepTransition:amao",
+              "table": "ProduceStepTransition",
+              "name": null,
+              "count": 12
+            },
+            {
+              "id": "ProduceStepTransition:hmsz",
+              "table": "ProduceStepTransition",
+              "name": null,
+              "count": 12
+            },
+            {
+              "id": "ProduceStepTransition:hrnm",
+              "table": "ProduceStepTransition",
+              "name": null,
+              "count": 12
+            },
+            {
+              "id": "ProduceStepTransition:hski",
+              "table": "ProduceStepTransition",
+              "name": null,
+              "count": 12
+            },
+            {
+              "id": "ProduceStepTransition:hume",
+              "table": "ProduceStepTransition",
+              "name": null,
+              "count": 12
+            },
+            {
+              "id": "ProduceStepTransition:kcna",
+              "table": "ProduceStepTransition",
+              "name": null,
+              "count": 12
+            }
+          ],
+          "owner_total": 12,
+          "tables": {
+            "ProduceStepTransition": 112
+          }
+        },
+        "ProduceStepType_OpenLessonDanceNormalStar": {
+          "status": "unhandled",
+          "reason": "no ProduceRuntime action",
+          "rows": 80,
+          "example_row_ids": [],
+          "owners": [
+            {
+              "id": "Produce:produce-007",
+              "table": "Produce",
+              "name": null,
+              "count": 80
+            },
+            {
+              "id": "Produce:produce-008",
+              "table": "Produce",
+              "name": null,
+              "count": 80
+            },
+            {
+              "id": "ProduceStepTransition:amao",
+              "table": "ProduceStepTransition",
+              "name": null,
+              "count": 8
+            },
+            {
+              "id": "ProduceStepTransition:hmsz",
+              "table": "ProduceStepTransition",
+              "name": null,
+              "count": 8
+            },
+            {
+              "id": "ProduceStepTransition:hrnm",
+              "table": "ProduceStepTransition",
+              "name": null,
+              "count": 8
+            },
+            {
+              "id": "ProduceStepTransition:hski",
+              "table": "ProduceStepTransition",
+              "name": null,
+              "count": 8
+            },
+            {
+              "id": "ProduceStepTransition:hume",
+              "table": "ProduceStepTransition",
+              "name": null,
+              "count": 8
+            },
+            {
+              "id": "ProduceStepTransition:kcna",
+              "table": "ProduceStepTransition",
+              "name": null,
+              "count": 8
+            }
+          ],
+          "owner_total": 12,
+          "tables": {
+            "ProduceStepTransition": 80
+          }
+        },
+        "ProduceStepType_OpenLessonDanceSp": {
+          "status": "unhandled",
+          "reason": "no ProduceRuntime action",
+          "rows": 112,
+          "example_row_ids": [],
+          "owners": [
+            {
+              "id": "Produce:produce-007",
+              "table": "Produce",
+              "name": null,
+              "count": 112
+            },
+            {
+              "id": "Produce:produce-008",
+              "table": "Produce",
+              "name": null,
+              "count": 112
+            },
+            {
+              "id": "ProduceStepTransition:amao",
+              "table": "ProduceStepTransition",
+              "name": null,
+              "count": 12
+            },
+            {
+              "id": "ProduceStepTransition:hmsz",
+              "table": "ProduceStepTransition",
+              "name": null,
+              "count": 12
+            },
+            {
+              "id": "ProduceStepTransition:hrnm",
+              "table": "ProduceStepTransition",
+              "name": null,
+              "count": 12
+            },
+            {
+              "id": "ProduceStepTransition:hski",
+              "table": "ProduceStepTransition",
+              "name": null,
+              "count": 12
+            },
+            {
+              "id": "ProduceStepTransition:hume",
+              "table": "ProduceStepTransition",
+              "name": null,
+              "count": 12
+            },
+            {
+              "id": "ProduceStepTransition:kcna",
+              "table": "ProduceStepTransition",
+              "name": null,
+              "count": 12
+            }
+          ],
+          "owner_total": 12,
+          "tables": {
+            "ProduceStepTransition": 112
+          }
+        },
+        "ProduceStepType_OpenLessonDanceSpStar": {
+          "status": "unhandled",
+          "reason": "no ProduceRuntime action",
+          "rows": 80,
+          "example_row_ids": [],
+          "owners": [
+            {
+              "id": "Produce:produce-007",
+              "table": "Produce",
+              "name": null,
+              "count": 80
+            },
+            {
+              "id": "Produce:produce-008",
+              "table": "Produce",
+              "name": null,
+              "count": 80
+            },
+            {
+              "id": "ProduceStepTransition:amao",
+              "table": "ProduceStepTransition",
+              "name": null,
+              "count": 8
+            },
+            {
+              "id": "ProduceStepTransition:hmsz",
+              "table": "ProduceStepTransition",
+              "name": null,
+              "count": 8
+            },
+            {
+              "id": "ProduceStepTransition:hrnm",
+              "table": "ProduceStepTransition",
+              "name": null,
+              "count": 8
+            },
+            {
+              "id": "ProduceStepTransition:hski",
+              "table": "ProduceStepTransition",
+              "name": null,
+              "count": 8
+            },
+            {
+              "id": "ProduceStepTransition:hume",
+              "table": "ProduceStepTransition",
+              "name": null,
+              "count": 8
+            },
+            {
+              "id": "ProduceStepTransition:kcna",
+              "table": "ProduceStepTransition",
+              "name": null,
+              "count": 8
+            }
+          ],
+          "owner_total": 12,
+          "tables": {
+            "ProduceStepTransition": 80
+          }
+        },
+        "ProduceStepType_OpenLessonVisualNormal": {
+          "status": "unhandled",
+          "reason": "no ProduceRuntime action",
+          "rows": 112,
+          "example_row_ids": [],
+          "owners": [
+            {
+              "id": "Produce:produce-007",
+              "table": "Produce",
+              "name": null,
+              "count": 112
+            },
+            {
+              "id": "Produce:produce-008",
+              "table": "Produce",
+              "name": null,
+              "count": 112
+            },
+            {
+              "id": "ProduceStepTransition:amao",
+              "table": "ProduceStepTransition",
+              "name": null,
+              "count": 12
+            },
+            {
+              "id": "ProduceStepTransition:hmsz",
+              "table": "ProduceStepTransition",
+              "name": null,
+              "count": 12
+            },
+            {
+              "id": "ProduceStepTransition:hrnm",
+              "table": "ProduceStepTransition",
+              "name": null,
+              "count": 12
+            },
+            {
+              "id": "ProduceStepTransition:hski",
+              "table": "ProduceStepTransition",
+              "name": null,
+              "count": 12
+            },
+            {
+              "id": "ProduceStepTransition:hume",
+              "table": "ProduceStepTransition",
+              "name": null,
+              "count": 12
+            },
+            {
+              "id": "ProduceStepTransition:kcna",
+              "table": "ProduceStepTransition",
+              "name": null,
+              "count": 12
+            }
+          ],
+          "owner_total": 12,
+          "tables": {
+            "ProduceStepTransition": 112
+          }
+        },
+        "ProduceStepType_OpenLessonVisualNormalStar": {
+          "status": "unhandled",
+          "reason": "no ProduceRuntime action",
+          "rows": 80,
+          "example_row_ids": [],
+          "owners": [
+            {
+              "id": "Produce:produce-007",
+              "table": "Produce",
+              "name": null,
+              "count": 80
+            },
+            {
+              "id": "Produce:produce-008",
+              "table": "Produce",
+              "name": null,
+              "count": 80
+            },
+            {
+              "id": "ProduceStepTransition:amao",
+              "table": "ProduceStepTransition",
+              "name": null,
+              "count": 8
+            },
+            {
+              "id": "ProduceStepTransition:hmsz",
+              "table": "ProduceStepTransition",
+              "name": null,
+              "count": 8
+            },
+            {
+              "id": "ProduceStepTransition:hrnm",
+              "table": "ProduceStepTransition",
+              "name": null,
+              "count": 8
+            },
+            {
+              "id": "ProduceStepTransition:hski",
+              "table": "ProduceStepTransition",
+              "name": null,
+              "count": 8
+            },
+            {
+              "id": "ProduceStepTransition:hume",
+              "table": "ProduceStepTransition",
+              "name": null,
+              "count": 8
+            },
+            {
+              "id": "ProduceStepTransition:kcna",
+              "table": "ProduceStepTransition",
+              "name": null,
+              "count": 8
+            }
+          ],
+          "owner_total": 12,
+          "tables": {
+            "ProduceStepTransition": 80
+          }
+        },
+        "ProduceStepType_OpenLessonVisualSp": {
+          "status": "unhandled",
+          "reason": "no ProduceRuntime action",
+          "rows": 112,
+          "example_row_ids": [],
+          "owners": [
+            {
+              "id": "Produce:produce-007",
+              "table": "Produce",
+              "name": null,
+              "count": 112
+            },
+            {
+              "id": "Produce:produce-008",
+              "table": "Produce",
+              "name": null,
+              "count": 112
+            },
+            {
+              "id": "ProduceStepTransition:amao",
+              "table": "ProduceStepTransition",
+              "name": null,
+              "count": 12
+            },
+            {
+              "id": "ProduceStepTransition:hmsz",
+              "table": "ProduceStepTransition",
+              "name": null,
+              "count": 12
+            },
+            {
+              "id": "ProduceStepTransition:hrnm",
+              "table": "ProduceStepTransition",
+              "name": null,
+              "count": 12
+            },
+            {
+              "id": "ProduceStepTransition:hski",
+              "table": "ProduceStepTransition",
+              "name": null,
+              "count": 12
+            },
+            {
+              "id": "ProduceStepTransition:hume",
+              "table": "ProduceStepTransition",
+              "name": null,
+              "count": 12
+            },
+            {
+              "id": "ProduceStepTransition:kcna",
+              "table": "ProduceStepTransition",
+              "name": null,
+              "count": 12
+            }
+          ],
+          "owner_total": 12,
+          "tables": {
+            "ProduceStepTransition": 112
+          }
+        },
+        "ProduceStepType_OpenLessonVisualSpStar": {
+          "status": "unhandled",
+          "reason": "no ProduceRuntime action",
+          "rows": 80,
+          "example_row_ids": [],
+          "owners": [
+            {
+              "id": "Produce:produce-007",
+              "table": "Produce",
+              "name": null,
+              "count": 80
+            },
+            {
+              "id": "Produce:produce-008",
+              "table": "Produce",
+              "name": null,
+              "count": 80
+            },
+            {
+              "id": "ProduceStepTransition:amao",
+              "table": "ProduceStepTransition",
+              "name": null,
+              "count": 8
+            },
+            {
+              "id": "ProduceStepTransition:hmsz",
+              "table": "ProduceStepTransition",
+              "name": null,
+              "count": 8
+            },
+            {
+              "id": "ProduceStepTransition:hrnm",
+              "table": "ProduceStepTransition",
+              "name": null,
+              "count": 8
+            },
+            {
+              "id": "ProduceStepTransition:hski",
+              "table": "ProduceStepTransition",
+              "name": null,
+              "count": 8
+            },
+            {
+              "id": "ProduceStepTransition:hume",
+              "table": "ProduceStepTransition",
+              "name": null,
+              "count": 8
+            },
+            {
+              "id": "ProduceStepTransition:kcna",
+              "table": "ProduceStepTransition",
+              "name": null,
+              "count": 8
+            }
+          ],
+          "owner_total": 12,
+          "tables": {
+            "ProduceStepTransition": 80
+          }
+        },
+        "ProduceStepType_OpenLessonVocalNormal": {
+          "status": "unhandled",
+          "reason": "no ProduceRuntime action",
+          "rows": 112,
+          "example_row_ids": [],
+          "owners": [
+            {
+              "id": "Produce:produce-007",
+              "table": "Produce",
+              "name": null,
+              "count": 112
+            },
+            {
+              "id": "Produce:produce-008",
+              "table": "Produce",
+              "name": null,
+              "count": 112
+            },
+            {
+              "id": "ProduceStepTransition:amao",
+              "table": "ProduceStepTransition",
+              "name": null,
+              "count": 12
+            },
+            {
+              "id": "ProduceStepTransition:hmsz",
+              "table": "ProduceStepTransition",
+              "name": null,
+              "count": 12
+            },
+            {
+              "id": "ProduceStepTransition:hrnm",
+              "table": "ProduceStepTransition",
+              "name": null,
+              "count": 12
+            },
+            {
+              "id": "ProduceStepTransition:hski",
+              "table": "ProduceStepTransition",
+              "name": null,
+              "count": 12
+            },
+            {
+              "id": "ProduceStepTransition:hume",
+              "table": "ProduceStepTransition",
+              "name": null,
+              "count": 12
+            },
+            {
+              "id": "ProduceStepTransition:kcna",
+              "table": "ProduceStepTransition",
+              "name": null,
+              "count": 12
+            }
+          ],
+          "owner_total": 12,
+          "tables": {
+            "ProduceStepTransition": 112
+          }
+        },
+        "ProduceStepType_OpenLessonVocalNormalStar": {
+          "status": "unhandled",
+          "reason": "no ProduceRuntime action",
+          "rows": 80,
+          "example_row_ids": [],
+          "owners": [
+            {
+              "id": "Produce:produce-007",
+              "table": "Produce",
+              "name": null,
+              "count": 80
+            },
+            {
+              "id": "Produce:produce-008",
+              "table": "Produce",
+              "name": null,
+              "count": 80
+            },
+            {
+              "id": "ProduceStepTransition:amao",
+              "table": "ProduceStepTransition",
+              "name": null,
+              "count": 8
+            },
+            {
+              "id": "ProduceStepTransition:hmsz",
+              "table": "ProduceStepTransition",
+              "name": null,
+              "count": 8
+            },
+            {
+              "id": "ProduceStepTransition:hrnm",
+              "table": "ProduceStepTransition",
+              "name": null,
+              "count": 8
+            },
+            {
+              "id": "ProduceStepTransition:hski",
+              "table": "ProduceStepTransition",
+              "name": null,
+              "count": 8
+            },
+            {
+              "id": "ProduceStepTransition:hume",
+              "table": "ProduceStepTransition",
+              "name": null,
+              "count": 8
+            },
+            {
+              "id": "ProduceStepTransition:kcna",
+              "table": "ProduceStepTransition",
+              "name": null,
+              "count": 8
+            }
+          ],
+          "owner_total": 12,
+          "tables": {
+            "ProduceStepTransition": 80
+          }
+        },
+        "ProduceStepType_OpenLessonVocalSp": {
+          "status": "unhandled",
+          "reason": "no ProduceRuntime action",
+          "rows": 112,
+          "example_row_ids": [],
+          "owners": [
+            {
+              "id": "Produce:produce-007",
+              "table": "Produce",
+              "name": null,
+              "count": 112
+            },
+            {
+              "id": "Produce:produce-008",
+              "table": "Produce",
+              "name": null,
+              "count": 112
+            },
+            {
+              "id": "ProduceStepTransition:amao",
+              "table": "ProduceStepTransition",
+              "name": null,
+              "count": 12
+            },
+            {
+              "id": "ProduceStepTransition:hmsz",
+              "table": "ProduceStepTransition",
+              "name": null,
+              "count": 12
+            },
+            {
+              "id": "ProduceStepTransition:hrnm",
+              "table": "ProduceStepTransition",
+              "name": null,
+              "count": 12
+            },
+            {
+              "id": "ProduceStepTransition:hski",
+              "table": "ProduceStepTransition",
+              "name": null,
+              "count": 12
+            },
+            {
+              "id": "ProduceStepTransition:hume",
+              "table": "ProduceStepTransition",
+              "name": null,
+              "count": 12
+            },
+            {
+              "id": "ProduceStepTransition:kcna",
+              "table": "ProduceStepTransition",
+              "name": null,
+              "count": 12
+            }
+          ],
+          "owner_total": 12,
+          "tables": {
+            "ProduceStepTransition": 112
+          }
+        },
+        "ProduceStepType_OpenLessonVocalSpStar": {
+          "status": "unhandled",
+          "reason": "no ProduceRuntime action",
+          "rows": 80,
+          "example_row_ids": [],
+          "owners": [
+            {
+              "id": "Produce:produce-007",
+              "table": "Produce",
+              "name": null,
+              "count": 80
+            },
+            {
+              "id": "Produce:produce-008",
+              "table": "Produce",
+              "name": null,
+              "count": 80
+            },
+            {
+              "id": "ProduceStepTransition:amao",
+              "table": "ProduceStepTransition",
+              "name": null,
+              "count": 8
+            },
+            {
+              "id": "ProduceStepTransition:hmsz",
+              "table": "ProduceStepTransition",
+              "name": null,
+              "count": 8
+            },
+            {
+              "id": "ProduceStepTransition:hrnm",
+              "table": "ProduceStepTransition",
+              "name": null,
+              "count": 8
+            },
+            {
+              "id": "ProduceStepTransition:hski",
+              "table": "ProduceStepTransition",
+              "name": null,
+              "count": 8
+            },
+            {
+              "id": "ProduceStepTransition:hume",
+              "table": "ProduceStepTransition",
+              "name": null,
+              "count": 8
+            },
+            {
+              "id": "ProduceStepTransition:kcna",
+              "table": "ProduceStepTransition",
+              "name": null,
+              "count": 8
+            }
+          ],
+          "owner_total": 12,
+          "tables": {
+            "ProduceStepTransition": 80
+          }
+        },
+        "ProduceStepType_Present": {
+          "status": "handled",
+          "reason": "ProduceRuntime action `present`",
+          "rows": 52,
+          "example_row_ids": [],
+          "owners": [],
+          "owner_total": 0,
+          "tables": {
+            "ProduceStepTransition": 52
+          }
+        },
+        "ProduceStepType_Refresh": {
+          "status": "handled",
+          "reason": "ProduceRuntime action `refresh`",
+          "rows": 49,
+          "example_row_ids": [],
+          "owners": [],
+          "owner_total": 0,
+          "tables": {
+            "ProduceStepTransition": 46,
+            "TutorialProduceStep": 3
+          }
+        },
+        "ProduceStepType_SelfLessonDanceNormal": {
+          "status": "handled",
+          "reason": "ProduceRuntime / ScenarioSpec literal",
+          "rows": 78,
+          "example_row_ids": [],
+          "owners": [],
+          "owner_total": 0,
+          "tables": {
+            "ProduceStepTransition": 78
+          }
+        },
+        "ProduceStepType_SelfLessonDanceSp": {
+          "status": "handled",
+          "reason": "ProduceRuntime / ScenarioSpec literal",
+          "rows": 78,
+          "example_row_ids": [],
+          "owners": [],
+          "owner_total": 0,
+          "tables": {
+            "ProduceStepTransition": 78
+          }
+        },
+        "ProduceStepType_SelfLessonVisualNormal": {
+          "status": "handled",
+          "reason": "ProduceRuntime / ScenarioSpec literal",
+          "rows": 78,
+          "example_row_ids": [],
+          "owners": [],
+          "owner_total": 0,
+          "tables": {
+            "ProduceStepTransition": 78
+          }
+        },
+        "ProduceStepType_SelfLessonVisualSp": {
+          "status": "handled",
+          "reason": "ProduceRuntime / ScenarioSpec literal",
+          "rows": 78,
+          "example_row_ids": [],
+          "owners": [],
+          "owner_total": 0,
+          "tables": {
+            "ProduceStepTransition": 78
+          }
+        },
+        "ProduceStepType_SelfLessonVocalNormal": {
+          "status": "handled",
+          "reason": "ProduceRuntime / ScenarioSpec literal",
+          "rows": 78,
+          "example_row_ids": [],
+          "owners": [],
+          "owner_total": 0,
+          "tables": {
+            "ProduceStepTransition": 78
+          }
+        },
+        "ProduceStepType_SelfLessonVocalSp": {
+          "status": "handled",
+          "reason": "ProduceRuntime / ScenarioSpec literal",
+          "rows": 78,
+          "example_row_ids": [],
+          "owners": [],
+          "owner_total": 0,
+          "tables": {
+            "ProduceStepTransition": 78
+          }
+        }
+      }
+    }
+  }
+}

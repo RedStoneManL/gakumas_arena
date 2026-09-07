@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """Second half of the hand-written annotations (tables F-J) + per-value notes for key enums."""
 from atlas_annotations import add, T, COMMON, NESTED  # noqa: F401
 
@@ -306,3 +305,43 @@ en("ProduceEffectType", {
     "BeforeAuditionRefreshStaminaUp": "试炼前回复 +v‰。", "BeforeAuditionRefreshStaminaDown": "-v‰。", "ParameterLimitUp": "参数上限 +v。", "StarAddition": "スター性 +v。", "StarPermilUp": "スター性获得 +v‰。",
     "HighScoreGoldAddition": "活动货币 +v。", "CustomizeProduceCardProducePointDownMultiple": "下次定制费用 -v‰。", "IdolCardProduceCardCustomizeEnable": "允许定制固有卡。", "ProduceCustomizeItemUpgrade": "升级定制道具。", "ProduceDrinkPossessLimitUp": "饮料上限 +v。",
 })
+
+# =========================================================================== fill-ins for remaining fields
+def _f(table, **kw):
+    T.setdefault(table, {"desc": "", "fields": {}, "notes": "", "fk": []})["fields"].update(kw)
+
+_f("ProduceSeason", fixRankTime="排名锁定时间（Unix ms 字符串）。")
+_f("ProduceNextIdolAuditionMasterRankingSeason", fixRankTime="排名锁定时间。")
+_f("ProduceStepSelfLesson", progressLevel="进度等级（全 1）。")
+_f("PvpRateCommonProduceCard", produceCards="公共卡列表（id/upgradeCount/customizes）。", **{"produceCards.id": "→ ProduceCard。", "produceCards.upgradeCount": "强化段。", "produceCards.customizes": "定制（空）。"})
+_f("MemoryGift", grade="ResultGrade（メモリー评价）。", produceCardPhaseType="ProduceMemoryProduceCardPhaseType：该卡在 ProduceStart 还是 EndAuditionMid 时进入卡组。",
+   memoryAbilities="→ MemoryAbility 列表。", vocal="メモリー三维。", dance="。", visual="。", stamina="体力。",
+   examBattleProduceCards="コンテスト用卡组。", examBattleProduceItemIds="→ ProduceItem コンテスト用道具。",
+   **{"produceCard.id": "→ ProduceCard。", "produceCard.upgradeCount": "强化段。", "produceCard.customizes": "定制列表。",
+      "produceCard.customizes.id": "→ ProduceCardCustomize。", "produceCard.customizes.customizeCount": "段数。",
+      "memoryAbilities.id": "→ MemoryAbility。", "memoryAbilities.level": "等级。",
+      "examBattleProduceCards.id": "→ ProduceCard。", "examBattleProduceCards.upgradeCount": "强化段。", "examBattleProduceCards.customizes": "定制。"})
+_f("ProduceEffectIcon", type="ProduceEffectType。", iconAssetId="图标。", backgroundAssetId="背景。")
+_f("IdolCardPrimaStellaProduceSkill", produceSkillLevel="技能等级（全 1）。")
+_f("ProduceExamAutoTriggerEvaluation", type="ExamPlayType。")
+_f("PvpRateConfig", vocal="赛季基准 Vocal。", dance="。", visual="。", examBattleFirstRankBonusPermil="第一名分数加成千分比（200）。",
+   startTimelineInitialTimePermil="演出时间参数。", winTimelineAssetId="演出。", loseTimelineAssetId="演出。", topAssetId="UI。",
+   **{"stages.stageType": "PvpRateStageType（_1/_2/_3）。", "stages.planType": "该阶段プラン。", "stages.turn": "回合数。", "stages.produceItemId": "→ ProduceItem 阶段道具。",
+      "stages.produceItemIds": "→ ProduceItem。", "stages.produceExamGimmickEffectGroupId": "→ ProduceExamGimmickEffectGroup。", "stages.bgmAssetId": "BGM。",
+      "stages.startTimelineAssetId": "演出。", "stages.examTimelineAssetId": "演出。", "stages.vocal": "阶段基准 Vocal。", "stages.dance": "。", "stages.visual": "。",
+      "stages.produceExamBattleScoreConfigId": "→ ProduceExamBattleScoreConfig。"})
+_f("CompetitionExamStatusEffectIcon", examStatusEffectType="ExamStatusEffectType。")
+_f("ProduceGuide", producerLevel="适用 P 等级（20/35）。", produceGuideProduceCardCategoryGroupId="→ ProduceGuideProduceCardCategoryGroup。", produceGuideProduceCardSampleDeckCategoryGroupId="→ ProduceGuideProduceCardSampleDeckCategoryGroup。")
+_f("ProduceSplitAdv", type="ProduceAdvType。", produceSplitTypes="适用的 ProduceSplitType。", targetCharacterId="→ Character。")
+_f("ProduceGroupLiveCommon", type="ProduceLiveType。", needForceLiveCommonIdolCard="需要指定形象卡。", musicId="→ Music。")
+_f("SeminarExamTransition", isLessonInt="1=课程型研修。", seminarExamGroupName="研修组名。", seminarExamName="研修名。", rewards="奖励。", seminarExamGroupId="研修组 id（不在 dump 中）。", seminarExamId="研修 id（不在 dump 中）。",
+   **{"rewards.resourceType": "。", "rewards.resourceId": "。", "rewards.quantity": "。"})
+_f("TutorialProduce", tutorialType="TutorialType。", idolCardParameterGrowthLimit="参数上限 1200。", memoryGiftId="→ MemoryGift。", musicId="→ Music。")
+_f("TutorialProduceStep", tutorialType="TutorialType。", stepNumber="周序号。", tutorialStep="教程步骤号。", produceStepRefresh="是否休息。", produceStepLessonId="→ ProduceStepLesson。",
+   progressLevel="进度等级。", produceNavigationNumber="导航台词序号。", rankThreshold="合格名次。", parameterBaseLine="参数基准。", baseScore="基础分。", forceEndScore="强制结束分。",
+   produceExamBattleNpcGroupId="→ ProduceExamBattleNpcGroup。", produceExamBattleConfigId="→ ProduceExamBattleConfig。", produceExamGimmickEffectGroupId="→ ProduceExamGimmickEffectGroup。")
+_f("ProduceStory", produceEventHintProduceConditionDescriptions="触发条件提示文本。", advAssetId="ADV。")
+_f("ProduceAdv", type="ProduceAdvType。")
+
+ENUM_NOTES["ProduceCardGrowEffectType"].pop("CostBuffAdd/Reduce", None)
+ENUM_NOTES["ProduceCardGrowEffectType"].update({"CostBuffAdd": "强化状态费用 +v（未使用）。", "CostBuffReduce": "强化状态费用 -v（未使用）。"})

@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """Hand-written Chinese annotations for the master-data atlas.
 
 Used by build_docs.py.  Keys are table names; each entry has

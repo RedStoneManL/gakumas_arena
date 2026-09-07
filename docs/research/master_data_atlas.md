@@ -577,7 +577,7 @@ dump 共 286 张表；本图谱详述 120 张。全部表的行数：
 | `name` | string | 100% | 显示名（日文）。 | "シーズン0", "シーズン1" |
 | `startTime` | int64 | 100% | 开始时间（Unix ms 字符串）。 | "1715824800000", "1759111200000" |
 | `endTime` | int64 | 100% | 结束时间（Unix ms 字符串，0=无）。 | "1759107600000", "0" |
-| `fixRankTime` | int64 | 100% | 排名锁定时间。 | "1759370400000", "0" |
+| `fixRankTime` | int64 | 100% | 排名锁定时间（Unix ms 字符串）。 | "1759370400000", "0" |
 
 代表行：
 ```json
@@ -798,7 +798,7 @@ N.I.A マスター 排行赛季时间窗。
 | `produceId` | string | 100% | → Produce（剧本/难度）。 | "produce-005" |
 | `startTime` | int64 | 100% | 开始时间（Unix ms 字符串）。 | "1747620000000", "1751248800000" |
 | `endTime` | int64 | 100% | 结束时间（Unix ms 字符串，0=无）。 | "1750795200000", "1754424000000" |
-| `fixRankTime` | int64 | 100% | （未注释） | "1751227200000", "1754942400000" |
+| `fixRankTime` | int64 | 100% | 排名锁定时间。 | "1751227200000", "1754942400000" |
 
 外键（按 id 连接验证）：
 - `produceId` → **Produce** (1/1 命中)
@@ -986,7 +986,7 @@ N.I.A マスター 排行赛季时间窗。
 | 字段 | proto 类型 | 非空率 | 含义 | 示例值 |
 |---|---|---|---|---|
 | `id` | string | 100% | 主键。绝大多数表的 id 本身就是“可读的编码”（见各表说明），很多语义只在 id 里出现。 | "self_lesson-produce_004-01-normal", "self_lesson-produce_004-01-sp" |
-| `progressLevel` | int32 | 100% | （未注释） | 1 |
+| `progressLevel` | int32 | 100% | 进度等级（全 1）。 | 1 |
 | `stamina` | int32 | 100% | 消耗体力。 | 6, 8 |
 | `parameter` | int32 | 100% | 参数收益。 | 80, 100 |
 
@@ -1385,51 +1385,51 @@ N.I.A 各角色每次试炼的合格/失败后排名（successNextIdolAuditionRa
 |---|---|---|---|---|
 | `id` | string | 100% | 主键。绝大多数表的 id 本身就是“可读的编码”（见各表说明），很多语义只在 id 里出现。 | "p_card-00-acc-0_002", "p_card-00-act-0_001" |
 | `upgradeCount` | int32 | 74% | 强化段数（0=未强化，1=+，2/3 见 legend 卡）。 | 0, 1 |
-| `name` | ? | 100% | 显示名（日文）。 | "眠気", "アピールの基本" |
-| `assetId` | ? | 100% | 美术/预制体资源 id（非外键；AssetDownload 里只登记了一部分）。 | "img_general_skillcard_acc-0_002", "img_general_skillcard_act-0_001" |
-| `isCharacterAsset` | ? | 29% | 使用角色专属立绘。 | false, true |
-| `voiceAssetId` | ? | 0% | 语音资源 id。 | "sud_vo_system_cidol-jsna-3-015_produce_…", "sud_vo_system_cidol-hrnm-3-013_produce_…" |
-| `rarity` | ? | 100% | 稀有度枚举。 | "ProduceCardRarity_N", "ProduceCardRarity_Sr" |
-| `planType` | ? | 100% | ProducePlanType：Common=全プラン通用 / Plan1=センス / Plan2=ロジック / Plan3=アノマリー。 | "ProducePlanType_Common", "ProducePlanType_Plan1" |
-| `category` | ? | 100% | ProduceCardCategory：ActiveSkill / MentalSkill / Trouble。 | "ProduceCardCategory_Trouble", "ProduceCardCategory_ActiveSkill" |
-| `stamina` | ? | 67% | 体力消耗（受元気抵扣、消費体力減少/増加 影响）。 | 0, 4 |
-| `forceStamina` | ? | 12% | 体力消費(无视元気)：直接扣体力的费用。 | 0, 1 |
-| `costType` | ? | 100% | ExamCostType：非体力费用种类（好調/集中/好印象/やる気/全力値/絶好調）。 | "ExamCostType_Unknown", "ExamCostType_ExamLessonBuff" |
-| `costValue` | ? | 9% | 非体力费用数值。 | 0, 5 |
-| `playProduceExamTriggerId` | ? | 13% | → ProduceExamTrigger，使用条件（例：元気 0、好調中、強気2段）。 | "e_trigger-exam_start_turn-condition_thr…", "e_trigger-exam_start_turn-no_block" |
-| `playEffects` | ? | 100% | 效果列表（结构见 §2）。 | [{"produceExamTriggerId": "", "produceExamEffectId": "e_effect-exam_lesson-0009-01", "hideIcon": false, "isOncePlayEffect": false}], [{"produceExamTriggerId": "", "produceExamEffectId": "e_effect-exam_lesson-0014-01", "hideIcon": false, "isOncePlayEffect": false}] |
-| `playMovePositionType` | ? | 100% | 用后去向：Grave=弃牌堆 / Lost=除外（レッスン中1回）。 | "ProduceCardMovePositionType_Lost", "ProduceCardMovePositionType_Grave" |
-| `moveEffectTriggerType` | ? | 100% | ProduceCardMoveEffectTriggerType：移动到 Hand/Hold 时触发 moveProduceExamEffectIds。 | "ProduceCardMoveEffectTriggerType_Unknown", "ProduceCardMoveEffectTriggerType_Hand" |
-| `moveProduceExamEffectIds` | ? | 0% | 移动时效果。 | ["e_effect-exam_block-0005"], ["e_effect-exam_card_play_aggressive-0003"] |
-| `isEndTurnLost` | ? | 0% | 未使用(false)。 | false |
-| `isInitial` | ? | 5% | レッスン開始時手札に入る。 | false, true |
-| `isRestrict` | ? | 0% | 未使用(false)。 | false |
-| `produceCardStatusEnchantId` | ? | 3% | → ProduceCardStatusEnchant，成长(成長)规则。 | "card_enchant-e_trigger-exam_stance_chan…", "card_enchant-e_trigger-exam_stance_chan…" |
-| `searchTag` | ? | 46% | 标签：starter / idol-unique（ProduceCardSearch.cardSearchTag 用）。 | "starter", "idol-unique" |
-| `libraryHidden` | ? | 1% | 图鉴（ピクチャーブック）中隐藏。 | false, true |
-| `noDeckDuplication` | ? | 72% | 重複不可（卡组内只能一张）。 | false, true |
-| `isReward` | ? | 0% | 未使用。 | false |
-| `produceDescriptions` | ? | 100% | 描述模板片段列表（结构见 §2），渲染后即游戏内效果文本。**这是效果语义最可靠的说明**。 | "(渲染) レッスン中1回", "(渲染) パラメータ+9" |
-| `unlockProducerLevel` | ? | 28% | 解锁所需 P 等级。 | 0, 3 |
-| `rentalUnlockProducerLevel` | ? | 28% | 租借解锁等级。 | 0, 1 |
-| `evaluation` | ? | 46% | 评价分：用于メモリー/编成强度评估（越高越强）。 | 5, 0 |
-| `originIdolCardId` | ? | 36% | → IdolCard，偶像固有卡来源。 | "i_card-hski-1-000", "i_card-ttmr-1-000" |
-| `originSupportCardId` | ? | 13% | → SupportCard，支援卡来源（sup 卡）。 | "s_card-2-0000", "s_card-2-0002" |
-| `isInitialDeckProduceCard` | ? | 14% | 初始卡组卡（アピールの基本 等）。 | false, true |
-| `effectGroupIds` | ? | 100% | → EffectGroup。把效果归入“xx效果”组，用于筛选（例如“好調効果のスキルカード”这类条件就是按 effectGroup 匹配）。 | ["effect_group-visible-exam_lesson-000"], ["effect_group-visible-exam_lesson-000", "effect_group-visible-exam_block-000"] |
-| `produceCardCustomizeIds` | ? | 41% | → ProduceCardCustomize，可选定制方案。 | ["p_card_custom-040_070-g_effect-block_ad…", "p_card_custom-100-g_effect-lesson_count…", "p_card_custom-040_070-g_effect-lesson_a…"], ["p_card_custom-040_040_070-g_effect-bloc…", "p_card_custom-040_040_070-g_effect-stam…", "p_card_custom-070-g_effect-initial_add"] |
-| `maxCustomizeCount` | ? | 41% | 最大定制次数（2/3）。 | 0, 2 |
-| `isConversion` | ? | 5% | 由 ProduceCardConversion 转换得到的卡。 | false, true |
-| `moveProduceExamTriggerIds` | ? | 0% | 未使用。 |  |
-| `originCharacterId` | ? | 1% | → Character（nasr 专属卡）。 | "nasr" |
-| `originPrimaStellaIdolCardId` | ? | 1% | → IdolCard，プリマステラ(H.I.F 一番星) 专属卡来源。 | "i_card-amao-3-015", "i_card-ssmk-3-012" |
-| `viewStartTime` | ? | 100% | 可见起始时间，Unix 毫秒字符串；"0" 表示一直可见。 | "0", "1716339600000" |
-| `isLimited` | ? | 0% | 限定标记（全库均为 false）。 | false |
-| `order` | ? | 100% | 客户端排序键（字符串或整数，纯展示用）。 | "13000010000002", "11000010000001" |
-| &nbsp;&nbsp;↳ `produceExamTriggerId` | ? | 8% | 该条效果的附加发动条件（空=无条件）。 | "e_trigger-exam_card_play-stamina_up_mul…", "e_trigger-none-stamina_up_multiple-500" |
-| &nbsp;&nbsp;↳ `produceExamEffectId` | ? | 100% | → ProduceExamEffect。 | "e_effect-exam_lesson-0009-01", "e_effect-exam_lesson-0014-01" |
-| &nbsp;&nbsp;↳ `hideIcon` | ? | 0% | 不显示效果图标。 | false, true |
-| &nbsp;&nbsp;↳ `isOncePlayEffect` | ? | 0% | 每场只发动一次的效果（用于 再演 ExamStatusEnchantEncore 等）。 | false, true |
+| `name` | string | 100% | 显示名（日文）。 | "眠気", "アピールの基本" |
+| `assetId` | string | 100% | 美术/预制体资源 id（非外键；AssetDownload 里只登记了一部分）。 | "img_general_skillcard_acc-0_002", "img_general_skillcard_act-0_001" |
+| `isCharacterAsset` | bool | 29% | 使用角色专属立绘。 | false, true |
+| `voiceAssetId` | string | 0% | 语音资源 id。 | "sud_vo_system_cidol-jsna-3-015_produce_…", "sud_vo_system_cidol-hrnm-3-013_produce_…" |
+| `rarity` | ProduceCardRarity | 100% | 稀有度枚举。 | "ProduceCardRarity_N", "ProduceCardRarity_Sr" |
+| `planType` | ProducePlanType | 100% | ProducePlanType：Common=全プラン通用 / Plan1=センス / Plan2=ロジック / Plan3=アノマリー。 | "ProducePlanType_Common", "ProducePlanType_Plan1" |
+| `category` | ProduceCardCategory | 100% | ProduceCardCategory：ActiveSkill / MentalSkill / Trouble。 | "ProduceCardCategory_Trouble", "ProduceCardCategory_ActiveSkill" |
+| `stamina` | int32 | 67% | 体力消耗（受元気抵扣、消費体力減少/増加 影响）。 | 0, 4 |
+| `forceStamina` | int32 | 12% | 体力消費(无视元気)：直接扣体力的费用。 | 0, 1 |
+| `costType` | ExamCostType | 100% | ExamCostType：非体力费用种类（好調/集中/好印象/やる気/全力値/絶好調）。 | "ExamCostType_Unknown", "ExamCostType_ExamLessonBuff" |
+| `costValue` | int32 | 9% | 非体力费用数值。 | 0, 5 |
+| `playProduceExamTriggerId` | string | 13% | → ProduceExamTrigger，使用条件（例：元気 0、好調中、強気2段）。 | "e_trigger-exam_start_turn-condition_thr…", "e_trigger-exam_start_turn-no_block" |
+| `playEffects` | repeated PlayEffect | 100% | 效果列表（结构见 §2）。 | [{"produceExamTriggerId": "", "produceExamEffectId": "e_effect-exam_lesson-0009-01", "hideIcon": false, "isOncePlayEffect": false}], [{"produceExamTriggerId": "", "produceExamEffectId": "e_effect-exam_lesson-0014-01", "hideIcon": false, "isOncePlayEffect": false}] |
+| `playMovePositionType` | ProduceCardMovePositionType | 100% | 用后去向：Grave=弃牌堆 / Lost=除外（レッスン中1回）。 | "ProduceCardMovePositionType_Lost", "ProduceCardMovePositionType_Grave" |
+| `moveEffectTriggerType` | ProduceCardMoveEffectTriggerType | 100% | ProduceCardMoveEffectTriggerType：移动到 Hand/Hold 时触发 moveProduceExamEffectIds。 | "ProduceCardMoveEffectTriggerType_Unknown", "ProduceCardMoveEffectTriggerType_Hand" |
+| `moveProduceExamEffectIds` | repeated string | 0% | 移动时效果。 | ["e_effect-exam_block-0005"], ["e_effect-exam_card_play_aggressive-0003"] |
+| `isEndTurnLost` | bool | 0% | 未使用(false)。 | false |
+| `isInitial` | bool | 5% | レッスン開始時手札に入る。 | false, true |
+| `isRestrict` | bool | 0% | 未使用(false)。 | false |
+| `produceCardStatusEnchantId` | string | 3% | → ProduceCardStatusEnchant，成长(成長)规则。 | "card_enchant-e_trigger-exam_stance_chan…", "card_enchant-e_trigger-exam_stance_chan…" |
+| `searchTag` | string | 46% | 标签：starter / idol-unique（ProduceCardSearch.cardSearchTag 用）。 | "starter", "idol-unique" |
+| `libraryHidden` | bool | 1% | 图鉴（ピクチャーブック）中隐藏。 | false, true |
+| `noDeckDuplication` | bool | 72% | 重複不可（卡组内只能一张）。 | false, true |
+| `isReward` | bool | 0% | 未使用。 | false |
+| `produceDescriptions` | repeated ProduceDescriptionSegment | 100% | 描述模板片段列表（结构见 §2），渲染后即游戏内效果文本。**这是效果语义最可靠的说明**。 | "(渲染) レッスン中1回", "(渲染) パラメータ+9" |
+| `unlockProducerLevel` | int32 | 28% | 解锁所需 P 等级。 | 0, 3 |
+| `rentalUnlockProducerLevel` | int32 | 28% | 租借解锁等级。 | 0, 1 |
+| `evaluation` | int32 | 46% | 评价分：用于メモリー/编成强度评估（越高越强）。 | 5, 0 |
+| `originIdolCardId` | string | 36% | → IdolCard，偶像固有卡来源。 | "i_card-hski-1-000", "i_card-ttmr-1-000" |
+| `originSupportCardId` | string | 13% | → SupportCard，支援卡来源（sup 卡）。 | "s_card-2-0000", "s_card-2-0002" |
+| `isInitialDeckProduceCard` | bool | 14% | 初始卡组卡（アピールの基本 等）。 | false, true |
+| `effectGroupIds` | repeated string | 100% | → EffectGroup。把效果归入“xx效果”组，用于筛选（例如“好調効果のスキルカード”这类条件就是按 effectGroup 匹配）。 | ["effect_group-visible-exam_lesson-000"], ["effect_group-visible-exam_lesson-000", "effect_group-visible-exam_block-000"] |
+| `produceCardCustomizeIds` | repeated string | 41% | → ProduceCardCustomize，可选定制方案。 | ["p_card_custom-040_070-g_effect-block_ad…", "p_card_custom-100-g_effect-lesson_count…", "p_card_custom-040_070-g_effect-lesson_a…"], ["p_card_custom-040_040_070-g_effect-bloc…", "p_card_custom-040_040_070-g_effect-stam…", "p_card_custom-070-g_effect-initial_add"] |
+| `maxCustomizeCount` | int32 | 41% | 最大定制次数（2/3）。 | 0, 2 |
+| `isConversion` | bool | 5% | 由 ProduceCardConversion 转换得到的卡。 | false, true |
+| `moveProduceExamTriggerIds` | repeated string | 0% | 未使用。 |  |
+| `originCharacterId` | string | 1% | → Character（nasr 专属卡）。 | "nasr" |
+| `originPrimaStellaIdolCardId` | string | 1% | → IdolCard，プリマステラ(H.I.F 一番星) 专属卡来源。 | "i_card-amao-3-015", "i_card-ssmk-3-012" |
+| `viewStartTime` | int64 | 100% | 可见起始时间，Unix 毫秒字符串；"0" 表示一直可见。 | "0", "1716339600000" |
+| `isLimited` | bool | 0% | 限定标记（全库均为 false）。 | false |
+| `order` | int64 | 100% | 客户端排序键（字符串或整数，纯展示用）。 | "13000010000002", "11000010000001" |
+| &nbsp;&nbsp;↳ `produceExamTriggerId` | string | 8% | 该条效果的附加发动条件（空=无条件）。 | "e_trigger-exam_card_play-stamina_up_mul…", "e_trigger-none-stamina_up_multiple-500" |
+| &nbsp;&nbsp;↳ `produceExamEffectId` | string | 100% | → ProduceExamEffect。 | "e_effect-exam_lesson-0009-01", "e_effect-exam_lesson-0014-01" |
+| &nbsp;&nbsp;↳ `hideIcon` | bool | 0% | 不显示效果图标。 | false, true |
+| &nbsp;&nbsp;↳ `isOncePlayEffect` | bool | 0% | 每场只发动一次的效果（用于 再演 ExamStatusEnchantEncore 等）。 | false, true |
 
 外键（按 id 连接验证）：
 - `assetId` → AssetDownload? (92/448 = 21%，多态或部分引用)
@@ -1558,9 +1558,9 @@ N.I.A 各角色每次试炼的合格/失败后排名（successNextIdolAuditionRa
 |---|---|---|---|---|
 | `beforeProduceCardId` | string | 100% | → ProduceCard。 | "p_card-01-act-1_019", "p_card-01-act-2_002" |
 | `afterProduceCardId` | string | 100% | → ProduceCard。 | "p_card-01-act-1_069", "p_card-01-men-2_110" |
-| `conditionSetId` | ? | 100% | → ConditionSet（P等级）。 | "cd_producer_level-052", "cd_producer_level-056" |
-| `isNotReward` | ? | 100% | 全 true。 | true |
-| `order` | ? | 100% | 客户端排序键（字符串或整数，纯展示用）。 | 2101052, 3101056 |
+| `conditionSetId` | string | 100% | → ConditionSet（P等级）。 | "cd_producer_level-052", "cd_producer_level-056" |
+| `isNotReward` | bool | 100% | 全 true。 | true |
+| `order` | int32 | 100% | 客户端排序键（字符串或整数，纯展示用）。 | 2101052, 3101056 |
 
 外键（按 id 连接验证）：
 - `beforeProduceCardId` → **ProduceCard** (21/21 命中)
@@ -1581,10 +1581,10 @@ N.I.A 各角色每次试炼的合格/失败后排名（successNextIdolAuditionRa
 |---|---|---|---|---|
 | `id` | string | 100% | 主键。绝大多数表的 id 本身就是“可读的编码”（见各表说明），很多语义只在 id 里出现。 | "p_card_custom-020-g_effect-cost_penetra…", "p_card_custom-020-g_effect-cost_reduce-2" |
 | `customizeCount` | int32 | 100% | 定制段数。 | 1, 2 |
-| `overwriteProduceCardGrowEffectType` | ? | 100% | 显示用覆盖类型。 | "ProduceCardGrowEffectType_Unknown", "ProduceCardGrowEffectType_CardStatusEnc…" |
-| `description` | ? | 38% | 说明文（日文）。 | "成長追加", "成長+" |
-| `produceCardGrowEffectIds` | ? | 100% | 外键/引用 id（见 FK）。 | ["g_effect-cost_penetrate_reduce-1"], ["g_effect-cost_reduce-2"] |
-| `producePoint` | ? | 100% | P点费用（20/40/70/100…）。 | 20, 40 |
+| `overwriteProduceCardGrowEffectType` | ProduceCardGrowEffectType | 100% | 显示用覆盖类型。 | "ProduceCardGrowEffectType_Unknown", "ProduceCardGrowEffectType_CardStatusEnc…" |
+| `description` | string | 38% | 说明文（日文）。 | "成長追加", "成長+" |
+| `produceCardGrowEffectIds` | repeated string | 100% | 外键/引用 id（见 FK）。 | ["g_effect-cost_penetrate_reduce-1"], ["g_effect-cost_reduce-2"] |
+| `producePoint` | int32 | 100% | P点费用（20/40/70/100…）。 | 20, 40 |
 
 外键（按 id 连接验证）：
 - `produceCardGrowEffectIds` → **ProduceCardGrowEffect** (157/157 命中)
@@ -1739,10 +1739,10 @@ N.I.A 各角色每次试炼的合格/失败后排名（successNextIdolAuditionRa
 |---|---|---|---|---|
 | `id` | string | 100% | 主键。绝大多数表的 id 本身就是“可读的编码”（见各表说明），很多语义只在 id 里出现。 | "pvp_live_battle_1" |
 | `planType` | ProducePlanType | 100% | ProducePlanType：Common=全プラン通用 / Plan1=センス / Plan2=ロジック / Plan3=アノマリー。 | "ProducePlanType_Plan1", "ProducePlanType_Plan2" |
-| `produceCards` | repeated ProduceCard | 100% | （未注释） | [{"id": "p_card-01-men-0_007", "upgradeCount": 0, "customizes": []}, {"id": "p_card-01-men-0_007", "upgradeCount": 0, "customizes": []}, {"id": "p_card-01-men-0_008", "upgradeCount": 0, "customizes": []}, {"id": "p_card-01-men-0_008", "upgradeCount": 0, "customizes": []}, {"id": "p_card-01-act-0_005", "upgradeCount": 0, "customizes": []}, "…(+3)"], [{"id": "p_card-02-men-0_011", "upgradeCount": 0, "customizes": []}, {"id": "p_card-02-men-0_011", "upgradeCount": 0, "customizes": []}, {"id": "p_card-02-men-0_012", "upgradeCount": 0, "customizes": []}, {"id": "p_card-02-men-0_012", "upgradeCount": 0, "customizes": []}, {"id": "p_card-02-act-0_009", "upgradeCount": 0, "customizes": []}, "…(+3)"] |
-| &nbsp;&nbsp;↳ `id` | string | 100% | 主键。绝大多数表的 id 本身就是“可读的编码”（见各表说明），很多语义只在 id 里出现。 | "p_card-01-men-0_007", "p_card-01-men-0_008" |
-| &nbsp;&nbsp;↳ `upgradeCount` | int32 | 0% | 强化段数（0=未强化，1=+，2/3 见 legend 卡）。 | 0 |
-| &nbsp;&nbsp;↳ `customizes` | repeated ProduceCardCustomize | 0% | （未注释） |  |
+| `produceCards` | repeated ProduceCard | 100% | 公共卡列表（id/upgradeCount/customizes）。 | [{"id": "p_card-01-men-0_007", "upgradeCount": 0, "customizes": []}, {"id": "p_card-01-men-0_007", "upgradeCount": 0, "customizes": []}, {"id": "p_card-01-men-0_008", "upgradeCount": 0, "customizes": []}, {"id": "p_card-01-men-0_008", "upgradeCount": 0, "customizes": []}, {"id": "p_card-01-act-0_005", "upgradeCount": 0, "customizes": []}, "…(+3)"], [{"id": "p_card-02-men-0_011", "upgradeCount": 0, "customizes": []}, {"id": "p_card-02-men-0_011", "upgradeCount": 0, "customizes": []}, {"id": "p_card-02-men-0_012", "upgradeCount": 0, "customizes": []}, {"id": "p_card-02-men-0_012", "upgradeCount": 0, "customizes": []}, {"id": "p_card-02-act-0_009", "upgradeCount": 0, "customizes": []}, "…(+3)"] |
+| &nbsp;&nbsp;↳ `id` | string | 100% | → ProduceCard。 | "p_card-01-men-0_007", "p_card-01-men-0_008" |
+| &nbsp;&nbsp;↳ `upgradeCount` | int32 | 0% | 强化段。 | 0 |
+| &nbsp;&nbsp;↳ `customizes` | repeated ProduceCardCustomize | 0% | 定制（空）。 |  |
 
 代表行：
 ```json
@@ -1992,34 +1992,34 @@ P道具（1038）。id 编码 `pitem_{00共通|01|02|03}-{稀有度}-{序号}-{0
 
 | 字段 | proto 类型 | 非空率 | 含义 | 示例值 |
 |---|---|---|---|---|
-| `id` | ? | 100% | 主键。绝大多数表的 id 本身就是“可读的编码”（见各表说明），很多语义只在 id 里出现。 | "pitem_00-0-004-0-000", "pitem_00-0-004-0-001" |
-| `assetId` | ? | 100% | 美术/预制体资源 id（非外键；AssetDownload 里只登记了一部分）。 | "img_general_pitem_0-004", "img_general_pitem_0-008" |
-| `rarity` | ? | 100% | 稀有度枚举。 | "ProduceItemRarity_N", "ProduceItemRarity_R" |
-| `name` | ? | 100% | 显示名（日文）。 | "初星バッチ（赤）", "初星バッチ（紫）" |
-| `planType` | ? | 100% | ProducePlanType：Common=全プラン通用 / Plan1=センス / Plan2=ロジック / Plan3=アノマリー。 | "ProducePlanType_Common", "ProducePlanType_Plan1" |
-| `fireLimit` | ? | 27% | 培育中发动次数上限（0=不限）。 | 0, 1 |
-| `fireInterval` | ? | 1% | 发动间隔。 | 0, 2 |
-| `produceTriggerId` | ? | 33% | → ProduceTrigger（培育外循环触发时机）。 | "p_trigger-start_shop", "p_trigger-end_audition" |
-| `produceTriggerIds` | ? | 0% | 未使用。 |  |
-| `produceItemEffectIds` | ? | 100% | → ProduceItemEffect。 | ["p_item_effect-exam_status_enchant-inf-0…"], ["p_item_effect-exam_status_enchant-inf-0…"] |
-| `skills` | ? | 100% | 效果列表（每项 produceItemEffectId，produceTriggerId 均空）。 | [{"produceTriggerId": "", "produceItemEffectId": "p_item_effect-exam_status_enchant-inf-0…"}], [{"produceTriggerId": "", "produceItemEffectId": "p_item_effect-exam_status_enchant-inf-0…"}] |
-| &nbsp;&nbsp;↳ `produceTriggerId` | ? | 0% | 未使用。 |  |
-| &nbsp;&nbsp;↳ `produceItemEffectId` | ? | 100% | → ProduceItemEffect。 | "p_item_effect-exam_status_enchant-inf-0…", "p_item_effect-exam_status_enchant-inf-0…" |
-| `libraryHidden` | ? | 55% | 图鉴（ピクチャーブック）中隐藏。 | true, false |
-| `produceDescriptions` | ? | 100% | 描述模板片段列表（结构见 §2），渲染后即游戏内效果文本。**这是效果语义最可靠的说明**。 | "(渲染) 8ターン目開始時、 / パラメータ+15 / 元気+15 / （レッスン内1回）", "(渲染) ターン開始時、消費体力減少状態の場合、 / パラメータ上昇量増加15%" |
-| `evaluation` | ? | 42% | 评价分：用于メモリー/编成强度评估（越高越强）。 | 0, 50 |
-| `isExamEffect` | ? | 67% | 考试内生效的道具。 | true, false |
-| `originIdolCardId` | ? | 29% | → IdolCard 固有道具来源。 | "i_card-hski-1-000", "i_card-ttmr-1-000" |
-| `originSupportCardId` | ? | 13% | → SupportCard 来源。 | "s_card-2-0001", "s_card-2-0003" |
-| `isUpgraded` | ? | 15% | 强化版（+）。 | false, true |
-| `effectGroupIds` | ? | 93% | → EffectGroup。把效果归入“xx效果”组，用于筛选（例如“好調効果のスキルカード”这类条件就是按 effectGroup 匹配）。 | ["effect_group-visible-exam_lesson-000", "effect_group-visible-exam_block-000"], ["effect_group-visible-exam_lesson_value_…"] |
-| `isChallenge` | ? | 23% | チャレンジPアイテム。 | false, true |
-| `isHighScoreRush` | ? | 2% | 高分 Rush 活动道具。 | false, true |
-| `isResearch` | ? | 1% | リサーチ活动道具。 | false, true |
-| `isEasy` | ? | 0% | 简单模式道具。 | false, true |
-| `viewStartTime` | ? | 100% | 可见起始时间，Unix 毫秒字符串；"0" 表示一直可见。 | "0", "1716339600000" |
-| `isLimited` | ? | 0% | 限定标记（全库均为 false）。 | false |
-| `order` | ? | 100% | 客户端排序键（字符串或整数，纯展示用）。 | "1", "1003400130" |
+| `id` | string | 100% | 主键。绝大多数表的 id 本身就是“可读的编码”（见各表说明），很多语义只在 id 里出现。 | "pitem_00-0-004-0-000", "pitem_00-0-004-0-001" |
+| `assetId` | string | 100% | 美术/预制体资源 id（非外键；AssetDownload 里只登记了一部分）。 | "img_general_pitem_0-004", "img_general_pitem_0-008" |
+| `rarity` | ProduceItemRarity | 100% | 稀有度枚举。 | "ProduceItemRarity_N", "ProduceItemRarity_R" |
+| `name` | string | 100% | 显示名（日文）。 | "初星バッチ（赤）", "初星バッチ（紫）" |
+| `planType` | ProducePlanType | 100% | ProducePlanType：Common=全プラン通用 / Plan1=センス / Plan2=ロジック / Plan3=アノマリー。 | "ProducePlanType_Common", "ProducePlanType_Plan1" |
+| `fireLimit` | int32 | 27% | 培育中发动次数上限（0=不限）。 | 0, 1 |
+| `fireInterval` | int32 | 1% | 发动间隔。 | 0, 2 |
+| `produceTriggerId` | string | 33% | → ProduceTrigger（培育外循环触发时机）。 | "p_trigger-start_shop", "p_trigger-end_audition" |
+| `produceTriggerIds` | repeated string | 0% | 未使用。 |  |
+| `produceItemEffectIds` | repeated string | 100% | → ProduceItemEffect。 | ["p_item_effect-exam_status_enchant-inf-0…"], ["p_item_effect-exam_status_enchant-inf-0…"] |
+| `skills` | repeated Skill | 100% | 效果列表（每项 produceItemEffectId，produceTriggerId 均空）。 | [{"produceTriggerId": "", "produceItemEffectId": "p_item_effect-exam_status_enchant-inf-0…"}], [{"produceTriggerId": "", "produceItemEffectId": "p_item_effect-exam_status_enchant-inf-0…"}] |
+| &nbsp;&nbsp;↳ `produceTriggerId` | string | 0% | 未使用。 |  |
+| &nbsp;&nbsp;↳ `produceItemEffectId` | string | 100% | → ProduceItemEffect。 | "p_item_effect-exam_status_enchant-inf-0…", "p_item_effect-exam_status_enchant-inf-0…" |
+| `libraryHidden` | bool | 55% | 图鉴（ピクチャーブック）中隐藏。 | true, false |
+| `produceDescriptions` | repeated ProduceDescriptionSegment | 100% | 描述模板片段列表（结构见 §2），渲染后即游戏内效果文本。**这是效果语义最可靠的说明**。 | "(渲染) 8ターン目開始時、 / パラメータ+15 / 元気+15 / （レッスン内1回）", "(渲染) ターン開始時、消費体力減少状態の場合、 / パラメータ上昇量増加15%" |
+| `evaluation` | int32 | 42% | 评价分：用于メモリー/编成强度评估（越高越强）。 | 0, 50 |
+| `isExamEffect` | bool | 67% | 考试内生效的道具。 | true, false |
+| `originIdolCardId` | string | 29% | → IdolCard 固有道具来源。 | "i_card-hski-1-000", "i_card-ttmr-1-000" |
+| `originSupportCardId` | string | 13% | → SupportCard 来源。 | "s_card-2-0001", "s_card-2-0003" |
+| `isUpgraded` | bool | 15% | 强化版（+）。 | false, true |
+| `effectGroupIds` | repeated string | 93% | → EffectGroup。把效果归入“xx效果”组，用于筛选（例如“好調効果のスキルカード”这类条件就是按 effectGroup 匹配）。 | ["effect_group-visible-exam_lesson-000", "effect_group-visible-exam_block-000"], ["effect_group-visible-exam_lesson_value_…"] |
+| `isChallenge` | bool | 23% | チャレンジPアイテム。 | false, true |
+| `isHighScoreRush` | bool | 2% | 高分 Rush 活动道具。 | false, true |
+| `isResearch` | bool | 1% | リサーチ活动道具。 | false, true |
+| `isEasy` | bool | 0% | 简单模式道具。 | false, true |
+| `viewStartTime` | int64 | 100% | 可见起始时间，Unix 毫秒字符串；"0" 表示一直可见。 | "0", "1716339600000" |
+| `isLimited` | bool | 0% | 限定标记（全库均为 false）。 | false |
+| `order` | int64 | 100% | 客户端排序键（字符串或整数，纯展示用）。 | "1", "1003400130" |
 
 外键（按 id 连接验证）：
 - `assetId` → AssetDownload? (125/517 = 24%，多态或部分引用)
@@ -2183,11 +2183,11 @@ N.I.A マスター 的“カスタマイズPアイテム”树（180）：isBase
 |---|---|---|---|---|
 | `id` | string | 100% | 主键。绝大多数表的 id 本身就是“可读的编码”（见各表说明），很多语义只在 id 里出现。 | "ability-001-p_memory_skill-common-p_tri…", "ability-001-p_memory_skill-common-p_tri…" |
 | `level` | int32 | 100% | 等级。 | 1 |
-| `skillId` | ? | 100% | → ProduceSkill。 | "p_memory_skill-common-p_trigger-end_les…", "p_memory_skill-common-p_trigger-end_les…" |
-| `evaluation` | ? | 100% | 评价分：用于メモリー/编成强度评估（越高越强）。 | 18, 27 |
-| `rarity` | ? | 100% | 稀有度枚举。 | "SkillRarity_Unknown" |
-| `produceGroupIds` | ? | 87% | → ProduceGroup 可用系列。 | ["produce_group-001"], ["produce_group-002"] |
-| `isUniqueActivation` | ? | 18% | 同名只发动一次。 | false, true |
+| `skillId` | string | 100% | → ProduceSkill。 | "p_memory_skill-common-p_trigger-end_les…", "p_memory_skill-common-p_trigger-end_les…" |
+| `evaluation` | int32 | 100% | 评价分：用于メモリー/编成强度评估（越高越强）。 | 18, 27 |
+| `rarity` | SkillRarity | 100% | 稀有度枚举。 | "SkillRarity_Unknown" |
+| `produceGroupIds` | repeated string | 87% | → ProduceGroup 可用系列。 | ["produce_group-001"], ["produce_group-002"] |
+| `isUniqueActivation` | bool | 18% | 同名只发动一次。 | false, true |
 
 外键（按 id 连接验证）：
 - `skillId` → **ProduceSkill** (340/340 命中)
@@ -2209,27 +2209,27 @@ N.I.A マスター 的“カスタマイズPアイテム”树（180）：isBase
 | `name` | string | 100% | 显示名（日文）。 | "メモリー「学園生活 倉本千奈 」", "メモリー「学園生活 篠澤広」" |
 | `description` | string | 0% | 说明文（日文）。 |  |
 | `assetId` | string | 100% | 美术/预制体资源 id（非外键；AssetDownload 里只登记了一部分）。 | "img_general_memory_linkcontest-002", "img_general_memory_linkcontest-001" |
-| `grade` | ResultGrade | 100% | （未注释） | "ResultGrade_D", "ResultGrade_F" |
+| `grade` | ResultGrade | 100% | ResultGrade（メモリー评价）。 | "ResultGrade_D", "ResultGrade_F" |
 | `idolCardId` | string | 100% | → IdolCard。 | "i_card-kcna-1-000", "i_card-shro-1-000" |
 | `planType` | ProducePlanType | 100% | ProducePlanType：Common=全プラン通用 / Plan1=センス / Plan2=ロジック / Plan3=アノマリー。 | "ProducePlanType_Unknown" |
-| &nbsp;&nbsp;↳ `id` | string | 100% | 主键。绝大多数表的 id 本身就是“可读的编码”（见各表说明），很多语义只在 id 里出现。 | "p_card-02-act-1_028", "p_card-02-men-1_031" |
-| &nbsp;&nbsp;↳ `upgradeCount` | int32 | 48% | 强化段数（0=未强化，1=+，2/3 见 legend 卡）。 | 0, 1 |
-| &nbsp;&nbsp;↳ `customizes` | repeated ProduceCardCustomize | 10% | （未注释） | [{"id": "p_card_custom-wrapper-p_card-03-men-1_0…", "customizeCount": 1}], [{"id": "p_card_custom-100-g_effect-lesson_count…", "customizeCount": 1}] |
-| `produceCardPhaseType` | ProduceMemoryProduceCardPhaseType | 100% | （未注释） | "ProduceMemoryProduceCardPhaseType_EndAu…", "ProduceMemoryProduceCardPhaseType_Produ…" |
-| `memoryAbilities` | repeated MemoryAbility | 100% | （未注释） | [{"id": "ability-001-p_memory_skill-common-p_tri…", "level": 1}, {"id": "ability-001-p_memory_skill-common-p_tri…", "level": 1}, {"id": "ability-001-p_memory_skill-common-p_tri…", "level": 1}], [{"id": "ability-p_cd-memory-vocal-450-001-p_mem…", "level": 1}, {"id": "ability-p_cd-memory-dance-450-001-p_mem…", "level": 1}, {"id": "ability-p_cd-memory-visual-450-001-p_me…", "level": 1}] |
-| &nbsp;&nbsp;↳ `id` | string | 100% | 主键。绝大多数表的 id 本身就是“可读的编码”（见各表说明），很多语义只在 id 里出现。 | "ability-001-p_memory_skill-common-p_tri…", "ability-001-p_memory_skill-common-p_tri…" |
+| &nbsp;&nbsp;↳ `id` | string | 100% | → ProduceCard。 | "p_card-02-act-1_028", "p_card-02-men-1_031" |
+| &nbsp;&nbsp;↳ `upgradeCount` | int32 | 48% | 强化段。 | 0, 1 |
+| &nbsp;&nbsp;↳ `customizes` | repeated ProduceCardCustomize | 10% | 定制列表。 | [{"id": "p_card_custom-wrapper-p_card-03-men-1_0…", "customizeCount": 1}], [{"id": "p_card_custom-100-g_effect-lesson_count…", "customizeCount": 1}] |
+| `produceCardPhaseType` | ProduceMemoryProduceCardPhaseType | 100% | ProduceMemoryProduceCardPhaseType：该卡在 ProduceStart 还是 EndAuditionMid 时进入卡组。 | "ProduceMemoryProduceCardPhaseType_EndAu…", "ProduceMemoryProduceCardPhaseType_Produ…" |
+| `memoryAbilities` | repeated MemoryAbility | 100% | → MemoryAbility 列表。 | [{"id": "ability-001-p_memory_skill-common-p_tri…", "level": 1}, {"id": "ability-001-p_memory_skill-common-p_tri…", "level": 1}, {"id": "ability-001-p_memory_skill-common-p_tri…", "level": 1}], [{"id": "ability-p_cd-memory-vocal-450-001-p_mem…", "level": 1}, {"id": "ability-p_cd-memory-dance-450-001-p_mem…", "level": 1}, {"id": "ability-p_cd-memory-visual-450-001-p_me…", "level": 1}] |
+| &nbsp;&nbsp;↳ `id` | string | 100% | → MemoryAbility。 | "ability-001-p_memory_skill-common-p_tri…", "ability-001-p_memory_skill-common-p_tri…" |
 | &nbsp;&nbsp;↳ `level` | int32 | 100% | 等级。 | 1 |
-| `vocal` | int32 | 100% | （未注释） | 200, 400 |
-| `dance` | int32 | 100% | （未注释） | 400, 300 |
-| `visual` | int32 | 100% | （未注释） | 300, 200 |
-| `stamina` | int32 | 100% | （未注释） | 25 |
-| `examBattleProduceCards` | repeated ProduceCard | 100% | （未注释） | [{"id": "p_card-02-ido-1_018", "upgradeCount": 0, "customizes": []}, {"id": "p_card-02-act-1_028", "upgradeCount": 0, "customizes": []}, {"id": "p_card-02-act-1_004", "upgradeCount": 0, "customizes": []}, {"id": "p_card-02-act-2_045", "upgradeCount": 0, "customizes": []}, {"id": "p_card-02-act-2_047", "upgradeCount": 0, "customizes": []}], [{"id": "p_card-02-ido-1_015", "upgradeCount": 0, "customizes": []}, {"id": "p_card-02-men-1_031", "upgradeCount": 0, "customizes": []}, {"id": "p_card-02-men-1_006", "upgradeCount": 0, "customizes": []}, {"id": "p_card-02-men-2_053", "upgradeCount": 0, "customizes": []}, {"id": "p_card-02-act-2_047", "upgradeCount": 0, "customizes": []}] |
-| &nbsp;&nbsp;↳ `id` | string | 100% | 主键。绝大多数表的 id 本身就是“可读的编码”（见各表说明），很多语义只在 id 里出现。 | "p_card-02-ido-1_018", "p_card-02-act-1_028" |
-| &nbsp;&nbsp;↳ `upgradeCount` | int32 | 0% | 强化段数（0=未强化，1=+，2/3 见 legend 卡）。 | 0 |
-| &nbsp;&nbsp;↳ `customizes` | repeated ProduceCardCustomize | 0% | （未注释） |  |
-| `examBattleProduceItemIds` | repeated string | 100% | 外键/引用 id（见 FK）。 | ["pitem_00-1-009-0"], ["pitem_00-1-006-0"] |
-| &nbsp;&nbsp;↳ `id` | string | 100% | 主键。绝大多数表的 id 本身就是“可读的编码”（见各表说明），很多语义只在 id 里出现。 | "p_card_custom-wrapper-p_card-03-men-1_0…", "p_card_custom-100-g_effect-lesson_count…" |
-| &nbsp;&nbsp;↳ `customizeCount` | int32 | 100% | （未注释） | 1 |
+| `vocal` | int32 | 100% | メモリー三维。 | 200, 400 |
+| `dance` | int32 | 100% | 。 | 400, 300 |
+| `visual` | int32 | 100% | 。 | 300, 200 |
+| `stamina` | int32 | 100% | 体力。 | 25 |
+| `examBattleProduceCards` | repeated ProduceCard | 100% | コンテスト用卡组。 | [{"id": "p_card-02-ido-1_018", "upgradeCount": 0, "customizes": []}, {"id": "p_card-02-act-1_028", "upgradeCount": 0, "customizes": []}, {"id": "p_card-02-act-1_004", "upgradeCount": 0, "customizes": []}, {"id": "p_card-02-act-2_045", "upgradeCount": 0, "customizes": []}, {"id": "p_card-02-act-2_047", "upgradeCount": 0, "customizes": []}], [{"id": "p_card-02-ido-1_015", "upgradeCount": 0, "customizes": []}, {"id": "p_card-02-men-1_031", "upgradeCount": 0, "customizes": []}, {"id": "p_card-02-men-1_006", "upgradeCount": 0, "customizes": []}, {"id": "p_card-02-men-2_053", "upgradeCount": 0, "customizes": []}, {"id": "p_card-02-act-2_047", "upgradeCount": 0, "customizes": []}] |
+| &nbsp;&nbsp;↳ `id` | string | 100% | → ProduceCard。 | "p_card-02-ido-1_018", "p_card-02-act-1_028" |
+| &nbsp;&nbsp;↳ `upgradeCount` | int32 | 0% | 强化段。 | 0 |
+| &nbsp;&nbsp;↳ `customizes` | repeated ProduceCardCustomize | 0% | 定制。 |  |
+| `examBattleProduceItemIds` | repeated string | 100% | → ProduceItem コンテスト用道具。 | ["pitem_00-1-009-0"], ["pitem_00-1-006-0"] |
+| &nbsp;&nbsp;↳ `id` | string | 100% | → ProduceCardCustomize。 | "p_card_custom-wrapper-p_card-03-men-1_0…", "p_card_custom-100-g_effect-lesson_count…" |
+| &nbsp;&nbsp;↳ `customizeCount` | int32 | 100% | 段数。 | 1 |
 
 外键（按 id 连接验证）：
 - `idolCardId` → **IdolCard** (8/8 命中)
@@ -2247,10 +2247,10 @@ N.I.A マスター 的“カスタマイズPアイテム”树（180）：isBase
 
 | 字段 | proto 类型 | 非空率 | 含义 | 示例值 |
 |---|---|---|---|---|
-| `type` | ProduceEffectType | 100% | （未注释） | "ProduceEffectType_VocalAddition", "ProduceEffectType_DanceAddition" |
+| `type` | ProduceEffectType | 100% | ProduceEffectType。 | "ProduceEffectType_VocalAddition", "ProduceEffectType_DanceAddition" |
 | `resourceType` | ProduceResourceType | 100% | ResourceType/ProduceResourceType 枚举。 | "ProduceResourceType_Unknown", "ProduceResourceType_ProduceCard" |
-| `iconAssetId` | string | 100% | 外键/引用 id（见 FK）。 | "img_general_icon_produce-effect_pict-vo…", "img_general_icon_produce-effect_pict-da…" |
-| `backgroundAssetId` | string | 100% | 外键/引用 id（见 FK）。 | "img_general_icon_produce-effect_bg-vocal", "img_general_icon_produce-effect_bg-dance" |
+| `iconAssetId` | string | 100% | 图标。 | "img_general_icon_produce-effect_pict-vo…", "img_general_icon_produce-effect_pict-da…" |
+| `backgroundAssetId` | string | 100% | 背景。 | "img_general_icon_produce-effect_bg-vocal", "img_general_icon_produce-effect_bg-dance" |
 | `order` | int64 | 100% | 客户端排序键（字符串或整数，纯展示用）。 | "1010000", "1010010" |
 
 外键（按 id 连接验证）：
@@ -2271,57 +2271,57 @@ N.I.A マスター 的“カスタマイズPアイテム”树（180）：isBase
 
 | 字段 | proto 类型 | 非空率 | 含义 | 示例值 |
 |---|---|---|---|---|
-| `id` | ? | 100% | 主键。绝大多数表的 id 本身就是“可读的编码”（见各表说明），很多语义只在 id 里出现。 | "i_card-amao-1-000", "i_card-amao-1-001" |
-| `characterId` | ? | 100% | → Character（4 字母缩写，如 amao=有村麻央、hski=花海咲季）。 | "amao", "atbm" |
-| `originalIdolCardSkinId` | ? | 100% | → IdolCardSkin 默认皮肤。 | "i_card-skin-amao-1-000", "i_card-skin-amao-1-001" |
-| `assetId` | ? | 100% | 美术/预制体资源 id（非外键；AssetDownload 里只登记了一部分）。 | "cidol-amao-1-000", "cidol-amao-1-001" |
-| `name` | ? | 100% | 显示名（日文）。 | "学園生活", "初恋" |
-| `rarity` | ? | 100% | 稀有度枚举。 | "IdolCardRarity_R", "IdolCardRarity_Sr" |
-| `isLimited` | ? | 0% | 限定标记（全库均为 false）。 | false |
-| `anotherCostumeHeadId` | ? | 50% | → CostumeHead。 | "costume_head_amao-cstm-0016", "costume_head_amao-cstm-0054" |
-| `anotherCostumeId` | ? | 66% | → Costume。 | "amao-cstm-0016", "amao-cstm-0036" |
-| `idolCardPotentialId` | ? | 100% | → IdolCardPotential（潜能 4 段）。 | "idol_card_potential-amao-r-01", "idol_card_potential-i_card-amao-1-001" |
-| `idolCardPotentialProduceSkillId` | ? | 100% | → IdolCardPotentialProduceSkill。 | "idol_card_potential_produce_skill_001", "idol_card_potential_produce_skill-i_car…" |
-| `idolCardLevelLimitId` | ? | 100% | → IdolCardLevelLimit（突破消耗）。 | "idol_card_level_limit-r-plan1-vo-vi", "idol_card_level_limit-r-plan2-vo-vi" |
-| `idolCardLevelLimitProduceSkillId` | ? | 100% | → IdolCardLevelLimitProduceSkill（突破解锁技能）。 | "idol_card_level_limit_produce_skill_001", "idol_card_level_limit_produce_skill_005" |
-| `maxIdolCardLevelLimitRank` | ? | 100% | 最大突破段（6 或 7）。 | "IdolCardLevelLimitRank__6", "IdolCardLevelLimitRank__7" |
-| `additionalAnotherCostumeHeadIds` | ? | 3% | 额外服装。 | ["costume_head_hmsz-cstm-0174"], ["costume_head_jsna-hair-0017"] |
-| `additionalAnotherCostumeIds` | ? | 1% | 额外服装。 | ["hmsz-cstm-0174"], ["ttmr-cstm-0174"] |
-| `planType` | ? | 100% | ProducePlanType：Common=全プラン通用 / Plan1=センス / Plan2=ロジック / Plan3=アノマリー。 | "ProducePlanType_Plan1", "ProducePlanType_Plan2" |
-| `idolCardLevelLimitStatusUpId` | ? | 100% | → IdolCardLevelLimitStatusUp（突破加三维）。 | "level_limit_status_up-001", "level_limit_status_up-003" |
-| `produceVocal` | ? | 100% | 初始 Vocal。 | 65, 70 |
-| `produceDance` | ? | 100% | 初始 Dance。 | 55, 60 |
-| `produceVisual` | ? | 100% | 初始 Visual。 | 45, 50 |
-| `produceVocalGrowthRatePermil` | ? | 100% | Vocal 成长率千分比（课程/试炼参数加成）。 | 200, 210 |
-| `produceDanceGrowthRatePermil` | ? | 100% | 。 | 40, 50 |
-| `produceVisualGrowthRatePermil` | ? | 100% | 。 | 180, 100 |
-| `produceStamina` | ? | 100% | 初始最大体力。 | 31, 27 |
-| `produceStepAuditionDifficultyId` | ? | 100% | → ProduceStepAuditionDifficulty 难度组。 | "p_step_audition_difficulty-amao", "p_step_audition_difficulty-i_card-amao-…" |
-| `examInitialDeckId` | ? | 100% | → ExamInitialDeck（流派 2 张组：initial_deck-parameter_buff 等，用于表示卡的流派/教程）。 | "initial_deck-parameter_buff", "initial_deck-review" |
-| `produceCardId` | ? | 100% | → ProduceCard（注意 ProduceCard 主键是 (id, upgradeCount)）。 | "p_card-01-ido-1_013", "p_card-02-ido-1_059" |
-| `beforeProduceItemId` | ? | 100% | → ProduceItem 固有道具。 | "pitem_00-1-004-0", "pitem_02-1-016-0" |
-| `afterProduceItemId` | ? | 100% | → ProduceItem 固有道具+。 | "pitem_00-1-004-1", "pitem_02-1-016-1" |
-| `examEffectType` | ? | 100% | ProduceExamEffectType；在“按プラン/主 buff 分流”的表里表示 6 大流派之一（ExamParameterBuff=好調系 / ExamLessonBuff=集中系 / ExamReview=好印象系 / ExamCardPlayAggressive=やる気系 / ExamConcentration=強気(アノマリー) / ExamFullPower=全力(アノマリー)）。 | "ProduceExamEffectType_ExamParameterBuff", "ProduceExamEffectType_ExamReview" |
-| `produceChallengeSlotId` | ? | 100% | → ProduceChallengeSlot。 | "challenge_slot-exam_parameter_buff", "challenge_slot-exam_review" |
-| `showExamEffectType` | ? | 100% | 图鉴额外显示的流派（温存）。 | "ProduceExamEffectType_Unknown", "ProduceExamEffectType_ExamPreservation" |
-| `secondProduceCardId` | ? | 3% | → ProduceCard 第二固有卡（部分 SSR）。 | "p_card-01-ido-3_213", "p_card-03-ido-3_210" |
-| `beforeLevelLimitProduceItemId` | ? | 0% | 未使用。 |  |
-| `afterLevelLimitProduceItemId` | ? | 0% | 未使用。 |  |
-| `primaStellaConsumptionSetId` | ? | 7% | → ConsumptionSet，プリマステラ 解放消耗。 | "cs-idol_card_prima_stella-i_card-amao-3…", "cs-idol_card_prima_stella-i_card-hmsz-3…" |
-| `idolCardPrimaStellaProduceSkillId` | ? | 7% | → IdolCardPrimaStellaProduceSkill。 | "prima_stella_produce_skill-i_card-amao-…", "prima_stella_produce_skill-i_card-hmsz-…" |
-| `primaStellaAchievementId` | ? | 7% | → Achievement。 | "achieve-p_idol-amao-025", "achieve-p_idol-hmsz-025" |
-| `potentialRankVoiceAssetId` | ? | 100% | 语音。 | "sud_vo_system_cidol-amao-1-000_idol_pot…", "sud_vo_system_cidol-amao-1-001_idol_pot…" |
-| `produceSelectVoiceAssetId` | ? | 100% | 语音。 | "sud_vo_system_cidol-amao-1-000_produce_…", "sud_vo_system_cidol-amao-1-001_produce_…" |
-| `produceScheduleFrontVoiceGroupId` | ? | 75% | → VoiceGroup。 | "voice_group-cidol-amao-3-000-produce_sc…", "voice_group-cidol-amao-3-001-produce_sc…" |
-| `produceScheduleBackVoiceGroupId` | ? | 0% | 未使用。 |  |
-| `useProduceCardVoiceAssetId` | ? | 100% | 语音。 | "sud_vo_system_cidol-amao-1-000_produce_…", "sud_vo_system_cidol-amao-1-001_produce_…" |
-| `useSecondProduceCardVoiceAssetId` | ? | 3% | 语音。 | "sud_vo_system_cidol-hrnm-3-017_produce_…", "sud_vo_system_cidol-hski-3-018_produce_…" |
-| `usePrimaStellaProduceCardVoiceAssetId` | ? | 7% | 语音。 | "sud_vo_system_cidol-amao-3-015_produce_…", "sud_vo_system_cidol-hmsz-3-016_produce_…" |
-| `primaStellaVoiceAssetId` | ? | 7% | 语音。 | "sud_vo_system_cidol-amao-3-015_idol_det…", "sud_vo_system_cidol-hmsz-3-016_idol_det…" |
-| `viewStartTime` | ? | 100% | 可见起始时间，Unix 毫秒字符串；"0" 表示一直可见。 | "0", "1728871200000" |
-| `order` | ? | 100% | 客户端排序键（字符串或整数，纯展示用）。 | "3999900109999", "3997950109998" |
-| `produceStoryIds` | ? | 75% | → ProduceStory 偶像卡剧情。 | ["p_story-i_card-amao-3-000-01", "p_story-i_card-amao-3-000-02", "p_story-i_card-amao-3-000-03"], ["p_story-i_card-amao-3-001-01", "p_story-i_card-amao-3-001-02", "p_story-i_card-amao-3-001-03"] |
-| `achievementIds` | ? | 83% | → Achievement。 | ["achieve-i_card-amao-2-000-04", "achieve-i_card-amao-2-000-05", "achieve-i_card-amao-2-000-06", "achieve-p_idol-card-amao-002-1", "achieve-p_idol-card-amao-002-2", "…(+1)"], ["achieve-i_card-amao-3-000-04", "achieve-i_card-amao-3-000-05", "achieve-i_card-amao-3-000-06", "achieve-p_idol-card-amao-003-1", "achieve-p_idol-card-amao-003-2", "…(+1)"] |
+| `id` | string | 100% | 主键。绝大多数表的 id 本身就是“可读的编码”（见各表说明），很多语义只在 id 里出现。 | "i_card-amao-1-000", "i_card-amao-1-001" |
+| `characterId` | string | 100% | → Character（4 字母缩写，如 amao=有村麻央、hski=花海咲季）。 | "amao", "atbm" |
+| `originalIdolCardSkinId` | string | 100% | → IdolCardSkin 默认皮肤。 | "i_card-skin-amao-1-000", "i_card-skin-amao-1-001" |
+| `assetId` | string | 100% | 美术/预制体资源 id（非外键；AssetDownload 里只登记了一部分）。 | "cidol-amao-1-000", "cidol-amao-1-001" |
+| `name` | string | 100% | 显示名（日文）。 | "学園生活", "初恋" |
+| `rarity` | IdolCardRarity | 100% | 稀有度枚举。 | "IdolCardRarity_R", "IdolCardRarity_Sr" |
+| `isLimited` | bool | 0% | 限定标记（全库均为 false）。 | false |
+| `anotherCostumeHeadId` | string | 50% | → CostumeHead。 | "costume_head_amao-cstm-0016", "costume_head_amao-cstm-0054" |
+| `anotherCostumeId` | string | 66% | → Costume。 | "amao-cstm-0016", "amao-cstm-0036" |
+| `idolCardPotentialId` | string | 100% | → IdolCardPotential（潜能 4 段）。 | "idol_card_potential-amao-r-01", "idol_card_potential-i_card-amao-1-001" |
+| `idolCardPotentialProduceSkillId` | string | 100% | → IdolCardPotentialProduceSkill。 | "idol_card_potential_produce_skill_001", "idol_card_potential_produce_skill-i_car…" |
+| `idolCardLevelLimitId` | string | 100% | → IdolCardLevelLimit（突破消耗）。 | "idol_card_level_limit-r-plan1-vo-vi", "idol_card_level_limit-r-plan2-vo-vi" |
+| `idolCardLevelLimitProduceSkillId` | string | 100% | → IdolCardLevelLimitProduceSkill（突破解锁技能）。 | "idol_card_level_limit_produce_skill_001", "idol_card_level_limit_produce_skill_005" |
+| `maxIdolCardLevelLimitRank` | IdolCardLevelLimitRank | 100% | 最大突破段（6 或 7）。 | "IdolCardLevelLimitRank__6", "IdolCardLevelLimitRank__7" |
+| `additionalAnotherCostumeHeadIds` | repeated string | 3% | 额外服装。 | ["costume_head_hmsz-cstm-0174"], ["costume_head_jsna-hair-0017"] |
+| `additionalAnotherCostumeIds` | repeated string | 1% | 额外服装。 | ["hmsz-cstm-0174"], ["ttmr-cstm-0174"] |
+| `planType` | ProducePlanType | 100% | ProducePlanType：Common=全プラン通用 / Plan1=センス / Plan2=ロジック / Plan3=アノマリー。 | "ProducePlanType_Plan1", "ProducePlanType_Plan2" |
+| `idolCardLevelLimitStatusUpId` | string | 100% | → IdolCardLevelLimitStatusUp（突破加三维）。 | "level_limit_status_up-001", "level_limit_status_up-003" |
+| `produceVocal` | int32 | 100% | 初始 Vocal。 | 65, 70 |
+| `produceDance` | int32 | 100% | 初始 Dance。 | 55, 60 |
+| `produceVisual` | int32 | 100% | 初始 Visual。 | 45, 50 |
+| `produceVocalGrowthRatePermil` | int32 | 100% | Vocal 成长率千分比（课程/试炼参数加成）。 | 200, 210 |
+| `produceDanceGrowthRatePermil` | int32 | 100% | 。 | 40, 50 |
+| `produceVisualGrowthRatePermil` | int32 | 100% | 。 | 180, 100 |
+| `produceStamina` | int32 | 100% | 初始最大体力。 | 31, 27 |
+| `produceStepAuditionDifficultyId` | string | 100% | → ProduceStepAuditionDifficulty 难度组。 | "p_step_audition_difficulty-amao", "p_step_audition_difficulty-i_card-amao-…" |
+| `examInitialDeckId` | string | 100% | → ExamInitialDeck（流派 2 张组：initial_deck-parameter_buff 等，用于表示卡的流派/教程）。 | "initial_deck-parameter_buff", "initial_deck-review" |
+| `produceCardId` | string | 100% | → ProduceCard（注意 ProduceCard 主键是 (id, upgradeCount)）。 | "p_card-01-ido-1_013", "p_card-02-ido-1_059" |
+| `beforeProduceItemId` | string | 100% | → ProduceItem 固有道具。 | "pitem_00-1-004-0", "pitem_02-1-016-0" |
+| `afterProduceItemId` | string | 100% | → ProduceItem 固有道具+。 | "pitem_00-1-004-1", "pitem_02-1-016-1" |
+| `examEffectType` | ProduceExamEffectType | 100% | ProduceExamEffectType；在“按プラン/主 buff 分流”的表里表示 6 大流派之一（ExamParameterBuff=好調系 / ExamLessonBuff=集中系 / ExamReview=好印象系 / ExamCardPlayAggressive=やる気系 / ExamConcentration=強気(アノマリー) / ExamFullPower=全力(アノマリー)）。 | "ProduceExamEffectType_ExamParameterBuff", "ProduceExamEffectType_ExamReview" |
+| `produceChallengeSlotId` | string | 100% | → ProduceChallengeSlot。 | "challenge_slot-exam_parameter_buff", "challenge_slot-exam_review" |
+| `showExamEffectType` | ProduceExamEffectType | 100% | 图鉴额外显示的流派（温存）。 | "ProduceExamEffectType_Unknown", "ProduceExamEffectType_ExamPreservation" |
+| `secondProduceCardId` | string | 3% | → ProduceCard 第二固有卡（部分 SSR）。 | "p_card-01-ido-3_213", "p_card-03-ido-3_210" |
+| `beforeLevelLimitProduceItemId` | string | 0% | 未使用。 |  |
+| `afterLevelLimitProduceItemId` | string | 0% | 未使用。 |  |
+| `primaStellaConsumptionSetId` | string | 7% | → ConsumptionSet，プリマステラ 解放消耗。 | "cs-idol_card_prima_stella-i_card-amao-3…", "cs-idol_card_prima_stella-i_card-hmsz-3…" |
+| `idolCardPrimaStellaProduceSkillId` | string | 7% | → IdolCardPrimaStellaProduceSkill。 | "prima_stella_produce_skill-i_card-amao-…", "prima_stella_produce_skill-i_card-hmsz-…" |
+| `primaStellaAchievementId` | string | 7% | → Achievement。 | "achieve-p_idol-amao-025", "achieve-p_idol-hmsz-025" |
+| `potentialRankVoiceAssetId` | string | 100% | 语音。 | "sud_vo_system_cidol-amao-1-000_idol_pot…", "sud_vo_system_cidol-amao-1-001_idol_pot…" |
+| `produceSelectVoiceAssetId` | string | 100% | 语音。 | "sud_vo_system_cidol-amao-1-000_produce_…", "sud_vo_system_cidol-amao-1-001_produce_…" |
+| `produceScheduleFrontVoiceGroupId` | string | 75% | → VoiceGroup。 | "voice_group-cidol-amao-3-000-produce_sc…", "voice_group-cidol-amao-3-001-produce_sc…" |
+| `produceScheduleBackVoiceGroupId` | string | 0% | 未使用。 |  |
+| `useProduceCardVoiceAssetId` | string | 100% | 语音。 | "sud_vo_system_cidol-amao-1-000_produce_…", "sud_vo_system_cidol-amao-1-001_produce_…" |
+| `useSecondProduceCardVoiceAssetId` | string | 3% | 语音。 | "sud_vo_system_cidol-hrnm-3-017_produce_…", "sud_vo_system_cidol-hski-3-018_produce_…" |
+| `usePrimaStellaProduceCardVoiceAssetId` | string | 7% | 语音。 | "sud_vo_system_cidol-amao-3-015_produce_…", "sud_vo_system_cidol-hmsz-3-016_produce_…" |
+| `primaStellaVoiceAssetId` | string | 7% | 语音。 | "sud_vo_system_cidol-amao-3-015_idol_det…", "sud_vo_system_cidol-hmsz-3-016_idol_det…" |
+| `viewStartTime` | int64 | 100% | 可见起始时间，Unix 毫秒字符串；"0" 表示一直可见。 | "0", "1728871200000" |
+| `order` | int64 | 100% | 客户端排序键（字符串或整数，纯展示用）。 | "3999900109999", "3997950109998" |
+| `produceStoryIds` | repeated string | 75% | → ProduceStory 偶像卡剧情。 | ["p_story-i_card-amao-3-000-01", "p_story-i_card-amao-3-000-02", "p_story-i_card-amao-3-000-03"], ["p_story-i_card-amao-3-001-01", "p_story-i_card-amao-3-001-02", "p_story-i_card-amao-3-001-03"] |
+| `achievementIds` | repeated string | 83% | → Achievement。 | ["achieve-i_card-amao-2-000-04", "achieve-i_card-amao-2-000-05", "achieve-i_card-amao-2-000-06", "achieve-p_idol-card-amao-002-1", "achieve-p_idol-card-amao-002-2", "…(+1)"], ["achieve-i_card-amao-3-000-04", "achieve-i_card-amao-3-000-05", "achieve-i_card-amao-3-000-06", "achieve-p_idol-card-amao-003-1", "achieve-p_idol-card-amao-003-2", "…(+1)"] |
 
 外键（按 id 连接验证）：
 - `characterId` → **Character** (13/13 命中)
@@ -2467,7 +2467,7 @@ N.I.A マスター 的“カスタマイズPアイテム”树（180）：isBase
 |---|---|---|---|---|
 | `id` | string | 100% | 主键。绝大多数表的 id 本身就是“可读的编码”（见各表说明），很多语义只在 id 里出现。 | "prima_stella_produce_skill-i_card-amao-…", "prima_stella_produce_skill-i_card-hmsz-…" |
 | `produceSkillId` | string | 100% | → ProduceSkill。 | "p_primastella_skill-common-hatsuboshi_i…", "p_primastella_skill-common-hatsuboshi_i…" |
-| `produceSkillLevel` | int32 | 100% | （未注释） | 1 |
+| `produceSkillLevel` | int32 | 100% | 技能等级（全 1）。 | 1 |
 | `order` | int32 | 100% | 客户端排序键（字符串或整数，纯展示用）。 | 1 |
 
 外键（按 id 连接验证）：
@@ -2623,29 +2623,29 @@ N.I.A マスター 的“カスタマイズPアイテム”树（180）：isBase
 | 字段 | proto 类型 | 非空率 | 含义 | 示例值 |
 |---|---|---|---|---|
 | `id` | string | 100% | 主键。绝大多数表的 id 本身就是“可读的编码”（见各表说明），很多语义只在 id 里出现。 | "s_card-1-0000", "s_card-1-0001" |
-| `characterIds` | ? | 100% | 登场角色。 | ["hski", "kcna", "shro"], ["ttmr", "hski"] |
-| `name` | ? | 100% | 显示名（日文）。 | "念入りにストレッチ", "全力、その後" |
-| `type` | ? | 100% | SupportCardType。 | "SupportCardType_Visual", "SupportCardType_Vocal" |
-| `planType` | ? | 100% | ProducePlanType：Common=全プラン通用 / Plan1=センス / Plan2=ロジック / Plan3=アノマリー。 | "ProducePlanType_Common", "ProducePlanType_Plan2" |
-| `rarity` | ? | 100% | 稀有度枚举。 | "SupportCardRarity_R", "SupportCardRarity_Sr" |
-| `assetId` | ? | 100% | 美术/预制体资源 id（非外键；AssetDownload 里只登记了一部分）。 | "csprt-1-0000", "csprt-1-0001" |
-| `supportCardLevelId` | ? | 100% | → SupportCardLevel。 | "support_card_level-1-001", "support_card_level-2-001" |
-| `supportCardLevelLimitId` | ? | 100% | → SupportCardLevelLimit。 | "support_card_level_limit-1-001", "support_card_level_limit-2-001" |
-| `produceStoryIds` | ? | 100% | → ProduceStory。 | ["p_story-s_card-1-0000-01", "p_story-s_card-1-0000-02"], ["p_story-s_card-1-0001-01", "p_story-s_card-1-0001-02"] |
-| `displayPositionX` | ? | 0% | UI。 | 0 |
-| `displayPositionY` | ? | 0% | UI。 | 0 |
-| `displayScale` | ? | 56% | UI。 | 1, 0 |
-| &nbsp;&nbsp;↳ `resourceType` | ? | 100% | 分解奖励。 | "ResourceType_Item" |
-| &nbsp;&nbsp;↳ `resourceId` | ? | 100% | 。 | "item-support_card-exchange-1" |
-| &nbsp;&nbsp;↳ `quantity` | ? | 100% | 。 | 1, 5 |
-| `isLimited` | ? | 0% | 限定标记（全库均为 false）。 | false |
-| `produceCardUpgradePermil` | ? | 100% | レッスンサポート 发生率千分比（每张卡基础值；技能 SupportCardProduceCardUpgradeProbabilityUp 叠加）。 | 19, 28 |
-| `upgradeProduceCardSearchId` | ? | 100% | → ProduceCardSearch（手札）。 | "p_card_search-hand" |
-| `produceCardUpgradeLessonParameterType` | ? | 100% | 只在该属性课程中发生。 | "ProduceParameterType_Visual", "ProduceParameterType_Vocal" |
-| `gashaSupportAnimationNumber` | ? | 9% | 抽卡演出。 | 0, 1 |
-| `upgradeProduceCardProduceDescriptions` | ? | 100% | サポート发生率描述（確率小/中/大）。 | "(渲染) / 確率小", "(渲染) / 確率中" |
-| `viewStartTime` | ? | 100% | 可见起始时间，Unix 毫秒字符串；"0" 表示一直可见。 | "0", "1716339600000" |
-| `order` | ? | 100% | 客户端排序键（字符串或整数，纯展示用）。 | "3999900001", "3999900002" |
+| `characterIds` | repeated string | 100% | 登场角色。 | ["hski", "kcna", "shro"], ["ttmr", "hski"] |
+| `name` | string | 100% | 显示名（日文）。 | "念入りにストレッチ", "全力、その後" |
+| `type` | SupportCardType | 100% | SupportCardType。 | "SupportCardType_Visual", "SupportCardType_Vocal" |
+| `planType` | ProducePlanType | 100% | ProducePlanType：Common=全プラン通用 / Plan1=センス / Plan2=ロジック / Plan3=アノマリー。 | "ProducePlanType_Common", "ProducePlanType_Plan2" |
+| `rarity` | SupportCardRarity | 100% | 稀有度枚举。 | "SupportCardRarity_R", "SupportCardRarity_Sr" |
+| `assetId` | string | 100% | 美术/预制体资源 id（非外键；AssetDownload 里只登记了一部分）。 | "csprt-1-0000", "csprt-1-0001" |
+| `supportCardLevelId` | string | 100% | → SupportCardLevel。 | "support_card_level-1-001", "support_card_level-2-001" |
+| `supportCardLevelLimitId` | string | 100% | → SupportCardLevelLimit。 | "support_card_level_limit-1-001", "support_card_level_limit-2-001" |
+| `produceStoryIds` | repeated string | 100% | → ProduceStory。 | ["p_story-s_card-1-0000-01", "p_story-s_card-1-0000-02"], ["p_story-s_card-1-0001-01", "p_story-s_card-1-0001-02"] |
+| `displayPositionX` | float | 0% | UI。 | 0 |
+| `displayPositionY` | float | 0% | UI。 | 0 |
+| `displayScale` | float | 56% | UI。 | 1, 0 |
+| &nbsp;&nbsp;↳ `resourceType` | ResourceType | 100% | 分解奖励。 | "ResourceType_Item" |
+| &nbsp;&nbsp;↳ `resourceId` | string | 100% | 。 | "item-support_card-exchange-1" |
+| &nbsp;&nbsp;↳ `quantity` | int32 | 100% | 。 | 1, 5 |
+| `isLimited` | bool | 0% | 限定标记（全库均为 false）。 | false |
+| `produceCardUpgradePermil` | int32 | 100% | レッスンサポート 发生率千分比（每张卡基础值；技能 SupportCardProduceCardUpgradeProbabilityUp 叠加）。 | 19, 28 |
+| `upgradeProduceCardSearchId` | string | 100% | → ProduceCardSearch（手札）。 | "p_card_search-hand" |
+| `produceCardUpgradeLessonParameterType` | ProduceParameterType | 100% | 只在该属性课程中发生。 | "ProduceParameterType_Visual", "ProduceParameterType_Vocal" |
+| `gashaSupportAnimationNumber` | int32 | 9% | 抽卡演出。 | 0, 1 |
+| `upgradeProduceCardProduceDescriptions` | repeated ProduceDescriptionSegment | 100% | サポート发生率描述（確率小/中/大）。 | "(渲染) / 確率小", "(渲染) / 確率中" |
+| `viewStartTime` | int64 | 100% | 可见起始时间，Unix 毫秒字符串；"0" 表示一直可见。 | "0", "1716339600000" |
+| `order` | int64 | 100% | 客户端排序键（字符串或整数，纯展示用）。 | "3999900001", "3999900002" |
 
 外键（按 id 连接验证）：
 - `characterIds` → **Character** (14/14 命中)
@@ -2667,9 +2667,9 @@ N.I.A マスター 的“カスタマイズPアイテム”树（180）：isBase
 
 | 字段 | proto 类型 | 非空率 | 含义 | 示例值 |
 |---|---|---|---|---|
-| `rarity` | ? | 100% | 稀有度枚举。 | "SupportCardRarity_R", "SupportCardRarity_Sr" |
-| `level` | ? | 100% | 等级。 | 10, 20 |
-| `bonusPermyriad` | ? | 100% | 加成万分比。 | 1, 2 |
+| `rarity` | SupportCardRarity | 100% | 稀有度枚举。 | "SupportCardRarity_R", "SupportCardRarity_Sr" |
+| `level` | int32 | 100% | 等级。 | 10, 20 |
+| `bonusPermyriad` | int32 | 100% | 加成万分比。 | 1, 2 |
 
 代表行：
 ```json
@@ -2845,7 +2845,7 @@ Vocal 支援卡在各等级解锁/升级的 ProduceSkill(p_support_skill)：(sup
 
 | 字段 | proto 类型 | 非空率 | 含义 | 示例值 |
 |---|---|---|---|---|
-| `type` | ExamPlayType | 100% | （未注释） | "ExamPlayType_AutoPlay", "ExamPlayType_ManualPlayLesson" |
+| `type` | ExamPlayType | 100% | ExamPlayType。 | "ExamPlayType_AutoPlay", "ExamPlayType_ManualPlayLesson" |
 | `examStatusEnchantProduceExamTriggerId` | string | 100% | → ProduceExamTrigger。 | "e_trigger-exam_aggressive_up_interval-5…", "e_trigger-exam_buff_consume" |
 | `coefficientPermil` | int32 | 97% | 系数。 | 330, 650 |
 | `count` | int32 | 10% | 预计次数。 | 2, 0 |
@@ -3182,31 +3182,31 @@ ProduceType × ProduceSplitType → 专用标记文本模板（{Label_ProduceTyp
 |---|---|---|---|---|
 | `id` | string | 100% | 主键。绝大多数表的 id 本身就是“可读的编码”（见各表说明），很多语义只在 id 里出现。 | "pvp_rate_config-1", "pvp_rate_config-10" |
 | `description` | string | 100% | 说明文（日文）。 | "初めてのコンテスト", "S10" |
-| `vocal` | int32 | 82% | （未注释） | 353, 446 |
-| `dance` | int32 | 82% | （未注释） | 238, 356 |
-| `visual` | int32 | 82% | （未注释） | 291, 89 |
+| `vocal` | int32 | 82% | 赛季基准 Vocal。 | 353, 446 |
+| `dance` | int32 | 82% | 。 | 238, 356 |
+| `visual` | int32 | 82% | 。 | 291, 89 |
 | `examSettingId` | string | 100% | 外键/引用 id（见 FK）。 | "p_exam_setting-1" |
 | `produceExamBattleScoreConfigId` | string | 82% | 外键/引用 id（见 FK）。 | "p_exam_battle_score_config-contest-seas…", "p_exam_battle_score_config-contest-seas…" |
-| `examBattleFirstRankBonusPermil` | int32 | 100% | （未注释） | 200 |
+| `examBattleFirstRankBonusPermil` | int32 | 100% | 第一名分数加成千分比（200）。 | 200 |
 | `pvpRateCommonProduceCardId` | string | 100% | 外键/引用 id（见 FK）。 | "pvp_live_battle_1" |
-| `winTimelineAssetId` | string | 100% | 外键/引用 id（见 FK）。 | "tln_cont_vovi-001_totalresult_win", "tln_cont_voda-001_totalresult_win" |
-| `loseTimelineAssetId` | string | 100% | 外键/引用 id（见 FK）。 | "tln_cont_vovi-001_totalresult_lose", "tln_cont_voda-001_totalresult_lose" |
-| `startTimelineInitialTimePermil` | int32 | 100% | （未注释） | 5033 |
-| `topAssetId` | string | 100% | 外键/引用 id（见 FK）。 | "contest-top-vovi", "contest-top-voda" |
+| `winTimelineAssetId` | string | 100% | 演出。 | "tln_cont_vovi-001_totalresult_win", "tln_cont_voda-001_totalresult_win" |
+| `loseTimelineAssetId` | string | 100% | 演出。 | "tln_cont_vovi-001_totalresult_lose", "tln_cont_voda-001_totalresult_lose" |
+| `startTimelineInitialTimePermil` | int32 | 100% | 演出时间参数。 | 5033 |
+| `topAssetId` | string | 100% | UI。 | "contest-top-vovi", "contest-top-voda" |
 | `stages` | repeated Stage | 100% | 阶段列表。 | [{"stageType": "PvpRateStageType__1", "planType": "ProducePlanType_Common", "turn": 12, "produceItemId": "pitem_00-0-004-0-000", "produceItemIds": ["pitem_00-0-004-0-000"], "produceExamGimmickEffectGroupId": "", "bgmAssetId": "sud_bgm_produce_audition-04", "startTimelineAssetId": "tln_cont_vovi-001_start", "examTimelineAssetId": "tln_cont_vovi-001_battle", "vocal": 353, "dance": 238, "visual": 291, "produceExamBattleScoreConfigId": "p_exam_battle_score_config-contest-seas…"}, {"stageType": "PvpRateStageType__2", "planType": "ProducePlanType_Plan1", "turn": 8, "produceItemId": "pitem_01-0-005-0-000", "produceItemIds": ["pitem_01-0-005-0-000"], "produceExamGimmickEffectGroupId": "", "bgmAssetId": "sud_bgm_produce_audition-04", "startTimelineAssetId": "tln_cont_vovi-001_start", "examTimelineAssetId": "tln_cont_vovi-001_battle", "vocal": 353, "dance": 238, "visual": 291, "produceExamBattleScoreConfigId": "p_exam_battle_score_config-contest-seas…"}, {"stageType": "PvpRateStageType__3", "planType": "ProducePlanType_Plan2", "turn": 8, "produceItemId": "pitem_02-0-002-0-000", "produceItemIds": ["pitem_02-0-002-0-000"], "produceExamGimmickEffectGroupId": "", "bgmAssetId": "sud_bgm_produce_audition-04", "startTimelineAssetId": "tln_cont_vovi-001_start", "examTimelineAssetId": "tln_cont_vovi-001_battle", "vocal": 353, "dance": 238, "visual": 291, "produceExamBattleScoreConfigId": "p_exam_battle_score_config-contest-seas…"}], [{"stageType": "PvpRateStageType__1", "planType": "ProducePlanType_Common", "turn": 10, "produceItemId": "pitem_00-0-004-0-006", "produceItemIds": ["pitem_00-0-004-0-006"], "produceExamGimmickEffectGroupId": "", "bgmAssetId": "sud_bgm_produce_audition-04", "startTimelineAssetId": "tln_cont_voda-001_start", "examTimelineAssetId": "tln_cont_voda-001_battle", "vocal": 446, "dance": 356, "visual": 89, "produceExamBattleScoreConfigId": "p_exam_battle_score_config-contest-seas…"}, {"stageType": "PvpRateStageType__2", "planType": "ProducePlanType_Plan1", "turn": 12, "produceItemId": "pitem_01-0-005-0-006", "produceItemIds": ["pitem_01-0-005-0-006"], "produceExamGimmickEffectGroupId": "", "bgmAssetId": "sud_bgm_produce_audition-04", "startTimelineAssetId": "tln_cont_voda-001_start", "examTimelineAssetId": "tln_cont_voda-001_battle", "vocal": 446, "dance": 356, "visual": 89, "produceExamBattleScoreConfigId": "p_exam_battle_score_config-contest-seas…"}, {"stageType": "PvpRateStageType__3", "planType": "ProducePlanType_Plan2", "turn": 8, "produceItemId": "pitem_02-0-006-0-007", "produceItemIds": ["pitem_02-0-006-0-007"], "produceExamGimmickEffectGroupId": "", "bgmAssetId": "sud_bgm_produce_audition-04", "startTimelineAssetId": "tln_cont_voda-001_start", "examTimelineAssetId": "tln_cont_voda-001_battle", "vocal": 446, "dance": 356, "visual": 89, "produceExamBattleScoreConfigId": "p_exam_battle_score_config-contest-seas…"}] |
-| &nbsp;&nbsp;↳ `stageType` | CompetitionStageType | 100% | （未注释） | "PvpRateStageType__1", "PvpRateStageType__2" |
-| &nbsp;&nbsp;↳ `planType` | ? | 100% | ProducePlanType：Common=全プラン通用 / Plan1=センス / Plan2=ロジック / Plan3=アノマリー。 | "ProducePlanType_Common", "ProducePlanType_Plan1" |
-| &nbsp;&nbsp;↳ `turn` | ? | 100% | （未注释） | 12, 8 |
-| &nbsp;&nbsp;↳ `produceItemId` | ? | 82% | 外键/引用 id（见 FK）。 | "pitem_00-0-004-0-000", "pitem_01-0-005-0-000" |
-| &nbsp;&nbsp;↳ `produceItemIds` | ? | 100% | 外键/引用 id（见 FK）。 | ["pitem_00-0-004-0-000"], ["pitem_01-0-005-0-000"] |
-| &nbsp;&nbsp;↳ `produceExamGimmickEffectGroupId` | ? | 12% | 外键/引用 id（见 FK）。 | "p_exam_gimmick-contest-season_017-stage3", "p_exam_gimmick-contest-season_019-stage3" |
-| &nbsp;&nbsp;↳ `bgmAssetId` | ? | 100% | 外键/引用 id（见 FK）。 | "sud_bgm_produce_audition-04" |
-| &nbsp;&nbsp;↳ `startTimelineAssetId` | ? | 100% | 外键/引用 id（见 FK）。 | "tln_cont_vovi-001_start", "tln_cont_voda-001_start" |
-| &nbsp;&nbsp;↳ `examTimelineAssetId` | ? | 100% | 外键/引用 id（见 FK）。 | "tln_cont_vovi-001_battle", "tln_cont_voda-001_battle" |
-| &nbsp;&nbsp;↳ `vocal` | ? | 100% | （未注释） | 353, 446 |
-| &nbsp;&nbsp;↳ `dance` | ? | 100% | （未注释） | 238, 356 |
-| &nbsp;&nbsp;↳ `visual` | ? | 100% | （未注释） | 291, 89 |
-| &nbsp;&nbsp;↳ `produceExamBattleScoreConfigId` | ? | 100% | 外键/引用 id（见 FK）。 | "p_exam_battle_score_config-contest-seas…", "p_exam_battle_score_config-contest-seas…" |
+| &nbsp;&nbsp;↳ `stageType` | PvpRateStageType | 100% | PvpRateStageType（_1/_2/_3）。 | "PvpRateStageType__1", "PvpRateStageType__2" |
+| &nbsp;&nbsp;↳ `planType` | ProducePlanType | 100% | 该阶段プラン。 | "ProducePlanType_Common", "ProducePlanType_Plan1" |
+| &nbsp;&nbsp;↳ `turn` | int32 | 100% | 回合数。 | 12, 8 |
+| &nbsp;&nbsp;↳ `produceItemId` | string | 82% | → ProduceItem 阶段道具。 | "pitem_00-0-004-0-000", "pitem_01-0-005-0-000" |
+| &nbsp;&nbsp;↳ `produceItemIds` | repeated string | 100% | → ProduceItem。 | ["pitem_00-0-004-0-000"], ["pitem_01-0-005-0-000"] |
+| &nbsp;&nbsp;↳ `produceExamGimmickEffectGroupId` | string | 12% | → ProduceExamGimmickEffectGroup。 | "p_exam_gimmick-contest-season_017-stage3", "p_exam_gimmick-contest-season_019-stage3" |
+| &nbsp;&nbsp;↳ `bgmAssetId` | string | 100% | BGM。 | "sud_bgm_produce_audition-04" |
+| &nbsp;&nbsp;↳ `startTimelineAssetId` | string | 100% | 演出。 | "tln_cont_vovi-001_start", "tln_cont_voda-001_start" |
+| &nbsp;&nbsp;↳ `examTimelineAssetId` | string | 100% | 演出。 | "tln_cont_vovi-001_battle", "tln_cont_voda-001_battle" |
+| &nbsp;&nbsp;↳ `vocal` | int32 | 100% | 阶段基准 Vocal。 | 353, 446 |
+| &nbsp;&nbsp;↳ `dance` | int32 | 100% | 。 | 238, 356 |
+| &nbsp;&nbsp;↳ `visual` | int32 | 100% | 。 | 291, 89 |
+| &nbsp;&nbsp;↳ `produceExamBattleScoreConfigId` | string | 100% | → ProduceExamBattleScoreConfig。 | "p_exam_battle_score_config-contest-seas…", "p_exam_battle_score_config-contest-seas…" |
 
 外键（按 id 连接验证）：
 - `examSettingId` → **ExamSetting** (1/1 命中)
@@ -3260,7 +3260,7 @@ ProduceType × ProduceSplitType → 专用标记文本模板（{Label_ProduceTyp
 | 字段 | proto 类型 | 非空率 | 含义 | 示例值 |
 |---|---|---|---|---|
 | `planType` | ProducePlanType | 100% | ProducePlanType：Common=全プラン通用 / Plan1=センス / Plan2=ロジック / Plan3=アノマリー。 | "ProducePlanType_Plan1", "ProducePlanType_Plan2" |
-| `examStatusEffectType` | ExamStatusEffectType | 100% | （未注释） | "ExamStatusEffectType_ParameterBuff", "ExamStatusEffectType_LessonBuff" |
+| `examStatusEffectType` | ExamStatusEffectType | 100% | ExamStatusEffectType。 | "ExamStatusEffectType_ParameterBuff", "ExamStatusEffectType_LessonBuff" |
 | `order` | int32 | 100% | 客户端排序键（字符串或整数，纯展示用）。 | 2, 1 |
 
 代表行：
@@ -3276,9 +3276,9 @@ ProduceType × ProduceSplitType → 专用标记文本模板（{Label_ProduceTyp
 | 字段 | proto 类型 | 非空率 | 含义 | 示例值 |
 |---|---|---|---|---|
 | `idolCardId` | string | 100% | → IdolCard。 | "i_card-amao-1-000", "i_card-amao-1-001" |
-| `producerLevel` | int32 | 100% | （未注释） | 20, 35 |
-| `produceGuideProduceCardCategoryGroupId` | string | 100% | 外键/引用 id（见 FK）。 | "ParameterBuff_group_20", "ParameterBuff_group_35" |
-| `produceGuideProduceCardSampleDeckCategoryGroupId` | string | 100% | 外键/引用 id（见 FK）。 | "ParameterBuff_group_20", "ParameterBuff_group_35" |
+| `producerLevel` | int32 | 100% | 适用 P 等级（20/35）。 | 20, 35 |
+| `produceGuideProduceCardCategoryGroupId` | string | 100% | → ProduceGuideProduceCardCategoryGroup。 | "ParameterBuff_group_20", "ParameterBuff_group_35" |
+| `produceGuideProduceCardSampleDeckCategoryGroupId` | string | 100% | → ProduceGuideProduceCardSampleDeckCategoryGroup。 | "ParameterBuff_group_20", "ParameterBuff_group_35" |
 
 外键（按 id 连接验证）：
 - `idolCardId` → **IdolCard** (151/151 命中)
@@ -3300,7 +3300,7 @@ ProduceType × ProduceSplitType → 专用标记文本模板（{Label_ProduceTyp
 | `id` | string | 100% | 主键。绝大多数表的 id 本身就是“可读的编码”（见各表说明），很多语义只在 id 里出现。 | "p_story_002_amao_after-audition-a-norma…", "p_story_002_amao_after-audition-a-norma…" |
 | `type` | ProduceStoryType | 100% | ProduceStoryType。 | "ProduceStoryType_Character", "ProduceStoryType_CharacterGrowth" |
 | `title` | string | 100% | 标题。 | "まだまだここから！", "まだまだこれから" |
-| `advAssetId` | string | 100% | 外键/引用 id（见 FK）。 | "adv_pstory_002_amao_after-audition-a-no…", "adv_pstory_002_amao_after-audition-a-no…" |
+| `advAssetId` | string | 100% | ADV。 | "adv_pstory_002_amao_after-audition-a-no…", "adv_pstory_002_amao_after-audition-a-no…" |
 | `produceEventHintProduceConditionDescriptions` | repeated string | 11% | 触发条件提示文本。 | ["１次オーディションで「メロBang!」を選択し合格する"], ["２次オーディションで「GALAXYミュージック」を選択し合格する"] |
 | `viewConditionSetId` | string | 0% | → ConditionSet，显示条件。 | "cd_close" |
 | `unlockConditionSetId` | string | 0% | → ConditionSet，解锁条件。 |  |
@@ -3360,9 +3360,9 @@ ProduceType × ProduceSplitType → 专用标记文本模板（{Label_ProduceTyp
 | 字段 | proto 类型 | 非空率 | 含义 | 示例值 |
 |---|---|---|---|---|
 | `produceType` | ProduceType | 100% | ProduceType：FirstStar=定期公演『初』 / NextIdolAudition=N.I.A / HatsuboshiIdolFestival=H.I.F。 | "ProduceType_HatsuboshiIdolFestival" |
-| `type` | ProduceAdvType | 100% | （未注释） | "ProduceAdvType_BeforeFinalAuditionRefre…", "ProduceAdvType_BeforeMid1AuditionRefresh" |
-| `produceSplitTypes` | ProduceSplitType | 100% | （未注释） | "ProduceSplitType_Selection", "ProduceSplitType_Final" |
-| `targetCharacterId` | string | 17% | 外键/引用 id（见 FK）。 | "hski", "kllj" |
+| `type` | ProduceAdvType | 100% | ProduceAdvType。 | "ProduceAdvType_BeforeFinalAuditionRefre…", "ProduceAdvType_BeforeMid1AuditionRefresh" |
+| `produceSplitTypes` | ProduceSplitType | 100% | 适用的 ProduceSplitType。 | "ProduceSplitType_Selection", "ProduceSplitType_Final" |
+| `targetCharacterId` | string | 17% | → Character。 | "hski", "kllj" |
 | `title` | string | 100% | 标题。 | "第3回『選抜試験』前", "『本戦』ラウンド2前" |
 | `assetId` | string | 100% | 美术/预制体资源 id（非外键；AssetDownload 里只登记了一部分）。 | "adv_produce-refresh_003_selection_03", "adv_produce-refresh_003_final_02" |
 
@@ -3383,9 +3383,9 @@ ProduceType × ProduceSplitType → 专用标记文本模板（{Label_ProduceTyp
 |---|---|---|---|---|
 | `characterId` | string | 100% | → Character（4 字母缩写，如 amao=有村麻央、hski=花海咲季）。 | "amao", "atbm" |
 | `produceGroupId` | string | 100% | → ProduceGroup（剧本系列：初 / N.I.A / H.I.F）。 | "produce_group-001", "produce_group-002" |
-| `type` | ProduceLiveType | 100% | （未注释） | "ProduceLiveType_TrueEnd", "ProduceLiveType_A" |
-| `musicId` | string | 100% | 外键/引用 id（见 FK）。 | "music-all-amao-001", "music-all-amao-002" |
-| `needForceLiveCommonIdolCard` | bool | 13% | （未注释） | false, true |
+| `type` | ProduceLiveType | 100% | ProduceLiveType。 | "ProduceLiveType_TrueEnd", "ProduceLiveType_A" |
+| `musicId` | string | 100% | → Music。 | "music-all-amao-001", "music-all-amao-002" |
+| `needForceLiveCommonIdolCard` | bool | 13% | 需要指定形象卡。 | false, true |
 | `unlockConditionSetId` | string | 2% | → ConditionSet，解锁条件。 | "cd_time_25_0630-1100" |
 | `thumbnailAssetId` | string | 100% | 外键/引用 id（见 FK）。 | "img_general_live_music-all-amao-001_tru…", "img_general_live_music-all-amao-001_a" |
 | `environmentAssetId` | string | 100% | 外键/引用 id（见 FK）。 | "env_3d_live_all001-00-noon", "env_3d_live_courtyard-00-00-noon" |
@@ -3420,17 +3420,17 @@ ProduceType × ProduceSplitType → 专用标记文本模板（{Label_ProduceTyp
 | 字段 | proto 类型 | 非空率 | 含义 | 示例值 |
 |---|---|---|---|---|
 | `examEffectType` | ProduceExamEffectType | 100% | ProduceExamEffectType；在“按プラン/主 buff 分流”的表里表示 6 大流派之一（ExamParameterBuff=好調系 / ExamLessonBuff=集中系 / ExamReview=好印象系 / ExamCardPlayAggressive=やる気系 / ExamConcentration=強気(アノマリー) / ExamFullPower=全力(アノマリー)）。 | "ProduceExamEffectType_ExamParameterBuff", "ProduceExamEffectType_ExamLessonBuff" |
-| `isLessonInt` | int32 | 50% | （未注释） | 0, 1 |
+| `isLessonInt` | int32 | 50% | 1=课程型研修。 | 0, 1 |
 | `description` | string | 100% | 说明文（日文）。 | "目標値に少し届きませんでしたね。好調は、パラメ\nータの上昇量をあげる効果があり…", "目標値に少し届きませんでしたね。好調は、パラメ\nータの上昇量をあげる効果があり…" |
-| `seminarExamGroupId` | string | 100% | 外键/引用 id（见 FK）。 | "seminar_gruop-03", "seminar_gruop-01" |
-| `seminarExamId` | string | 100% | 外键/引用 id（见 FK）。 | "seminar_gruop-03_01", "seminar_gruop-01_01" |
-| `seminarExamGroupName` | string | 100% | （未注释） | "試験研修", "基礎研修" |
-| `seminarExamName` | string | 100% | （未注释） | "【試験研修１】好調", "【基礎１】好調" |
+| `seminarExamGroupId` | string | 100% | 研修组 id（不在 dump 中）。 | "seminar_gruop-03", "seminar_gruop-01" |
+| `seminarExamId` | string | 100% | 研修 id（不在 dump 中）。 | "seminar_gruop-03_01", "seminar_gruop-01_01" |
+| `seminarExamGroupName` | string | 100% | 研修组名。 | "試験研修", "基礎研修" |
+| `seminarExamName` | string | 100% | 研修名。 | "【試験研修１】好調", "【基礎１】好調" |
 | `produceIds` | repeated string | 100% | 外键/引用 id（见 FK）。 | ["produce-001"] |
-| `rewards` | repeated Reward | 100% | （未注释） | [{"resourceType": "ResourceType_JewelTotal", "resourceId": "", "quantity": 50}] |
-| &nbsp;&nbsp;↳ `resourceType` | ResourceType | 100% | ResourceType/ProduceResourceType 枚举。 | "ResourceType_JewelTotal" |
-| &nbsp;&nbsp;↳ `resourceId` | string | 0% | 资源 id，按 resourceType 多态指向 Item/ProduceCard/ProduceItem/ProduceDrink/...。 |  |
-| &nbsp;&nbsp;↳ `quantity` | int32 | 100% | 数量。 | 50 |
+| `rewards` | repeated Reward | 100% | 奖励。 | [{"resourceType": "ResourceType_JewelTotal", "resourceId": "", "quantity": 50}] |
+| &nbsp;&nbsp;↳ `resourceType` | ResourceType | 100% | 。 | "ResourceType_JewelTotal" |
+| &nbsp;&nbsp;↳ `resourceId` | string | 0% | 。 |  |
+| &nbsp;&nbsp;↳ `quantity` | int32 | 100% | 。 | 50 |
 
 外键（按 id 连接验证）：
 - `produceIds` → **Produce** (1/1 命中)
@@ -3447,18 +3447,18 @@ ProduceType × ProduceSplitType → 专用标记文本模板（{Label_ProduceTyp
 
 | 字段 | proto 类型 | 非空率 | 含义 | 示例值 |
 |---|---|---|---|---|
-| `tutorialType` | TutorialType | 100% | （未注释） | "TutorialType_GameStart" |
+| `tutorialType` | TutorialType | 100% | TutorialType。 | "TutorialType_GameStart" |
 | `idolCardId` | string | 100% | → IdolCard。 | "i_card-fktn-1-000", "i_card-hski-1-000" |
 | `produceCardIds` | repeated string | 100% | → ProduceCard 列表（可重复表示多张）。 | ["p_card-02-act-1_027", "p_card-00-act-0_001", "p_card-00-act-0_002", "p_card-02-men-1_030", "p_card-00-men-0_003", "…(+4)"], ["p_card-01-act-1_001", "p_card-00-act-0_001", "p_card-00-act-0_002", "p_card-01-act-1_019", "p_card-00-men-0_003", "…(+4)"] |
 | `examSettingId` | string | 100% | 外键/引用 id（见 FK）。 | "p_exam_setting-1" |
 | `produceSettingId` | string | 100% | 外键/引用 id（见 FK）。 | "p_setting-1" |
-| `idolCardParameterGrowthLimit` | int32 | 100% | （未注释） | 1200 |
+| `idolCardParameterGrowthLimit` | int32 | 100% | 参数上限 1200。 | 1200 |
 | `produceNavigationNormalId` | string | 100% | 外键/引用 id（见 FK）。 | "p_navi-produce_group-001-tutorial" |
 | `produceNavigationAuditionId` | string | 100% | 外键/引用 id（见 FK）。 | "p_navi-produce_group-001-tutorial-audit…" |
-| `musicId` | string | 100% | 外键/引用 id（见 FK）。 | "music-all-fktn-001", "music-all-hski-001" |
+| `musicId` | string | 100% | → Music。 | "music-all-fktn-001", "music-all-hski-001" |
 | `environmentAssetId` | string | 100% | 外键/引用 id（见 FK）。 | "env_3d_live_schoolgarden-00-00-noon" |
 | `timelineAssetId` | string | 100% | 外键/引用 id（见 FK）。 | "tln_live_fktn_all-001-normal-003", "tln_live_hski_all-001-normal-003" |
-| `memoryGiftId` | string | 100% | 外键/引用 id（见 FK）。 | "memory_gift-fktn", "memory_gift-hski" |
+| `memoryGiftId` | string | 100% | → MemoryGift。 | "memory_gift-fktn", "memory_gift-hski" |
 
 外键（按 id 连接验证）：
 - `idolCardId` → **IdolCard** (3/3 命中)
@@ -3484,23 +3484,23 @@ ProduceType × ProduceSplitType → 专用标记文本模板（{Label_ProduceTyp
 
 | 字段 | proto 类型 | 非空率 | 含义 | 示例值 |
 |---|---|---|---|---|
-| `tutorialType` | TutorialType | 100% | （未注释） | "TutorialType_GameStart" |
+| `tutorialType` | TutorialType | 100% | TutorialType。 | "TutorialType_GameStart" |
 | `idolCardId` | string | 100% | → IdolCard。 | "i_card-fktn-1-000", "i_card-hski-1-000" |
-| `stepNumber` | int32 | 100% | （未注释） | 1, 2 |
-| `tutorialStep` | int32 | 100% | （未注释） | 5, 8 |
+| `stepNumber` | int32 | 100% | 周序号。 | 1, 2 |
+| `tutorialStep` | int32 | 100% | 教程步骤号。 | 5, 8 |
 | `stepType` | ProduceStepType | 100% | ProduceStepType（周程类型：LessonXxx / AuditionMid1/Mid2/Final / EventXxx / Present / Refresh / OpenLesson / SelfLesson ...）。 | "ProduceStepType_LessonVisualNormal", "ProduceStepType_LessonDanceNormal" |
 | `name` | string | 100% | 显示名（日文）。 | "ビジュアルレッスン", "ダンスレッスン" |
-| `produceStepRefresh` | bool | 25% | （未注释） | false, true |
-| `produceStepLessonId` | string | 50% | 外键/引用 id（见 FK）。 | "p_step_lesson_level-001-tutorial-fktn-0…", "p_step_lesson_level-001-tutorial-fktn-0…" |
-| `progressLevel` | int32 | 50% | （未注释） | 1, 0 |
-| `produceNavigationNumber` | int32 | 75% | （未注释） | 3, 2 |
-| `rankThreshold` | int32 | 25% | （未注释） | 0, 3 |
-| `parameterBaseLine` | int32 | 25% | （未注释） | 0, 100 |
-| `baseScore` | int32 | 25% | （未注释） | 0, 200 |
-| `forceEndScore` | int32 | 0% | （未注释） | 0 |
-| `produceExamBattleNpcGroupId` | string | 25% | 外键/引用 id（见 FK）。 | "p_npc_group-tutorial-fktn", "p_npc_group-tutorial-hski" |
-| `produceExamBattleConfigId` | string | 25% | 外键/引用 id（见 FK）。 | "p_exam_battle_config-tutorial_fktn", "p_exam_battle_config-tutorial_hski" |
-| `produceExamGimmickEffectGroupId` | string | 0% | 外键/引用 id（见 FK）。 |  |
+| `produceStepRefresh` | bool | 25% | 是否休息。 | false, true |
+| `produceStepLessonId` | string | 50% | → ProduceStepLesson。 | "p_step_lesson_level-001-tutorial-fktn-0…", "p_step_lesson_level-001-tutorial-fktn-0…" |
+| `progressLevel` | int32 | 50% | 进度等级。 | 1, 0 |
+| `produceNavigationNumber` | int32 | 75% | 导航台词序号。 | 3, 2 |
+| `rankThreshold` | int32 | 25% | 合格名次。 | 0, 3 |
+| `parameterBaseLine` | int32 | 25% | 参数基准。 | 0, 100 |
+| `baseScore` | int32 | 25% | 基础分。 | 0, 200 |
+| `forceEndScore` | int32 | 0% | 强制结束分。 | 0 |
+| `produceExamBattleNpcGroupId` | string | 25% | → ProduceExamBattleNpcGroup。 | "p_npc_group-tutorial-fktn", "p_npc_group-tutorial-hski" |
+| `produceExamBattleConfigId` | string | 25% | → ProduceExamBattleConfig。 | "p_exam_battle_config-tutorial_fktn", "p_exam_battle_config-tutorial_hski" |
+| `produceExamGimmickEffectGroupId` | string | 0% | → ProduceExamGimmickEffectGroup。 |  |
 
 外键（按 id 连接验证）：
 - `idolCardId` → **IdolCard** (3/3 命中)

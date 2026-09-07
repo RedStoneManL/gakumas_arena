@@ -550,3 +550,202 @@ def calculate_nia_produce_rating(*, difficulty: str, idol_id: int, stage: str, p
         'rating': total_rating,
         'rank': produce_rank,
     }
+
+
+# ---------------------------------------------------------------------------
+# H.I.F（Hatsuboshi IDOL FESTIVAL）評価値
+#
+# 公式来源：docs/research/existing_engines.md §6.1
+#   huraru7/gakumas_HIF_Rating_Calculation/js/formulas.js
+#   与 gakumas-tools/utils/hif.js、happyMilleFeuille/gakumas/calcModals.js 三方一致。
+# 与 docs/scenarios/hif.md §7.2 社区推定
+#   評価値 = 合計パラメータ×2 + スター性×7.5 + R1換算 + R2換算 − 2000
+# 结构一致；§6.1 额外给出 R2 分数→スター性 换算表与 R1/R2 分段系数，本文件以 §6.1 为准。
+# 等级阈值来源：主数据 ProduceGrade（produce_group-003）= hif.md §7.1。
+# ---------------------------------------------------------------------------
+
+HIF_TARGET_RATING_BY_RANK: dict[str, int] = {
+    'S5': 35000,
+    'S4+': 30000,
+    'S4': 26000,
+    'SSS+': 23000,
+    'SSS': 20000,
+    'SS+': 18000,
+    'SS': 16000,
+    'S+': 14500,
+    'S': 13000,
+    'A+': 11500,
+    'A': 10000,
+    'B+': 8000,
+    'B': 6000,
+    'C+': 4500,
+    'C': 3000,
+    'D': 2000,
+    'E': 1000,
+    'F': 0,
+}
+"""HIF 评价等级阈值（`ProduceGrade` produce_group-003，上限 `ResultGrade_Sssss`）。"""
+
+HIF_PARAM_RATING_MULTIPLIER = 2.0
+HIF_STAR_RATING_MULTIPLIER = 7.5
+HIF_RATING_BASE_OFFSET = 2000
+HIF_STAR_QUALITY_CAP_BEFORE_ROUND2 = 1110
+HIF_STAR_QUALITY_CAP = 1335
+HIF_ROUND2_STAR_GAIN_DEARNESS_MULTIPLIER = 1.5
+HIF_PARAMETER_CAP_FOR_RATING = 3200
+HIF_ROUND1_SCORE_MULTIPLIER = 1.2
+
+# R2 分数 → スター性 基础获得量（未乘亲爱度倍率）。分段：(分数上限, 段起始值, 斜率)
+HIF_ROUND2_STAR_GAIN_SEGMENTS: tuple[tuple[float, float, float], ...] = (
+    (400000.0, 0.0, 0.0001875),
+    (600000.0, 75.0, 0.000225),
+    (1000000.0, 120.0, 0.000075),
+)
+HIF_ROUND2_STAR_GAIN_MAX = 150.0
+
+# R1 分数（原始分，未乘 1.2）→ 評価値 分段：(分数上限, 段起始评价, 斜率)
+HIF_ROUND1_RATING_SEGMENTS: tuple[tuple[float, float, float], ...] = (
+    (300000.0, 0.0, 0.0),
+    (700000.0, 0.0, 0.01),
+    (1000000.0, 4000.0, 0.003),
+    (1200000.0, 4900.0, 0.002),
+    (1400000.0, 5300.0, 0.001),
+)
+HIF_ROUND1_RATING_MAX = 5500.0
+
+# R2 分数 → 評価値 分段
+HIF_ROUND2_RATING_SEGMENTS: tuple[tuple[float, float, float], ...] = (
+    (600000.0, 0.0, 0.0),
+    (900000.0, 0.0, 0.004),
+    (1500000.0, 1200.0, 0.008),
+    (2000000.0, 6000.0, 0.002),
+    (2400000.0, 7000.0, 0.001),
+)
+HIF_ROUND2_RATING_MAX = 7400.0
+
+
+def _piecewise_linear(score: float, segments: tuple[tuple[float, float, float], ...], maximum: float) -> float:
+    """按「(上限, 段起始值, 斜率)」分段表计算未取整的分段线性值。
+
+    Args:
+        score: 输入分数。
+        segments: 分段表，每段给出该段的分数上限、段起始值与斜率；段的下限是上一段的上限（首段为 0）。
+        maximum: 超过最后一段上限后的封顶值。
+
+    Returns:
+        分段线性插值结果（未取整）。
+    """
+
+    value = max(float(score), 0.0)
+    lower = 0.0
+    for upper, base, slope in segments:
+        if value <= upper:
+            return float(base) + (value - lower) * float(slope)
+        lower = float(upper)
+    return float(maximum)
+
+
+def get_hif_produce_rank(rating: float) -> str:
+    """按 HIF 等级阈值返回评价等级（最低为 F）。"""
+
+    numeric = float(rating)
+    for rank, threshold in HIF_TARGET_RATING_BY_RANK.items():
+        if numeric >= threshold:
+            return rank
+    return 'F'
+
+
+def calculate_hif_round2_star_gain(round2_score: float) -> int:
+    """按 §6.1 的 starGainR2 表计算 R2 分数换算的基础スター性（向上取整，未乘亲爱度倍率）。"""
+
+    return int(math.ceil(_piecewise_linear(round2_score, HIF_ROUND2_STAR_GAIN_SEGMENTS, HIF_ROUND2_STAR_GAIN_MAX) - 1e-9))
+
+
+def calculate_hif_round1_rating(round1_score: float) -> int:
+    """R1 原始分数（未乘 1.2）→ 評価値 贡献（向下取整）。"""
+
+    return int(math.floor(_piecewise_linear(round1_score, HIF_ROUND1_RATING_SEGMENTS, HIF_ROUND1_RATING_MAX) + 1e-9))
+
+
+def calculate_hif_round2_rating(round2_score: float) -> int:
+    """R2 分数 → 評価値 贡献（向下取整）。"""
+
+    return int(math.floor(_piecewise_linear(round2_score, HIF_ROUND2_RATING_SEGMENTS, HIF_ROUND2_RATING_MAX) + 1e-9))
+
+
+def calculate_hif_produce_rating(
+    *,
+    params: tuple[float, float, float],
+    star_quality_before_round2: float,
+    round1_score: float,
+    round2_score: float,
+    star_gain_multiplier: float = HIF_ROUND2_STAR_GAIN_DEARNESS_MULTIPLIER,
+    parameter_cap: float = HIF_PARAMETER_CAP_FOR_RATING,
+) -> dict[str, Any]:
+    """计算 H.I.F 本戦 的最终評価値与等级。
+
+    公式（existing_engines.md §6.1，三方计算器一致）：
+        r2StarGain = floor(starGainR2(round2) × 亲爱度倍率)
+        statStar   = floor(Σmin(param, 3200) × 2 + (r2StarGain + min(star, 1110)) × 7.5)
+        評価値     = statStar + r1Eval(round1) + r2Eval(round2) − 2000
+
+    Args:
+        params: 本戦结束时的三维属性。
+        star_quality_before_round2: Round2 开始前的スター性（上限 1110）。
+        round1_score: Round1 原始分数（未乘 1.2；gakumas-tools 输入的是 ×1.2 后的显示分再除回来）。
+        round2_score: Round2 分数。
+        star_gain_multiplier: R2 スター性获得倍率；社区计算器固定按亲爱度 37（+50%）计算。
+        parameter_cap: 单项属性参与评价的上限（3000 + 面板 +200）。
+
+    Returns:
+        含各分项与等级的字典。
+    """
+
+    param_total = sum(min(max(float(value), 0.0), float(parameter_cap)) for value in params)
+    round2_star_base = calculate_hif_round2_star_gain(round2_score)
+    round2_star_gain = int(math.floor(round2_star_base * float(star_gain_multiplier) + 1e-9))
+    star_before = min(max(float(star_quality_before_round2), 0.0), float(HIF_STAR_QUALITY_CAP_BEFORE_ROUND2))
+    stat_star_rating = int(math.floor(param_total * HIF_PARAM_RATING_MULTIPLIER + (round2_star_gain + star_before) * HIF_STAR_RATING_MULTIPLIER + 1e-9))
+    round1_rating = calculate_hif_round1_rating(round1_score)
+    round2_rating = calculate_hif_round2_rating(round2_score)
+    total = stat_star_rating + round1_rating + round2_rating - HIF_RATING_BASE_OFFSET
+    return {
+        'parameter_total': float(param_total),
+        'star_quality_before_round2': float(star_before),
+        'round2_star_gain_base': int(round2_star_base),
+        'round2_star_gain': int(round2_star_gain),
+        'final_star_quality': float(min(star_before + round2_star_gain, HIF_STAR_QUALITY_CAP)),
+        'stat_star_rating': int(stat_star_rating),
+        'round1_score': float(round1_score),
+        'round1_adjusted_score': int(math.floor(float(round1_score) * HIF_ROUND1_SCORE_MULTIPLIER + 1e-9)),
+        'round1_rating': int(round1_rating),
+        'round2_score': float(round2_score),
+        'round2_rating': int(round2_rating),
+        'rating': int(total),
+        'rank': get_hif_produce_rank(total),
+    }
+
+
+def calculate_hif_selection_rating(
+    *,
+    params: tuple[float, float, float],
+    star_quality: float,
+    parameter_cap: float = HIF_PARAMETER_CAP_FOR_RATING,
+) -> dict[str, Any]:
+    """計算 選抜試験（produce-007）结束时的暂定評価值。
+
+    主数据与社区资料只给出本戦的評価値公式，選抜試験本身的结算画面公式未取得。
+    这里沿用同一骨架（属性×2 + スター性×7.5 − 2000）但不含任何试验分数换算，
+    作为训练奖励和结果摘要的稳定代理。
+    # TODO(HIF-verify): 選抜試験 结算公式待实测确认。
+    """
+
+    param_total = sum(min(max(float(value), 0.0), float(parameter_cap)) for value in params)
+    star = min(max(float(star_quality), 0.0), float(HIF_STAR_QUALITY_CAP))
+    total = int(math.floor(param_total * HIF_PARAM_RATING_MULTIPLIER + star * HIF_STAR_RATING_MULTIPLIER + 1e-9)) - HIF_RATING_BASE_OFFSET
+    return {
+        'parameter_total': float(param_total),
+        'star_quality': float(star),
+        'rating': int(total),
+        'rank': get_hif_produce_rank(total),
+    }
