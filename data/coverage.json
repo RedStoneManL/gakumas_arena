@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-09-07T07:09:57+00:00",
+  "generated_at": "2026-09-07T07:24:45+00:00",
   "dump": {
     "path": "/home/user/gakumas_arena/data/raw/gakumasu-diff",
     "commit": "5b8969e363ae60cd1d9bf64560783b4b445f7da6",
@@ -15,11 +15,11 @@
       "source": "ProduceExamEffect.effectType",
       "summary": {
         "values": 107,
-        "handled": 101,
-        "referenced": 6,
+        "handled": 107,
+        "referenced": 0,
         "unhandled": 0,
         "rows_unhandled": 0,
-        "rows_referenced": 15
+        "rows_referenced": 0
       },
       "values": {
         "ProduceExamEffectType_ExamAddGrowEffect": {
@@ -51,21 +51,14 @@
           "owner_total": 0
         },
         "ProduceExamEffectType_ExamAggressiveAdditiveFix": {
-          "status": "referenced",
-          "reason": "ids.ExamEffect constant only",
+          "status": "handled",
+          "reason": "registry exact",
           "rows": 1,
           "example_row_ids": [
             "e_effect-exam_aggressive_additive_fix-0001-02"
           ],
-          "owners": [
-            {
-              "id": "p_card-02-ido-3_201",
-              "table": "ProduceCard",
-              "name": "わたしを支える言葉+++",
-              "count": 1
-            }
-          ],
-          "owner_total": 1
+          "owners": [],
+          "owner_total": 0
         },
         "ProduceExamEffectType_ExamAggressiveReduce": {
           "status": "handled",
@@ -357,28 +350,15 @@
           "owner_total": 0
         },
         "ProduceExamEffectType_ExamConcentrationLessonMultipleAdditive": {
-          "status": "referenced",
-          "reason": "ids.ExamEffect constant only",
+          "status": "handled",
+          "reason": "registry exact",
           "rows": 2,
           "example_row_ids": [
             "e_effect-exam_concentration_lesson_multiple_additive-0350-inf",
             "e_effect-exam_concentration_lesson_multiple_additive-0600-inf"
           ],
-          "owners": [
-            {
-              "id": "pitem_03-3-339-0",
-              "table": "ProduceItem",
-              "name": "夏を編んだ影",
-              "count": 1
-            },
-            {
-              "id": "pitem_03-3-339-1",
-              "table": "ProduceItem",
-              "name": "夏を編んだ影+",
-              "count": 1
-            }
-          ],
-          "owner_total": 2
+          "owners": [],
+          "owner_total": 0
         },
         "ProduceExamEffectType_ExamDebuffRecover": {
           "status": "handled",
@@ -459,21 +439,14 @@
           "owner_total": 0
         },
         "ProduceExamEffectType_ExamForcePlayCardSearchWithCost": {
-          "status": "referenced",
-          "reason": "ids.ExamEffect constant only",
+          "status": "handled",
+          "reason": "registry exact",
           "rows": 1,
           "example_row_ids": [
             "e_effect-exam_force_play_card_search_with_cost-p_card_search-not_lost-select-1_1"
           ],
-          "owners": [
-            {
-              "id": "p_card-03-ido-100_038",
-              "table": "ProduceCard",
-              "name": "高みへ羽ばたく一番星",
-              "count": 1
-            }
-          ],
-          "owner_total": 1
+          "owners": [],
+          "owner_total": 0
         },
         "ProduceExamEffectType_ExamFullPower": {
           "status": "handled",
@@ -486,41 +459,16 @@
           "owner_total": 0
         },
         "ProduceExamEffectType_ExamFullPowerLessonMultipleAdditive": {
-          "status": "referenced",
-          "reason": "ids.ExamEffect constant only",
+          "status": "handled",
+          "reason": "registry exact",
           "rows": 3,
           "example_row_ids": [
             "e_effect-exam_full_power_lesson_multiple_additive-0200-04",
             "e_effect-exam_full_power_lesson_multiple_additive-0250-inf",
             "e_effect-exam_full_power_lesson_multiple_additive-0350-inf"
           ],
-          "owners": [
-            {
-              "id": "p_exam_gimmick-tour-season_006-stage_3",
-              "table": "ProduceExamGimmickEffectGroup",
-              "name": null,
-              "count": 1
-            },
-            {
-              "id": "pitem_03-0-007-0-014",
-              "table": "ProduceItem",
-              "name": "初星フラッグ（紫）",
-              "count": 1
-            },
-            {
-              "id": "pitem_03-3-317-0",
-              "table": "ProduceItem",
-              "name": "あこがれチャージャー",
-              "count": 1
-            },
-            {
-              "id": "pitem_03-3-317-1",
-              "table": "ProduceItem",
-              "name": "あこがれチャージャー+",
-              "count": 1
-            }
-          ],
-          "owner_total": 4
+          "owners": [],
+          "owner_total": 0
         },
         "ProduceExamEffectType_ExamFullPowerPoint": {
           "status": "handled",
@@ -734,7 +682,7 @@
         },
         "ProduceExamEffectType_ExamLessonBuffAdditiveFix": {
           "status": "handled",
-          "reason": "registry prefix ProduceExamEffectType_ExamLesson",
+          "reason": "registry exact",
           "rows": 2,
           "example_row_ids": [
             "e_effect-exam_lesson_buff_additive_fix-0001-04",
@@ -994,23 +942,16 @@
           "owner_total": 0
         },
         "ProduceExamEffectType_ExamMultipleEnthusiasticLesson": {
-          "status": "referenced",
-          "reason": "ids.ExamEffect constant only",
+          "status": "handled",
+          "reason": "registry exact",
           "rows": 3,
           "example_row_ids": [
             "e_effect-exam_multiple_enthusiastic_lesson-0001-1000-01",
             "e_effect-exam_multiple_enthusiastic_lesson-0003-1000-01",
             "e_effect-exam_multiple_enthusiastic_lesson-0005-1000-01"
           ],
-          "owners": [
-            {
-              "id": "p_card-03-ido-3_197",
-              "table": "ProduceCard",
-              "name": "手を伸ばした先に+++",
-              "count": 3
-            }
-          ],
-          "owner_total": 1
+          "owners": [],
+          "owner_total": 0
         },
         "ProduceExamEffectType_ExamMultipleLessonBuffLesson": {
           "status": "handled",
@@ -1433,8 +1374,8 @@
           "owner_total": 0
         },
         "ProduceExamEffectType_ExamStatusEnchantEncore": {
-          "status": "referenced",
-          "reason": "ids.ExamEffect constant only",
+          "status": "handled",
+          "reason": "registry exact",
           "rows": 5,
           "example_row_ids": [
             "e_effect-exam_status_enchant_encore-0001-02-inf-enchant-p_card-01-ido-3_202-enc02",
@@ -1443,39 +1384,8 @@
             "e_effect-exam_status_enchant_encore-0001-03-inf-enchant-p_card-03-ido-3_197-enc01",
             "e_effect-exam_status_enchant_encore-0001-04-inf-enchant-p_card-01-ido-3_200-enc01"
           ],
-          "owners": [
-            {
-              "id": "p_card-01-ido-3_202",
-              "table": "ProduceCard",
-              "name": "わたしだけの思い出+++",
-              "count": 1
-            },
-            {
-              "id": "p_card-02-ido-3_198",
-              "table": "ProduceCard",
-              "name": "クールすぎるアイドル+++",
-              "count": 1
-            },
-            {
-              "id": "p_card-02-ido-3_201",
-              "table": "ProduceCard",
-              "name": "わたしを支える言葉+++",
-              "count": 1
-            },
-            {
-              "id": "p_card-03-ido-3_197",
-              "table": "ProduceCard",
-              "name": "手を伸ばした先に+++",
-              "count": 1
-            },
-            {
-              "id": "p_card-01-ido-3_200",
-              "table": "ProduceCard",
-              "name": "お姉さんの感覚+++",
-              "count": 1
-            }
-          ],
-          "owner_total": 5
+          "owners": [],
+          "owner_total": 0
         },
         "ProduceExamEffectType_StanceLock": {
           "status": "handled",
@@ -1495,10 +1405,10 @@
       "source": "ProduceEffect.produceEffectType",
       "summary": {
         "values": 66,
-        "handled": 57,
+        "handled": 66,
         "referenced": 0,
-        "unhandled": 9,
-        "rows_unhandled": 50,
+        "unhandled": 0,
+        "rows_unhandled": 0,
         "rows_referenced": 0
       },
       "values": {
@@ -1581,22 +1491,15 @@
           "owner_total": 0
         },
         "ProduceEffectType_CustomizeProduceCardProducePointDownMultiple": {
-          "status": "unhandled",
-          "reason": "not in _apply_produce_effect",
+          "status": "handled",
+          "reason": "_apply_produce_effect",
           "rows": 2,
           "example_row_ids": [
             "p_effect-customize_produce_card_produce_point_down_multiple-0200_0200",
             "p_effect-customize_produce_card_produce_point_down_multiple-0500_0500"
           ],
-          "owners": [
-            {
-              "id": "pitem_03-3-350-0",
-              "table": "ProduceItem",
-              "name": "大満足レポート♪",
-              "count": 1
-            }
-          ],
-          "owner_total": 1
+          "owners": [],
+          "owner_total": 0
         },
         "ProduceEffectType_DanceAddition": {
           "status": "handled",
@@ -1627,8 +1530,8 @@
           "owner_total": 0
         },
         "ProduceEffectType_EventActivityProducePointDown": {
-          "status": "unhandled",
-          "reason": "not in _apply_produce_effect",
+          "status": "handled",
+          "reason": "_apply_produce_effect",
           "rows": 1,
           "example_row_ids": [
             "p_effect-event_activity_produce_point_down-0500_0500"
@@ -1869,8 +1772,8 @@
           "owner_total": 0
         },
         "ProduceEffectType_ParameterLimitUp": {
-          "status": "unhandled",
-          "reason": "not in _apply_produce_effect",
+          "status": "handled",
+          "reason": "_apply_produce_effect",
           "rows": 6,
           "example_row_ids": [
             "p_effect-parameter_limit_up-0050_0050",
@@ -1879,15 +1782,8 @@
             "p_effect-parameter_limit_up-0140_0140",
             "p_effect-parameter_limit_up-0170_0170"
           ],
-          "owners": [
-            {
-              "id": "produce_growth_panel_sheet-hif-06",
-              "table": "ProduceGrowthPanel",
-              "name": null,
-              "count": 6
-            }
-          ],
-          "owner_total": 1
+          "owners": [],
+          "owner_total": 0
         },
         "ProduceEffectType_ProduceCardChange": {
           "status": "handled",
@@ -1904,8 +1800,8 @@
           "owner_total": 0
         },
         "ProduceEffectType_ProduceCardChangeSelect": {
-          "status": "unhandled",
-          "reason": "not in _apply_produce_effect",
+          "status": "handled",
+          "reason": "_apply_produce_effect",
           "rows": 23,
           "example_row_ids": [
             "p_effect-produce_card_change_select-0001_0001-p_rd-produce_007-customizeitem-p_card_search-active_skill-mental_skill-deck_all-select-01_01",
@@ -1914,57 +1810,8 @@
             "p_effect-produce_card_change_select-0001_0001-p_rd-produce_007-customizeitem-ssr-upgrade_0-p_card_search-deck_all-select-01_01",
             "p_effect-produce_card_change_select-0001_0001-p_rd-produce_007-event_activity-before_2nd-p_card_search-active_skill-mental_skill-deck_all-select-01_01"
           ],
-          "owners": [
-            {
-              "id": "customize_pitem-01-04-3-001_00-04-2-001_01-01-1-001_00-04-4-002",
-              "table": "ProduceCustomizeItem",
-              "name": "リボンくま（赤）",
-              "count": 1
-            },
-            {
-              "id": "customize_pitem-01-04-3-001_00-04-2-003_01-01-1-001",
-              "table": "ProduceCustomizeItem",
-              "name": "ロボ（赤）",
-              "count": 1
-            },
-            {
-              "id": "customize_pitem-01-04-3-002_00-04-2-001_01-01-1-001",
-              "table": "ProduceCustomizeItem",
-              "name": "くま（緑）",
-              "count": 1
-            },
-            {
-              "id": "customize_pitem-01-04-3-002_00-04-2-005_01-01-1-001_00-04-4-002",
-              "table": "ProduceCustomizeItem",
-              "name": "リボンインコ（緑）",
-              "count": 1
-            },
-            {
-              "id": "customize_pitem-01-04-3-003_00-04-2-003_01-01-1-001_00-04-4-002",
-              "table": "ProduceCustomizeItem",
-              "name": "リボンロボ（黄）",
-              "count": 1
-            },
-            {
-              "id": "customize_pitem-01-04-3-003_00-04-2-005_01-01-1-001",
-              "table": "ProduceCustomizeItem",
-              "name": "インコ（黄）",
-              "count": 1
-            },
-            {
-              "id": "customize_pitem-02-04-3-001_00-04-2-001_02-02-1-001_00-04-4-002",
-              "table": "ProduceCustomizeItem",
-              "name": "リボンくま（赤）",
-              "count": 1
-            },
-            {
-              "id": "customize_pitem-02-04-3-001_00-04-2-003_02-02-1-001",
-              "table": "ProduceCustomizeItem",
-              "name": "ロボ（赤）",
-              "count": 1
-            }
-          ],
-          "owner_total": 45
+          "owners": [],
+          "owner_total": 0
         },
         "ProduceEffectType_ProduceCardChangeUpgrade": {
           "status": "handled",
@@ -2046,44 +1893,24 @@
           "owner_total": 0
         },
         "ProduceEffectType_ProduceCustomizeItemUpgrade": {
-          "status": "unhandled",
-          "reason": "not in _apply_produce_effect",
+          "status": "handled",
+          "reason": "_apply_produce_effect",
           "rows": 1,
           "example_row_ids": [
             "p_effect-produce_customize_item_upgrade-select-01_01"
           ],
-          "owners": [
-            {
-              "id": "event-detail-p_story-003-produce-007-after_audition_final-1",
-              "table": "ProduceStepEventDetail",
-              "name": null,
-              "count": 1
-            },
-            {
-              "id": "event-detail-p_story-003-produce-007-after_audition_mid2-1",
-              "table": "ProduceStepEventDetail",
-              "name": null,
-              "count": 1
-            }
-          ],
-          "owner_total": 2
+          "owners": [],
+          "owner_total": 0
         },
         "ProduceEffectType_ProduceDrinkPossessLimitUp": {
-          "status": "unhandled",
-          "reason": "not in _apply_produce_effect",
+          "status": "handled",
+          "reason": "_apply_produce_effect",
           "rows": 1,
           "example_row_ids": [
             "p_effect-produce_drink_possess_limit_up-0001_0001"
           ],
-          "owners": [
-            {
-              "id": "p_dearness_skill-common-p_trigger-produce_start-no_description-produce_drink_possess_limit_up-03-001",
-              "table": "ProduceSkill",
-              "name": null,
-              "count": 1
-            }
-          ],
-          "owner_total": 1
+          "owners": [],
+          "owner_total": 0
         },
         "ProduceEffectType_ProducePointAddition": {
           "status": "handled",
@@ -2205,8 +2032,8 @@
           "owner_total": 0
         },
         "ProduceEffectType_ShopProduceCardPriceDiscountMultiplePermanent": {
-          "status": "unhandled",
-          "reason": "not in _apply_produce_effect",
+          "status": "handled",
+          "reason": "_apply_produce_effect",
           "rows": 6,
           "example_row_ids": [
             "p_effect-shop_produce_card_price_discount_multiple_permanent-0050_0050-p_card_search-deck_all",
@@ -2215,15 +2042,8 @@
             "p_effect-shop_produce_card_price_discount_multiple_permanent-0200_0200-p_card_search-deck_all",
             "p_effect-shop_produce_card_price_discount_multiple_permanent-0250_0250-p_card_search-deck_all"
           ],
-          "owners": [
-            {
-              "id": "produce_growth_panel_sheet-hif-09",
-              "table": "ProduceGrowthPanel",
-              "name": null,
-              "count": 6
-            }
-          ],
-          "owner_total": 1
+          "owners": [],
+          "owner_total": 0
         },
         "ProduceEffectType_ShopProduceCardUpgradePriceDiscountMultiple": {
           "status": "handled",
@@ -2306,25 +2126,18 @@
           "owner_total": 0
         },
         "ProduceEffectType_StarAddition": {
-          "status": "unhandled",
-          "reason": "not in _apply_produce_effect",
+          "status": "handled",
+          "reason": "_apply_produce_effect",
           "rows": 1,
           "example_row_ids": [
             "p_effect-star_addition-0010_0010"
           ],
-          "owners": [
-            {
-              "id": "pitem_00-3-265-0",
-              "table": "ProduceItem",
-              "name": "H.I.Fワッペン",
-              "count": 1
-            }
-          ],
-          "owner_total": 1
+          "owners": [],
+          "owner_total": 0
         },
         "ProduceEffectType_StarPermilUp": {
-          "status": "unhandled",
-          "reason": "not in _apply_produce_effect",
+          "status": "handled",
+          "reason": "_apply_produce_effect",
           "rows": 9,
           "example_row_ids": [
             "p_effect-star_permil_up-0050_0050",
@@ -2333,15 +2146,8 @@
             "p_effect-star_permil_up-0200_0200",
             "p_effect-star_permil_up-0250_0250"
           ],
-          "owners": [
-            {
-              "id": "p_dearness_skill-common-p_trigger-produce_start-no_description-star_permil_up-03-001",
-              "table": "ProduceSkill",
-              "name": null,
-              "count": 9
-            }
-          ],
-          "owner_total": 1
+          "owners": [],
+          "owner_total": 0
         },
         "ProduceEffectType_SupportCardEventParameterAdditionValueUp": {
           "status": "handled",
@@ -2844,103 +2650,24 @@
       "title": "ProduceExamStatusEnchant (derived)",
       "source": "ProduceExamStatusEnchant.produceExamEffectIds[].effectType + produceExamTriggerId.phaseTypes[]",
       "summary": {
-        "values": 4,
+        "values": 1,
         "handled": 1,
-        "referenced": 3,
+        "referenced": 0,
         "unhandled": 0,
         "rows_unhandled": 0,
-        "rows_referenced": 7
+        "rows_referenced": 0
       },
       "values": {
-        "effect:ProduceExamEffectType_ExamConcentrationLessonMultipleAdditive": {
-          "status": "referenced",
-          "reason": "contains referenced component(s)",
-          "rows": 2,
-          "example_row_ids": [
-            "enchant-p_item_effect_03-3-339-0-enc01",
-            "enchant-p_item_effect_03-3-339-1-enc01"
-          ],
-          "owners": [
-            {
-              "id": "pitem_03-3-339-0",
-              "table": "ProduceItem",
-              "name": "夏を編んだ影",
-              "count": 1
-            },
-            {
-              "id": "pitem_03-3-339-1",
-              "table": "ProduceItem",
-              "name": "夏を編んだ影+",
-              "count": 1
-            }
-          ],
-          "owner_total": 2
-        },
-        "effect:ProduceExamEffectType_ExamForcePlayCardSearchWithCost": {
-          "status": "referenced",
-          "reason": "contains referenced component(s)",
-          "rows": 1,
-          "example_row_ids": [
-            "enchant-p_card-03-ido-100_038-enc01"
-          ],
-          "owners": [
-            {
-              "id": "p_card-03-ido-100_038",
-              "table": "ProduceCard",
-              "name": "高みへ羽ばたく一番星",
-              "count": 1
-            }
-          ],
-          "owner_total": 1
-        },
-        "effect:ProduceExamEffectType_ExamFullPowerLessonMultipleAdditive": {
-          "status": "referenced",
-          "reason": "contains referenced component(s)",
-          "rows": 4,
-          "example_row_ids": [
-            "enchant-bullet_point-p_exam_gimmick-tour-006-stage-03-enc01",
-            "enchant-p_item_effect_03-0-007-0-014-enc01",
-            "enchant-p_item_effect_03-3-317-0-enc01",
-            "enchant-p_item_effect_03-3-317-1-enc01"
-          ],
-          "owners": [
-            {
-              "id": "p_exam_gimmick-tour-season_006-stage_3",
-              "table": "ProduceExamGimmickEffectGroup",
-              "name": null,
-              "count": 1
-            },
-            {
-              "id": "pitem_03-0-007-0-014",
-              "table": "ProduceItem",
-              "name": "初星フラッグ（紫）",
-              "count": 1
-            },
-            {
-              "id": "pitem_03-3-317-0",
-              "table": "ProduceItem",
-              "name": "あこがれチャージャー",
-              "count": 1
-            },
-            {
-              "id": "pitem_03-3-317-1",
-              "table": "ProduceItem",
-              "name": "あこがれチャージャー+",
-              "count": 1
-            }
-          ],
-          "owner_total": 4
-        },
         "handled": {
           "status": "handled",
           "reason": "all components handled",
-          "rows": 1996,
+          "rows": 2003,
           "example_row_ids": [
             "enchant-bullet_point-p_card-01-men-100_005-enc01",
             "enchant-bullet_point-p_exam_gimmick-tour-006-stage-01-enc01",
             "enchant-bullet_point-p_exam_gimmick-tour-006-stage-02-enc01",
-            "enchant-bullet_point-pitem_02-3-293-0-enc01",
-            "enchant-bullet_point-pitem_02-3-293-1-enc01"
+            "enchant-bullet_point-p_exam_gimmick-tour-006-stage-03-enc01",
+            "enchant-bullet_point-pitem_02-3-293-0-enc01"
           ],
           "owners": [],
           "owner_total": 0
@@ -3458,10 +3185,10 @@
       "source": "stepType fields of Produce / ProduceStep* tables",
       "summary": {
         "values": 33,
-        "handled": 20,
+        "handled": 33,
         "referenced": 0,
-        "unhandled": 13,
-        "rows_unhandled": 1198,
+        "unhandled": 0,
+        "rows_unhandled": 0,
         "rows_referenced": 0
       },
       "values": {
@@ -3537,61 +3264,12 @@
           }
         },
         "ProduceStepType_FanPresent": {
-          "status": "unhandled",
-          "reason": "no ProduceRuntime action",
+          "status": "handled",
+          "reason": "ProduceRuntime action `present`",
           "rows": 46,
           "example_row_ids": [],
-          "owners": [
-            {
-              "id": "Produce:produce-007",
-              "table": "Produce",
-              "name": null,
-              "count": 20
-            },
-            {
-              "id": "Produce:produce-008",
-              "table": "Produce",
-              "name": null,
-              "count": 20
-            },
-            {
-              "id": "ProduceStepTransition:amao",
-              "table": "ProduceStepTransition",
-              "name": null,
-              "count": 2
-            },
-            {
-              "id": "ProduceStepTransition:atbm",
-              "table": "ProduceStepTransition",
-              "name": null,
-              "count": 2
-            },
-            {
-              "id": "ProduceStepTransition:fktn",
-              "table": "ProduceStepTransition",
-              "name": null,
-              "count": 2
-            },
-            {
-              "id": "ProduceStepTransition:hmsz",
-              "table": "ProduceStepTransition",
-              "name": null,
-              "count": 2
-            },
-            {
-              "id": "ProduceStepTransition:hrnm",
-              "table": "ProduceStepTransition",
-              "name": null,
-              "count": 2
-            },
-            {
-              "id": "ProduceStepTransition:hski",
-              "table": "ProduceStepTransition",
-              "name": null,
-              "count": 2
-            }
-          ],
-          "owner_total": 15,
+          "owners": [],
+          "owner_total": 0,
           "tables": {
             "ProduceStepTransition": 46
           }
@@ -3669,289 +3347,133 @@
           }
         },
         "ProduceStepType_OpenLessonDanceNormal": {
-          "status": "unhandled",
-          "reason": "no ProduceRuntime action",
+          "status": "handled",
+          "reason": "ProduceRuntime action `lesson_dance_open`",
           "rows": 112,
           "example_row_ids": [],
-          "owners": [
-            {
-              "id": "Produce:produce-007",
-              "table": "Produce",
-              "name": null,
-              "count": 112
-            },
-            {
-              "id": "Produce:produce-008",
-              "table": "Produce",
-              "name": null,
-              "count": 112
-            }
-          ],
-          "owner_total": 2,
+          "owners": [],
+          "owner_total": 0,
           "tables": {
             "ProduceStepTransition": 112
           }
         },
         "ProduceStepType_OpenLessonDanceNormalStar": {
-          "status": "unhandled",
-          "reason": "no ProduceRuntime action",
+          "status": "handled",
+          "reason": "ProduceRuntime action `lesson_dance_open_star`",
           "rows": 80,
           "example_row_ids": [],
-          "owners": [
-            {
-              "id": "Produce:produce-007",
-              "table": "Produce",
-              "name": null,
-              "count": 80
-            },
-            {
-              "id": "Produce:produce-008",
-              "table": "Produce",
-              "name": null,
-              "count": 80
-            }
-          ],
-          "owner_total": 2,
+          "owners": [],
+          "owner_total": 0,
           "tables": {
             "ProduceStepTransition": 80
           }
         },
         "ProduceStepType_OpenLessonDanceSp": {
-          "status": "unhandled",
-          "reason": "no ProduceRuntime action",
+          "status": "handled",
+          "reason": "ProduceRuntime action `lesson_dance_open (SP roll)`",
           "rows": 112,
           "example_row_ids": [],
-          "owners": [
-            {
-              "id": "Produce:produce-007",
-              "table": "Produce",
-              "name": null,
-              "count": 112
-            },
-            {
-              "id": "Produce:produce-008",
-              "table": "Produce",
-              "name": null,
-              "count": 112
-            }
-          ],
-          "owner_total": 2,
+          "owners": [],
+          "owner_total": 0,
           "tables": {
             "ProduceStepTransition": 112
           }
         },
         "ProduceStepType_OpenLessonDanceSpStar": {
-          "status": "unhandled",
-          "reason": "no ProduceRuntime action",
+          "status": "handled",
+          "reason": "ProduceRuntime action `lesson_dance_open_star (SP roll)`",
           "rows": 80,
           "example_row_ids": [],
-          "owners": [
-            {
-              "id": "Produce:produce-007",
-              "table": "Produce",
-              "name": null,
-              "count": 80
-            },
-            {
-              "id": "Produce:produce-008",
-              "table": "Produce",
-              "name": null,
-              "count": 80
-            }
-          ],
-          "owner_total": 2,
+          "owners": [],
+          "owner_total": 0,
           "tables": {
             "ProduceStepTransition": 80
           }
         },
         "ProduceStepType_OpenLessonVisualNormal": {
-          "status": "unhandled",
-          "reason": "no ProduceRuntime action",
+          "status": "handled",
+          "reason": "ProduceRuntime action `lesson_visual_open`",
           "rows": 112,
           "example_row_ids": [],
-          "owners": [
-            {
-              "id": "Produce:produce-007",
-              "table": "Produce",
-              "name": null,
-              "count": 112
-            },
-            {
-              "id": "Produce:produce-008",
-              "table": "Produce",
-              "name": null,
-              "count": 112
-            }
-          ],
-          "owner_total": 2,
+          "owners": [],
+          "owner_total": 0,
           "tables": {
             "ProduceStepTransition": 112
           }
         },
         "ProduceStepType_OpenLessonVisualNormalStar": {
-          "status": "unhandled",
-          "reason": "no ProduceRuntime action",
+          "status": "handled",
+          "reason": "ProduceRuntime action `lesson_visual_open_star`",
           "rows": 80,
           "example_row_ids": [],
-          "owners": [
-            {
-              "id": "Produce:produce-007",
-              "table": "Produce",
-              "name": null,
-              "count": 80
-            },
-            {
-              "id": "Produce:produce-008",
-              "table": "Produce",
-              "name": null,
-              "count": 80
-            }
-          ],
-          "owner_total": 2,
+          "owners": [],
+          "owner_total": 0,
           "tables": {
             "ProduceStepTransition": 80
           }
         },
         "ProduceStepType_OpenLessonVisualSp": {
-          "status": "unhandled",
-          "reason": "no ProduceRuntime action",
+          "status": "handled",
+          "reason": "ProduceRuntime action `lesson_visual_open (SP roll)`",
           "rows": 112,
           "example_row_ids": [],
-          "owners": [
-            {
-              "id": "Produce:produce-007",
-              "table": "Produce",
-              "name": null,
-              "count": 112
-            },
-            {
-              "id": "Produce:produce-008",
-              "table": "Produce",
-              "name": null,
-              "count": 112
-            }
-          ],
-          "owner_total": 2,
+          "owners": [],
+          "owner_total": 0,
           "tables": {
             "ProduceStepTransition": 112
           }
         },
         "ProduceStepType_OpenLessonVisualSpStar": {
-          "status": "unhandled",
-          "reason": "no ProduceRuntime action",
+          "status": "handled",
+          "reason": "ProduceRuntime action `lesson_visual_open_star (SP roll)`",
           "rows": 80,
           "example_row_ids": [],
-          "owners": [
-            {
-              "id": "Produce:produce-007",
-              "table": "Produce",
-              "name": null,
-              "count": 80
-            },
-            {
-              "id": "Produce:produce-008",
-              "table": "Produce",
-              "name": null,
-              "count": 80
-            }
-          ],
-          "owner_total": 2,
+          "owners": [],
+          "owner_total": 0,
           "tables": {
             "ProduceStepTransition": 80
           }
         },
         "ProduceStepType_OpenLessonVocalNormal": {
-          "status": "unhandled",
-          "reason": "no ProduceRuntime action",
+          "status": "handled",
+          "reason": "ProduceRuntime action `lesson_vocal_open`",
           "rows": 112,
           "example_row_ids": [],
-          "owners": [
-            {
-              "id": "Produce:produce-007",
-              "table": "Produce",
-              "name": null,
-              "count": 112
-            },
-            {
-              "id": "Produce:produce-008",
-              "table": "Produce",
-              "name": null,
-              "count": 112
-            }
-          ],
-          "owner_total": 2,
+          "owners": [],
+          "owner_total": 0,
           "tables": {
             "ProduceStepTransition": 112
           }
         },
         "ProduceStepType_OpenLessonVocalNormalStar": {
-          "status": "unhandled",
-          "reason": "no ProduceRuntime action",
+          "status": "handled",
+          "reason": "ProduceRuntime action `lesson_vocal_open_star`",
           "rows": 80,
           "example_row_ids": [],
-          "owners": [
-            {
-              "id": "Produce:produce-007",
-              "table": "Produce",
-              "name": null,
-              "count": 80
-            },
-            {
-              "id": "Produce:produce-008",
-              "table": "Produce",
-              "name": null,
-              "count": 80
-            }
-          ],
-          "owner_total": 2,
+          "owners": [],
+          "owner_total": 0,
           "tables": {
             "ProduceStepTransition": 80
           }
         },
         "ProduceStepType_OpenLessonVocalSp": {
-          "status": "unhandled",
-          "reason": "no ProduceRuntime action",
+          "status": "handled",
+          "reason": "ProduceRuntime action `lesson_vocal_open (SP roll)`",
           "rows": 112,
           "example_row_ids": [],
-          "owners": [
-            {
-              "id": "Produce:produce-007",
-              "table": "Produce",
-              "name": null,
-              "count": 112
-            },
-            {
-              "id": "Produce:produce-008",
-              "table": "Produce",
-              "name": null,
-              "count": 112
-            }
-          ],
-          "owner_total": 2,
+          "owners": [],
+          "owner_total": 0,
           "tables": {
             "ProduceStepTransition": 112
           }
         },
         "ProduceStepType_OpenLessonVocalSpStar": {
-          "status": "unhandled",
-          "reason": "no ProduceRuntime action",
+          "status": "handled",
+          "reason": "ProduceRuntime action `lesson_vocal_open_star (SP roll)`",
           "rows": 80,
           "example_row_ids": [],
-          "owners": [
-            {
-              "id": "Produce:produce-007",
-              "table": "Produce",
-              "name": null,
-              "count": 80
-            },
-            {
-              "id": "Produce:produce-008",
-              "table": "Produce",
-              "name": null,
-              "count": 80
-            }
-          ],
-          "owner_total": 2,
+          "owners": [],
+          "owner_total": 0,
           "tables": {
             "ProduceStepTransition": 80
           }

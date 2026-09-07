@@ -123,6 +123,21 @@ STEP_TYPE_ACTION_ALIASES: dict[str, str] = {
     "ProduceStepType_EventActivity": "activity / activity_supply",
     "ProduceStepType_Business": "business",
     "ProduceStepType_Present": "present",
+    # H.I.F：公開レッスン（gakumas_rl/simulation/produce/hif.py HIF_OPEN_LESSON_ACTION_TYPES）
+    "ProduceStepType_OpenLessonVocalNormal": "lesson_vocal_open",
+    "ProduceStepType_OpenLessonVocalSp": "lesson_vocal_open (SP roll)",
+    "ProduceStepType_OpenLessonDanceNormal": "lesson_dance_open",
+    "ProduceStepType_OpenLessonDanceSp": "lesson_dance_open (SP roll)",
+    "ProduceStepType_OpenLessonVisualNormal": "lesson_visual_open",
+    "ProduceStepType_OpenLessonVisualSp": "lesson_visual_open (SP roll)",
+    "ProduceStepType_OpenLessonVocalNormalStar": "lesson_vocal_open_star",
+    "ProduceStepType_OpenLessonVocalSpStar": "lesson_vocal_open_star (SP roll)",
+    "ProduceStepType_OpenLessonDanceNormalStar": "lesson_dance_open_star",
+    "ProduceStepType_OpenLessonDanceSpStar": "lesson_dance_open_star (SP roll)",
+    "ProduceStepType_OpenLessonVisualNormalStar": "lesson_visual_open_star",
+    "ProduceStepType_OpenLessonVisualSpStar": "lesson_visual_open_star (SP roll)",
+    # H.I.F：差し入れ 走通用 present 动作（支援卡事件）
+    "ProduceStepType_FanPresent": "present",
 }
 
 
