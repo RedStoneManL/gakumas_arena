@@ -33,4 +33,8 @@ def apply_scalar_resource(context: ExamEffectContext, effect: dict[str, Any], so
         # 「直接効果でやる気が n 回増加時」（ProduceExamPhaseType_ExamAggressiveUpInterval）：
         # 只统计卡牌/饮料这类直接效果带来的やる気增加次数。
         context.total_counters['aggressive_up_count'] += 1
-        context.dispatch_interval_phase(ExamPhase.AGGRESSIVE_UP_INTERVAL, context.total_counters['aggressive_up_count'])
+        context.dispatch_interval_phase(
+            ExamPhase.AGGRESSIVE_UP_INTERVAL,
+            context.total_counters['aggressive_up_count'],
+            effect_types=[effect_type],
+        )

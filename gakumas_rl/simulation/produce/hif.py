@@ -110,17 +110,6 @@ class HifSelectionMemory:
     metadata: dict[str, Any] = field(default_factory=dict)
 
 
-@dataclass
-class HifRoundResult:
-    """本戦 单轮结果记录。"""
-
-    stage_type: str
-    raw_score: float
-    adjusted_score: float
-    rival_scores: tuple[float, ...]
-    rival_character_ids: tuple[str, ...]
-
-
 class HifRuntimeSupport:
     """挂在 `ProduceRuntime` 上的 H.I.F 专用行为集合。"""
 
@@ -138,6 +127,8 @@ class HifRuntimeSupport:
         self.selection_memory = selection_memory
         self.open_lessons = runtime.repository.load_table('ProduceStepOpenLesson')
         self.growth_panels = runtime.repository.load_table('ProduceGrowthPanel')
+        self.dearness_levels = runtime.repository.load_table('CharacterDearnessLevel')
+        self.produce_skills = runtime.repository.load_table('ProduceSkill')
 
     # ── 基础属性 ─────────────────────────────────────────────
 
@@ -263,6 +254,7 @@ class HifRuntimeSupport:
 
         if self.is_final and self.selection_memory is not None:
             self._apply_selection_memory(self.selection_memory)
+        self._apply_dearness_hif_skills()
         self._apply_growth_panel()
         if self.config.opening_event_detail_id:
             detail = self.runtime.event_details.first(self.config.opening_event_detail_id) or {}
@@ -312,6 +304,46 @@ class HifRuntimeSupport:
                     active.fire_count = max(int(active.fire_count), int(fire_count))
         state['hif_selection_scores'] = [float(value) for value in memory.selection_scores]
 
+    def _apply_dearness_hif_skills(self) -> None:
+        """应用 `CharacterDearnessLevel.produceSkills` 里的 H.I.F 专用亲爱度技能。
+
+        通用 loadout 只把亲爱度折算成分数倍率，没有读取 `produceSkills`；这里只补
+        `star_permil_up`（Lv28~36：獲得スター性 +5%…+50%）与 `produce_drink_possess_limit_up`（Lv37：饮料上限+1），
+        避免与已按亲爱度估算的 `audition_parameter_bonus` 重复计算。
+        """
+
+        if not self.config.apply_dearness_hif_skills:
+            return
+        loadout = self.runtime.idol_loadout
+        if loadout is None:
+            return
+        character_id = str(loadout.stat_profile.character_id or '')
+        dearness_level = int(loadout.dearness_level or 0)
+        matched_row: dict[str, Any] | None = None
+        for row in self.dearness_levels.rows:
+            if str(row.get('characterId') or '') != character_id:
+                continue
+            level = int(row.get('dearnessLevel') or 0)
+            if level <= dearness_level and (matched_row is None or level > int(matched_row.get('dearnessLevel') or 0)):
+                matched_row = row
+        if matched_row is None:
+            return
+        for skill in matched_row.get('produceSkills', []) or []:
+            skill_id = str(skill.get('id') or '')
+            if not any(tag in skill_id for tag in self.config.dearness_skill_id_tags):
+                continue
+            skill_level = int(skill.get('level') or 1)
+            candidates = [row for row in self.produce_skills.all(skill_id) if int(row.get('level') or 1) == skill_level]
+            skill_row = candidates[0] if candidates else None
+            if skill_row is None:
+                continue
+            effect_ids = [
+                str(skill_row.get(key) or '')
+                for key in ('produceEffectId1', 'produceEffectId2', 'produceEffectId3')
+                if skill_row.get(key)
+            ]
+            self.runtime._apply_effect_rows(effect_ids, source_action_type='idol_skill')
+
     def _apply_growth_panel(self) -> None:
         """按配置等级应用 H.I.F ボーナス 成长面板（`ProduceGrowthPanel`）的 ProduceEffect。"""
 
@@ -319,18 +351,27 @@ class HifRuntimeSupport:
         if not levels:
             return
         split_type = 'ProduceSplitType_Selection' if self.is_selection else 'ProduceSplitType_Final'
+        # 主数据里 `produceGrowthPanelSheetId` 是整张面板（produce_growth_panel_sheet-hif），
+        # `id` 才是单个面板项（…-hif-01 ~ -09），同一 id 下按 `level` 分多行；
+        # 每级的数值是「总量」（上限值 +50 → +80 → … → +200），因此只应用已解锁的最高一级。
+        selected_rows: dict[str, dict[str, Any]] = {}
         for row in self.growth_panels.rows:
-            sheet_id = str(row.get('produceGrowthPanelSheetId') or '')
-            if not sheet_id.startswith(self.config.growth_panel_sheet_id):
+            if str(row.get('produceGrowthPanelSheetId') or '') != self.config.growth_panel_sheet_id:
                 continue
-            sheet_key = sheet_id.rsplit('-', 1)[-1]
-            unlocked_level = int(levels.get(sheet_key, levels.get(sheet_id, 0)) or 0)
-            if int(row.get('level') or 0) > unlocked_level:
+            panel_id = str(row.get('id') or '')
+            panel_key = panel_id.rsplit('-', 1)[-1]
+            unlocked_level = int(levels.get(panel_key, levels.get(panel_id, 0)) or 0)
+            row_level = int(row.get('level') or 0)
+            if row_level > unlocked_level:
                 continue
             row_split = str(row.get('produceSplitType') or 'ProduceSplitType_Unknown')
             if row_split not in {'ProduceSplitType_Unknown', split_type}:
                 continue
-            effect_ids = [str(value) for value in row.get('produceEffectIds', []) or [] if value]
+            current = selected_rows.get(panel_id)
+            if current is None or int(current.get('level') or 0) < row_level:
+                selected_rows[panel_id] = row
+        for panel_id in sorted(selected_rows):
+            effect_ids = [str(value) for value in selected_rows[panel_id].get('produceEffectIds', []) or [] if value]
             self.runtime._apply_effect_rows(effect_ids, source_action_type='hif_growth_panel')
 
     def export_selection_memory(self) -> HifSelectionMemory:

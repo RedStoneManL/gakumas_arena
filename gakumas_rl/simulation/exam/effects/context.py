@@ -242,10 +242,24 @@ class ExamEffectContext:
 
         return self.runtime._gain_enthusiastic(amount)
 
-    def dispatch_interval_phase(self, phase_type: str, counter_value: int, acting_card: Any | None = None) -> None:
-        """按主数据里出现过的间隔值分发间隔型 phase。"""
+    def dispatch_interval_phase(
+        self,
+        phase_type: str,
+        counter_value: int,
+        acting_card: Any | None = None,
+        effect_types: list[str] | None = None,
+    ) -> None:
+        """按主数据里出现过的间隔值分发间隔型 phase；可附带触发器 effectTypes 匹配用的效果类型。"""
 
-        self.runtime._dispatch_interval_phase(phase_type, counter_value, acting_card=acting_card)
+        if counter_value <= 0:
+            return
+        runtime = self.runtime
+        for interval in runtime.repository.interval_phase_values.get(phase_type, ()):
+            if counter_value % interval != 0:
+                continue
+            runtime._dispatch_phase(phase_type, phase_value=interval, acting_card=acting_card, effect_types=effect_types or [])
+            if runtime.terminated:
+                return
 
     def search_cards(
         self,

@@ -199,6 +199,9 @@ class HifScenarioConfig:
     # H.I.F ボーナス 成长面板等级（sheet 序号 01..09 → 等级 0..6），默认全 0。
     growth_panel_levels: dict[str, int] = field(default_factory=dict)
     growth_panel_sheet_id: str = 'produce_growth_panel_sheet-hif'
+    # 是否从 `CharacterDearnessLevel.produceSkills` 读取 HIF 专用亲爱度技能（star_permil_up 等）。
+    apply_dearness_hif_skills: bool = True
+    dearness_skill_id_tags: tuple[str, ...] = ('star_permil_up', 'produce_drink_possess_limit_up')
     memory_handoff: HifMemoryHandoffConfig = field(default_factory=HifMemoryHandoffConfig)
     opening_event_detail_id: str = ''
     after_audition_event_detail_ids: dict[str, str] = field(default_factory=dict)

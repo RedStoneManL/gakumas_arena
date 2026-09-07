@@ -36,7 +36,6 @@ from .hif import (
     HifRuntimeSupport,
     HifSelectionMemory,
     is_hif_interval_action,
-    is_hif_open_lesson_action,
     is_hif_school_action,
 )
 from .items import ActiveProduceItem, ProduceItemInterpreter, RuntimeExamStatusEnchantSpec
@@ -3598,6 +3597,15 @@ class ProduceRuntime:
                     continue
                 # 支援卡事件只进差入（present），不混入授業 / 外出 / 活动支给
                 samples[ACTION_PRESENT].append(row)
+        if self.scenario.hif is not None:
+            # H.I.F：开场/试验后剧情事件（event-detail-p_story-*）由 HifRuntimeSupport 按日程显式触发，
+            # 不能混入 差入/外出 的随机池；授業 / 活動支給 也改由 HIF 专用采样从主数据事件池读取。
+            for action_type in (ACTION_PRESENT, ACTION_OUTING):
+                samples[action_type] = [
+                    row
+                    for row in samples[action_type]
+                    if not str(row.get('id') or '').startswith('event-detail-p_story-')
+                ]
         return samples
 
     def _fallback_lesson_stat_deltas(self, action_type: str) -> tuple[float, float, float]:

@@ -16,9 +16,67 @@ from gakumas_rl.repository.master_data import MasterDataRepository
 from gakumas_rl.simulation.exam.effects import EXAM_EFFECT_REGISTRY, STRICT_EFFECTS_ENV, UnknownExamEffectTypeError
 from gakumas_rl.simulation.exam.effects import fallback as fallback_module
 from gakumas_rl.simulation.exam.ids import ExamEffect, ExamPhase
+from gakumas_rl.idol_config import build_idol_loadout
 from gakumas_rl.simulation.exam.runtime import ExamRuntime, RuntimeCard
 
-from .test_rules import _effect_row, _first_exam_effect, _sample_audition_row_selector, _sample_loadout, _sample_runtime
+
+
+def _sample_loadout(repository: MasterDataRepository, scenario, idol_card_id: str = 'i_card-amao-1-000'):
+    """构造一个稳定的默认偶像编成（与 test_rules 保持一致）。"""
+
+    return build_idol_loadout(repository, scenario, idol_card_id, producer_level=35, idol_rank=4, dearness_level=10)
+
+
+def _sample_audition_row_selector(repository: MasterDataRepository, scenario, loadout) -> str | None:
+    """为测试构造一个稳定的 battle row selector（与 test_rules 保持一致）。"""
+
+    rows = repository.audition_rows(
+        scenario,
+        scenario.default_stage,
+        audition_difficulty_id=loadout.stat_profile.audition_difficulty_id,
+    )
+    if not rows:
+        return None
+    row = rows[0]
+    return f"{str(row.get('id') or '')}:{int(row.get('number') or 0)}"
+
+
+def _sample_runtime(seed: int = 7, **runtime_kwargs: Any) -> ExamRuntime:
+    """构造一个可直接调用内部运行时方法的考试实例（与 test_rules 保持一致）。"""
+
+    repository = MasterDataRepository()
+    scenario = repository.build_scenario('produce-005')
+    loadout = runtime_kwargs.pop('loadout', _sample_loadout(repository, scenario))
+    runtime = ExamRuntime(
+        repository,
+        scenario,
+        loadout=loadout,
+        seed=seed,
+        audition_row_id=runtime_kwargs.pop('audition_row_id', _sample_audition_row_selector(repository, scenario, loadout)),
+        **runtime_kwargs,
+    )
+    runtime.reset()
+    return runtime
+
+
+def _first_exam_effect(repository: MasterDataRepository, effect_type: str, **conditions: int) -> dict[str, Any]:
+    """按效果类型和简单字段过滤主数据里的第一条考试效果。"""
+
+    for row in repository.load_table('ProduceExamEffect').rows:
+        if str(row.get('effectType') or '') != effect_type:
+            continue
+        if all(int(row.get(key) or 0) == expected for key, expected in conditions.items()):
+            return row
+    raise AssertionError(f'Effect not found: {effect_type} {conditions}')
+
+
+def _effect_row(repository: MasterDataRepository, effect_id: str) -> dict[str, Any]:
+    """按 id 取一条考试效果行。"""
+
+    row = repository.exam_effect_map.get(effect_id)
+    if row is None:
+        raise AssertionError(f'Effect not found: {effect_id}')
+    return row
 
 
 def _make_runtime(seed: int = 7, **kwargs: Any) -> ExamRuntime:
@@ -424,56 +482,94 @@ def _play_stub_card_with_encore(runtime: ExamRuntime, encore_effect_id: str, *, 
 
 
 def test_encore_binds_to_the_played_card_and_refires_it_for_free_once_per_turn() -> None:
-    """再演（残り3ターン以内のターン終了時、3回まで・ターン内1回まで）：绑定自身、免费再使用、同回合只发动一次。"""
+    """再演（2ターンごとに、体力が80%以上の場合、2回まで・ターン内1回まで）：绑定自身、免费再使用、同回合只发动一次、次数用尽后移除。"""
 
     runtime = _make_runtime(seed=67)
     repository = runtime.repository
-    encore_id = 'e_effect-exam_status_enchant_encore-0001-03-inf-enchant-p_card-03-ido-3_197-enc01'
+    encore_id = 'e_effect-exam_status_enchant_encore-0001-02-inf-enchant-p_card-01-ido-3_202-enc02'
     encore = _effect_row(repository, encore_id)
     assert encore['effectType'] == ExamEffect.STATUS_ENCHANT_ENCORE
+    _clear_zones(runtime)
+    runtime.resources['block'] = 0.0
+    runtime.max_stamina = 30.0
+    runtime.stamina = 30.0
+    runtime.resources['review'] = 0.0
+    runtime.turn = 1
+
+    card = _play_stub_card_with_encore(runtime, encore_id)
+    assert runtime.resources['review'] == 2.0
+    assert runtime.stamina == 26.0
+    assert card in runtime.lost
+
+    enchants = [item for item in runtime.active_enchants if item.enchant_id == 'enchant-p_card-01-ido-3_202-enc02']
+    assert len(enchants) == 1
+    enchant = enchants[0]
+    assert enchant.bound_card_uid == card.uid
+    assert enchant.once_per_turn is True
+    assert enchant.remaining_count == 2
+    assert enchant.remaining_turns is None
+
+    # 第 1 回合：不是 2 的倍数，不发动
+    runtime._dispatch_interval_phase(ExamPhase.TURN_INTERVAL, runtime.turn)
+    assert runtime.resources['review'] == 2.0
+
+    # 第 2 回合但体力 < 80%：不发动
+    runtime.turn = 2
+    runtime.stamina = 20.0
+    runtime._dispatch_interval_phase(ExamPhase.TURN_INTERVAL, runtime.turn)
+    assert runtime.resources['review'] == 2.0
+
+    # 第 2 回合、体力 ≥ 80%：免费再使用自身（体力不变、效果结算、回到除外）
+    runtime.stamina = 26.0
+    runtime._dispatch_interval_phase(ExamPhase.TURN_INTERVAL, runtime.turn)
+    assert runtime.resources['review'] == 4.0
+    assert runtime.stamina == 26.0
+    assert card in runtime.lost
+    assert enchant.remaining_count == 1
+
+    # 同一回合内再触发：ターン内1回まで
+    runtime._dispatch_interval_phase(ExamPhase.TURN_INTERVAL, runtime.turn)
+    assert runtime.resources['review'] == 4.0
+    assert enchant.remaining_count == 1
+
+    runtime.turn = 3
+    runtime._dispatch_interval_phase(ExamPhase.TURN_INTERVAL, runtime.turn)
+    assert runtime.resources['review'] == 4.0
+
+    runtime.turn = 4
+    runtime._dispatch_interval_phase(ExamPhase.TURN_INTERVAL, runtime.turn)
+    assert runtime.resources['review'] == 6.0
+    assert not any(item.enchant_id == 'enchant-p_card-01-ido-3_202-enc02' for item in runtime.active_enchants)
+
+    runtime.turn = 6
+    runtime._dispatch_interval_phase(ExamPhase.TURN_INTERVAL, runtime.turn)
+    assert runtime.resources['review'] == 6.0
+
+
+def test_encore_end_turn_remaining_turn_trigger_fires_at_exact_threshold() -> None:
+    """再演「残り3ターン以内のターン終了時」：剩余恰好 3 回合时回合结束发动。
+
+    注意：上游触发器求值器（triggers/field_status.py）把 RemainingTurn 当作「≥ 阈值」处理，
+    与卡面「以内（≤）」相反；这里只在两种解释都成立的 remaining == 3 处断言，见 docs/rules/hif_exam_effects.md。
+    """
+
+    runtime = _make_runtime(seed=68)
+    encore_id = 'e_effect-exam_status_enchant_encore-0001-03-inf-enchant-p_card-03-ido-3_197-enc01'
     _clear_zones(runtime)
     runtime.resources['block'] = 0.0
     runtime.stamina = 20.0
     runtime.resources['review'] = 0.0
     runtime.max_turns = 6
-    runtime.turn = 1
+    runtime.turn = 4  # remaining = 3
 
     card = _play_stub_card_with_encore(runtime, encore_id)
     assert runtime.resources['review'] == 2.0
-    assert runtime.stamina == 16.0
-    assert card in runtime.lost
-
-    enchants = [item for item in runtime.active_enchants if item.enchant_id == 'enchant-p_card-03-ido-3_197-enc01']
-    assert len(enchants) == 1
-    enchant = enchants[0]
-    assert enchant.bound_card_uid == card.uid
-    assert enchant.once_per_turn is True
-    assert enchant.remaining_count == 3
-    assert enchant.remaining_turns is None
-
-    # 剩余回合 > 3：触发器不命中
-    runtime._dispatch_phase(ExamPhase.END_TURN, phase_value=runtime.turn)
-    assert runtime.resources['review'] == 2.0
-
-    # 剩余 3 回合：回合结束时免费再使用自身
-    runtime.turn = 4
     runtime._dispatch_phase(ExamPhase.END_TURN, phase_value=runtime.turn)
     assert runtime.resources['review'] == 4.0
     assert runtime.stamina == 16.0
     assert card in runtime.lost
+    enchant = next(item for item in runtime.active_enchants if item.enchant_id == 'enchant-p_card-03-ido-3_197-enc01')
     assert enchant.remaining_count == 2
-
-    # 同一回合内再触发：ターン内1回まで
-    runtime._dispatch_phase(ExamPhase.END_TURN, phase_value=runtime.turn)
-    assert runtime.resources['review'] == 4.0
-    assert enchant.remaining_count == 2
-
-    runtime.turn = 5
-    runtime._dispatch_phase(ExamPhase.END_TURN, phase_value=runtime.turn)
-    runtime.turn = 6
-    runtime._dispatch_phase(ExamPhase.END_TURN, phase_value=runtime.turn)
-    assert runtime.resources['review'] == 8.0
-    assert not any(item.enchant_id == 'enchant-p_card-03-ido-3_197-enc01' for item in runtime.active_enchants)
 
 
 def test_encore_is_only_attached_on_first_use() -> None:
