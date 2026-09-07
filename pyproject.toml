@@ -1,0 +1,28 @@
+[project]
+name = "gakumas-arena"
+version = "0.0.1"
+description = "Local, configurable, RL-ready sandbox of Gakuen Idolmaster produce mode"
+requires-python = ">=3.11"
+dependencies = [
+  "pydantic>=2.6",
+  "numpy>=1.26",
+  "pyyaml>=6.0",
+  "gymnasium>=0.29",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=8", "ruff>=0.4"]
+scrape = ["httpx>=0.27", "beautifulsoup4>=4.12", "lxml>=5", "playwright>=1.44"]
+
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+include = ["gakumas_arena*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+
+[tool.ruff]
+line-length = 100

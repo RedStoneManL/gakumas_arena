@@ -1,0 +1,9 @@
+[
+  {"id": "sc_sample_appeal", "name": "アピールの基本", "plan": "free", "type": "active", "rarity": "N",
+   "base": {"cost": {"kind": "genki", "value": 4}, "effects": [{"op": "score", "value": 9}], "source_text": "パラメータ+9"},
+   "upgraded": {"cost": {"kind": "genki", "value": 4}, "effects": [{"op": "score", "value": 14}]}},
+  {"id": "sc_sample_pose", "name": "ポーズの基本", "plan": "free", "type": "active", "rarity": "N",
+   "base": {"cost": {"kind": "genki", "value": 3}, "effects": [{"op": "score", "value": 2}, {"op": "genki", "value": 2}]}},
+  {"id": "sc_sample_focus", "name": "集中の基本", "plan": "sense", "type": "mental", "rarity": "N",
+   "base": {"cost": {"kind": "genki", "value": 2}, "effects": [{"op": "buff", "stat": "focus", "value": 2}]}}
+]
