@@ -128,8 +128,17 @@ def walk_fields(row: dict, prefix: str = "") -> Iterable[tuple[str, Any]]:
             yield path, v
 
 
+NON_ENUM_LEAVES = {"id", "name", "text", "template", "description", "assetId"}
+
+
 def is_enum(v: Any) -> bool:
     return isinstance(v, str) and bool(ENUM_RE.match(v)) and not v.startswith(("Label_", "Description_", "Swap_"))
+
+
+def enum_field_path(path: str) -> bool:
+    """Only consider fields whose leaf name is not an id/name/text field."""
+    leaf = path.rsplit(".", 1)[-1]
+    return leaf not in NON_ENUM_LEAVES and not leaf.endswith(("Id", "Ids"))
 
 
 def scalars(v: Any) -> Iterable[Any]:
@@ -147,9 +156,10 @@ def scalars(v: Any) -> Iterable[Any]:
 
 
 class FieldStat:
-    __slots__ = ("types", "n", "empty", "distinct", "samples", "enum_values")
+    __slots__ = ("types", "n", "empty", "distinct", "samples", "enum_values", "track_enums")
 
-    def __init__(self) -> None:
+    def __init__(self, track_enums: bool = True) -> None:
+        self.track_enums = track_enums
         self.types: collections.Counter[str] = collections.Counter()
         self.n = 0
         self.empty = 0
@@ -166,7 +176,7 @@ class FieldStat:
             if isinstance(s, (str, int, float, bool)) or s is None:
                 if len(self.distinct) < 5000:
                     self.distinct.add(s)
-            if is_enum(s):
+            if self.track_enums and is_enum(s):
                 self.enum_values[s] += 1
         if len(self.samples) < 5 and v not in (None, "", []) and v not in self.samples:
             self.samples.append(v)
@@ -180,7 +190,7 @@ def analyse(tables: dict[str, list[dict]]) -> dict[str, dict[str, FieldStat]]:
             if not isinstance(row, dict):
                 continue
             for path, v in walk_fields(row):
-                fs.setdefault(path, FieldStat()).add(v)
+                fs.setdefault(path, FieldStat(enum_field_path(path))).add(v)
         out[t] = fs
     return out
 

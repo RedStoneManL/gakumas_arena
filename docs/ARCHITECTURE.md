@@ -103,3 +103,14 @@ evaluate:
 | M5 | H.I.F 剧本 | scenarios/hif.yaml, plugins/hif.py |
 | M6 | Gym env + 启发式 agent + 自动打牌脚本 | env/, agents/ |
 | M7 | RL 训练（PPO 等） | 训练脚本 |
+
+## 8. 数据时效性与新机制兼容（设计原则）
+
+- **数据版本可追溯**：`MasterData` 记录 dump 的 commit/日期（`masterdata_json/_meta.json`）；每次模拟结果带上数据版本。
+  `tools/masterdata/fetch.sh` 一条命令更新；`tools/masterdata/history_diff.py` 比较两个 commit 之间新增的表/枚举值/配置改动。
+- **未知即报错**：效果类型、触发类型、状态附魔、步骤类型全部走注册表，遇到未注册的枚举值抛 `UnsupportedMechanic`，
+  并有一个 `tools/masterdata/coverage.py` 报告「dump 里出现过但引擎未实现」的枚举值清单。新版本上线后先跑覆盖率报告。
+- **结算公式版本化**：评价/评级/分数换算不硬编码，放在 `rules/scoring/*.yaml`，带 `effective_from` 日期与来源
+  （master 表优先：`ResultGradePattern`、`ProduceExamBattleScoreConfig`、`ProduceStepAuditionDifficulty`；wiki 公式次之）。
+- **剧本以 `Produce.id` 为键**：新剧本 = 新配置 + 可选 plugin，不改引擎核心。
+- **回归对拍**：固定 seed + 固定牌组的黄金分数序列作为 fixture；升级 dump 后跑一遍，差异即为版本变更信号。
