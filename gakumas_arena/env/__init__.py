@@ -24,8 +24,12 @@ from gakumas_rl.loadout import IdolLoadout
 from gakumas_rl.repository.master_data import MasterDataRepository, ScenarioSpec
 from gakumas_rl.simulation.envs import GakumasExamEnv, GakumasPlanningEnv
 
+from ..loadouts import LoadoutPreset, apply_preset_to_scenario, default_loadout_name, get_loadout
+
 __all__ = [
+    "AUTO",
     "DEFAULT_IDOL",
+    "LoadoutPreset",
     "SCENARIOS",
     "STAGE_TYPES",
     "LoadoutConfig",
@@ -36,6 +40,7 @@ __all__ = [
     "resolve_scenario_id",
     "get_scenario",
     "make_loadout_config",
+    "resolve_preset",
     "build_loadout",
     "make_exam_env",
     "make_produce_env",
@@ -69,8 +74,13 @@ STAGE_TYPES: dict[str, str] = {
     "final": "ProduceStepType_AuditionFinal",
 }
 
-#: 花海咲季 R — the stable default idol card also used by the upstream test-suite fixtures.
+#: 有村麻央 R (``amao``) — the stable fallback idol card also used by the upstream test-suite fixtures.
+#: Scenarios with a preset in ``gakumas_arena.loadouts.DEFAULT_PRESET_BY_SCENARIO`` (H.I.F) use that
+#: preset's idol instead when ``idol`` is left at ``AUTO``.
 DEFAULT_IDOL = "i_card-amao-1-000"
+
+#: Sentinel for ``idol``: "use the scenario's default preset idol if one exists, else DEFAULT_IDOL".
+AUTO = "auto"
 
 
 def get_repository() -> MasterDataRepository:
@@ -95,12 +105,43 @@ def resolve_stage_type(stage_type: str | None) -> str | None:
     return STAGE_TYPES.get(str(stage_type).strip().lower(), str(stage_type))
 
 
+def resolve_preset(
+    scenario: str | None,
+    idol: str | None,
+    loadout: Any,
+) -> LoadoutPreset | None:
+    """Which named preset (``gakumas_arena.loadouts``) applies, if any.
+
+    ``loadout`` may be a preset name (``"hif_sense_default"``) or a ``LoadoutPreset``; with
+    ``loadout=None`` and ``idol=AUTO`` the scenario's default preset (H.I.F only) is used.
+    """
+    if isinstance(loadout, LoadoutPreset):
+        return loadout
+    if isinstance(loadout, str):
+        return get_loadout(loadout)
+    if loadout is None and idol == AUTO and scenario is not None:
+        name = default_loadout_name(resolve_scenario_id(scenario))
+        return get_loadout(name) if name else None
+    return None
+
+
 def make_loadout_config(
-    idol: str | None = DEFAULT_IDOL,
-    loadout: LoadoutConfig | IdolLoadout | dict[str, Any] | None = None,
+    idol: str | None = AUTO,
+    loadout: LoadoutConfig | IdolLoadout | LoadoutPreset | dict[str, Any] | str | None = None,
+    scenario: str | None = None,
     **overrides: Any,
 ) -> LoadoutConfig:
-    """Normalise ``loadout`` (None / dict / LoadoutConfig / IdolLoadout) into a ``LoadoutConfig``."""
+    """Normalise ``loadout`` (None / preset name / LoadoutPreset / dict / LoadoutConfig / IdolLoadout)
+    into a ``LoadoutConfig``.  ``idol=AUTO`` resolves to the preset's idol (or ``DEFAULT_IDOL``);
+    an explicit ``idol`` overrides the preset's idol card."""
+    preset = resolve_preset(scenario, idol, loadout)
+    if preset is not None:
+        cfg = preset.to_loadout_config()
+        if idol and idol != AUTO and idol != preset.idol_card_id:
+            cfg = replace(cfg, idol_card_id=idol)
+        return replace(cfg, **overrides) if overrides else cfg
+    if idol == AUTO:
+        idol = DEFAULT_IDOL
     if isinstance(loadout, LoadoutConfig):
         cfg = loadout
     elif isinstance(loadout, IdolLoadout):
@@ -132,14 +173,14 @@ def make_loadout_config(
 
 def build_loadout(
     scenario: str = "first_star",
-    idol: str | None = DEFAULT_IDOL,
-    loadout: LoadoutConfig | IdolLoadout | dict[str, Any] | None = None,
+    idol: str | None = AUTO,
+    loadout: LoadoutConfig | IdolLoadout | LoadoutPreset | dict[str, Any] | str | None = None,
     **overrides: Any,
 ) -> IdolLoadout | None:
     """Resolve an ``IdolLoadout`` (stats, deck archetype, P-item, support cards) for a scenario."""
     if isinstance(loadout, IdolLoadout) and not overrides:
         return loadout
-    cfg = make_loadout_config(idol, loadout, **overrides)
+    cfg = make_loadout_config(idol, loadout, scenario=scenario, **overrides)
     return _service.build_loadout_from_config(resolve_scenario_id(scenario), cfg)
 
 
@@ -169,8 +210,8 @@ def _base_loadout_config(scenario_id: str, cfg: LoadoutConfig) -> dict[str, Any]
 
 def make_exam_env(
     scenario: str = "first_star",
-    idol: str | None = DEFAULT_IDOL,
-    loadout: LoadoutConfig | IdolLoadout | dict[str, Any] | None = None,
+    idol: str | None = AUTO,
+    loadout: LoadoutConfig | IdolLoadout | LoadoutPreset | dict[str, Any] | str | None = None,
     seed: int | None = None,
     stage_type: str | None = None,
     *,
@@ -186,8 +227,8 @@ def make_exam_env(
     Extra keyword arguments go straight to ``GakumasExamEnv``.
     """
     scenario_id = resolve_scenario_id(scenario)
-    spec = _service.get_scenario(scenario_id)
-    cfg = make_loadout_config(idol, loadout)
+    spec = apply_preset_to_scenario(_service.get_scenario(scenario_id), resolve_preset(scenario_id, idol, loadout))
+    cfg = make_loadout_config(idol, loadout, scenario=scenario_id)
     idol_loadout = build_loadout(scenario_id, cfg.idol_card_id or None, cfg)
     return GakumasExamEnv(
         get_repository(),
@@ -205,18 +246,22 @@ def make_exam_env(
 
 def make_produce_env(
     scenario: str = "first_star",
-    idol: str | None = DEFAULT_IDOL,
-    loadout: LoadoutConfig | IdolLoadout | dict[str, Any] | None = None,
+    idol: str | None = AUTO,
+    loadout: LoadoutConfig | IdolLoadout | LoadoutPreset | dict[str, Any] | str | None = None,
     seed: int | None = None,
     *,
     include_action_labels: bool = True,
     **env_kwargs: Any,
 ) -> GakumasPlanningEnv:
     """Build a ``GakumasPlanningEnv`` for a whole produce run (exams inside are auto-played by
-    gakumas_rl's heuristic unless ``exam_action_selectors`` is given)."""
+    gakumas_rl's heuristic unless ``exam_action_selectors`` is given).
+
+    ``loadout`` accepts a preset name from ``gakumas_arena.loadouts`` (e.g. ``"hif_sense_default"``);
+    for H.I.F scenarios the default preset is used when ``loadout`` is None and ``idol`` is ``AUTO``.
+    Preset scenario overrides (H.I.F growth panel levels) are applied to the ``ScenarioSpec``."""
     scenario_id = resolve_scenario_id(scenario)
-    spec = _service.get_scenario(scenario_id)
-    cfg = make_loadout_config(idol, loadout)
+    spec = apply_preset_to_scenario(_service.get_scenario(scenario_id), resolve_preset(scenario_id, idol, loadout))
+    cfg = make_loadout_config(idol, loadout, scenario=scenario_id)
     idol_loadout = build_loadout(scenario_id, cfg.idol_card_id or None, cfg)
     return GakumasPlanningEnv(
         get_repository(),

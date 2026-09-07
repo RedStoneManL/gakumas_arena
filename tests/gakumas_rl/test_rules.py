@@ -4098,6 +4098,10 @@ def test_exam_runtime_stance_lock_is_timed_and_preserves_full_power_points() -> 
     assert runtime.resources['full_power_point'] == pytest.approx(10.0)
     assert runtime.resources['stance_lock'] == pytest.approx(1.0)
 
+    # ターン経過減免（§3.5）：第 1 回合行动阶段获得的「指針固定 2ターン」在第 2 回合不递减，
+    # 第 3 回合递减到 1，第 4 回合开始时才失效并允许进入全力。
+    runtime._start_turn()
+    assert runtime.resources['stance_lock'] == pytest.approx(1.0)
     runtime._start_turn()
 
     assert runtime.stance == 'full_power'
@@ -4140,7 +4144,8 @@ def test_exam_runtime_weak_slump_and_panic_follow_game_labels() -> None:
     runtime._apply_exam_effect(slump, source='test')
     assert runtime._apply_score_value_modifiers(12.0) == 0.0
 
-    runtime._apply_exam_effect(panic, source='test')
+    # 気まぐれ 是回合开始阶段付与的トラブル：按回合开始语义挂上，下一回合开始时到期。
+    runtime.apply_effect_as_turn_start(panic, source='gimmick')
     panic_cost_first = runtime._card_stamina_components(zero_cost_card)
     panic_cost_second = runtime._card_stamina_components(zero_cost_card)
     assert panic_cost_first == panic_cost_second
@@ -6632,9 +6637,9 @@ def test_exam_turn_decay_skips_same_turn_effects() -> None:
 
 
 def test_exam_turn_decay_reduces_previous_turn_effects() -> None:
-    """ターン経過減免：上回合挂的效果在当前回合衰减 1。
+    """ターン経過減免（§3.5）：行动阶段新获得的 3 回合效果，在获得回合之外还能享受 3 个完整回合。
 
-    上回合挂上的 3 回合效果，本回合结束后剩 2 回合。
+    第 1 回合行动阶段挂上的 3 回合效果：第 2 回合开始不递减（仍 3），第 3 回合开始剩 2，第 4 回合开始剩 1。
     """
 
     runtime = _sample_runtime(seed=301)
@@ -6651,13 +6656,18 @@ def test_exam_turn_decay_reduces_previous_turn_effects() -> None:
     assert timed.remaining_turns == 3
     assert timed.applied_turn == 1
 
-    # 进入第 2 回合，衰减应减少 1
+    # 进入第 2 回合：获得回合的下一回合不递减（新規効果が付与されたターンは減免）
     runtime.turn = 2
     runtime._decay_turn_effects()
-    assert runtime.active_effects[-1].remaining_turns == 2, "上回合挂的效果本回合衰减后应剩 2"
+    assert runtime.active_effects[-1].remaining_turns == 3, "获得回合的下一回合开始不应递减"
 
-    # 进入第 3 回合，再衰减
+    # 进入第 3 回合，衰减应减少 1
     runtime.turn = 3
+    runtime._decay_turn_effects()
+    assert runtime.active_effects[-1].remaining_turns == 2, "上回合开始时已存在的效果本回合衰减后应剩 2"
+
+    # 进入第 4 回合，再衰减
+    runtime.turn = 4
     runtime._decay_turn_effects()
     assert runtime.active_effects[-1].remaining_turns == 1, "继续衰减后应剩 1"
 
@@ -6689,10 +6699,13 @@ def test_exam_enchant_decay_skips_same_turn() -> None:
     runtime._decay_turn_effects()
     assert runtime.active_enchants[-1].remaining_turns == 2, "本回合新挂附魔不应衰减"
 
-    # 下一回合衰减
+    # 下一回合开始也不递减（ターン経過減免），再下一回合才递减
     runtime.turn = 2
     runtime._decay_turn_effects()
-    assert runtime.active_enchants[-1].remaining_turns == 1, "上回合挂的附魔本回合衰减后应剩 1"
+    assert runtime.active_enchants[-1].remaining_turns == 2, "获得回合的下一回合开始不应递减"
+    runtime.turn = 3
+    runtime._decay_turn_effects()
+    assert runtime.active_enchants[-1].remaining_turns == 1, "上回合开始时已存在的附魔本回合衰减后应剩 1"
 
 
 def test_exam_self_lesson_disallows_drinks() -> None:

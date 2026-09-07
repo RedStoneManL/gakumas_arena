@@ -8,6 +8,8 @@ ExamForcePlayCardSearchWithCost，以及效果器注册表的严格模式。语�
 
 from __future__ import annotations
 
+import math
+
 from typing import Any
 
 import pytest
@@ -239,7 +241,8 @@ def test_full_power_lesson_multiple_additive_raises_full_power_multiplier() -> N
 
     runtime._enter_full_power()
     assert runtime.stance == 'full_power'
-    assert runtime._resolve_lesson_effect_value(lesson) == pytest.approx(10.0 * (base_multiple + 0.25))
+    # 分数管线每步向上取整：10 × 3.25 = 32.5 → 33
+    assert runtime._resolve_lesson_effect_value(lesson) == math.ceil(10.0 * (base_multiple + 0.25))
 
 
 def test_full_power_lesson_multiple_additive_with_turns_decays() -> None:
@@ -258,7 +261,11 @@ def test_full_power_lesson_multiple_additive_with_turns_decays() -> None:
     timed = next(item for item in runtime.active_effects if item.effect.get('id') == additive['id'])
     assert timed.remaining_turns == 4
 
-    for next_turn in range(2, 6):
+    # ターン経過減免：第 2 回合不递减，第 3～6 回合各减 1，第 6 回合开始时到期
+    runtime.turn = 2
+    runtime._decay_turn_effects()
+    assert timed.remaining_turns == 4
+    for next_turn in range(3, 7):
         runtime.turn = next_turn
         runtime._decay_turn_effects()
     assert not any(item.effect.get('id') == additive['id'] for item in runtime.active_effects)
@@ -281,14 +288,14 @@ def test_concentration_lesson_multiple_additive_raises_concentration_multiplier(
     assert runtime._resolve_lesson_effect_value(lesson) == 10.0  # 中立指针不生效
 
     runtime._apply_exam_effect(concentration, source='test')
-    assert runtime._resolve_lesson_effect_value(lesson) == pytest.approx(10.0 * (stage1 + 0.35))
+    assert runtime._resolve_lesson_effect_value(lesson) == math.ceil(10.0 * (stage1 + 0.35))
 
     runtime._apply_exam_effect(concentration, source='test')
     assert runtime.stance_level == 2
-    assert runtime._resolve_lesson_effect_value(lesson) == pytest.approx(10.0 * (stage2 + 0.35))
+    assert runtime._resolve_lesson_effect_value(lesson) == math.ceil(10.0 * (stage2 + 0.35))
 
     runtime._apply_exam_effect(additive_60, source='enchant:test')
-    assert runtime._resolve_lesson_effect_value(lesson) == pytest.approx(10.0 * (stage2 + 0.95))
+    assert runtime._resolve_lesson_effect_value(lesson) == math.ceil(10.0 * (stage2 + 0.95))
 
 
 # ---------------------------------------------------------------------------
@@ -353,9 +360,13 @@ def test_aggressive_additive_fix_adds_flat_amount_to_motivation_gain() -> None:
     runtime._apply_exam_effect(gain, source='card')
     assert runtime.resources['aggressive'] == pytest.approx(4.0 + (3.0 + 1.0) * 1.5)
 
+    # ターン経過減免：第 2 回合不递减，第 3 回合剩 1，第 4 回合开始时到期
     runtime.turn = 2
     runtime._decay_turn_effects()
+    assert any(item.effect.get('id') == fix['id'] for item in runtime.active_effects)
     runtime.turn = 3
+    runtime._decay_turn_effects()
+    runtime.turn = 4
     runtime._decay_turn_effects()
     assert not any(item.effect.get('id') == fix['id'] for item in runtime.active_effects)
 

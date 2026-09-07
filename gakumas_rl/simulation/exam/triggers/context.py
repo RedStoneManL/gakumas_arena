@@ -55,6 +55,10 @@ class ExamTriggerContext:
     def current_lesson_types(self) -> tuple[str, ...]:
         return self.runtime.current_lesson_types()
 
+    def remaining_turns_including_current(self) -> int:
+        """含当前回合与追加回合的剩余回合数（「残りnターン以内」按含追加回合后的值判定，§3.1）。"""
+        return self.runtime.remaining_turns_including_current()
+
     def search_cards(self, search_id: str, acting_card: Any | None = None, target_card: Any | None = None):
         return self.runtime.search_cards(search_id, acting_card=acting_card, target_card=target_card)
 

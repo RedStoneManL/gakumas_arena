@@ -25,7 +25,7 @@ from gakumas_rl.simulation.envs import GakumasExamEnv, GakumasPlanningEnv
 from gakumas_rl.simulation.produce.runtime import ProduceRuntime
 from gakumas_rl.training.reward_config import build_produce_reward_config
 
-from ..env import DEFAULT_IDOL, legal_actions, make_exam_env, make_produce_env, resolve_scenario_id
+from ..env import AUTO, DEFAULT_IDOL, legal_actions, make_exam_env, make_produce_env, resolve_preset, resolve_scenario_id
 
 __all__ = [
     "Policy",
@@ -62,6 +62,7 @@ class RolloutResult:
     log: list[dict[str, Any]] = field(default_factory=list)  # one entry per env step
     events: list[dict[str, Any]] = field(default_factory=list)  # ExamRuntime.event_log (exam only)
     data_version: dict[str, Any] = field(default_factory=dict)
+    loadout: str | None = None  # preset name from gakumas_arena.loadouts, if one was used
 
     def to_dict(self) -> dict[str, Any]:
         return dataclasses.asdict(self)
@@ -203,7 +204,7 @@ def _rollout(env: Any, policy: Policy, seed: int | None, max_steps: int) -> tupl
 
 def run_exam(
     scenario: str = "first_star",
-    idol: str | None = DEFAULT_IDOL,
+    idol: str | None = AUTO,
     seed: int | None = 0,
     policy: str | Policy = "random",
     *,
@@ -218,6 +219,7 @@ def run_exam(
     Same ``seed`` (and same dump / loadout) -> identical result.  Pass ``env`` to reuse an
     already-built environment (it is reset with ``seed``)."""
     env = env or make_exam_env(scenario, idol, loadout, seed=seed, stage_type=stage_type, **env_kwargs)
+    preset = resolve_preset(scenario, idol, loadout)
     policy_name, act = _resolve_policy(policy, env, seed)
     log, total, info, terminated, truncated = _rollout(env, act, seed, max_steps)
     runtime = env.runtime
@@ -238,12 +240,13 @@ def run_exam(
         log=log,
         events=[{"turn": e.turn, "type": e.event_type, **e.detail} for e in runtime.event_log],
         data_version=dump_version(),
+        loadout=preset.name if preset is not None else None,
     )
 
 
 def run_produce(
     scenario: str = "first_star",
-    idol: str | None = DEFAULT_IDOL,
+    idol: str | None = AUTO,
     seed: int | None = 0,
     policy: str | Policy = "random",
     *,
@@ -255,8 +258,10 @@ def run_produce(
     """Run a whole produce (planning) episode with ``policy``; exams inside are auto-played.
 
     ``score`` is the final audition score; ``summary`` carries gakumas_rl's ``final_summary``
-    (rank, produce_result rating, audition history) when the run completed."""
+    (rank, produce_result rating, audition history) when the run completed.  ``loadout`` may be a
+    preset name (``gakumas_arena.loadouts.list_loadouts()``); H.I.F defaults to ``hif_sense_default``."""
     env = env or make_produce_env(scenario, idol, loadout, seed=seed, **env_kwargs)
+    preset = resolve_preset(scenario, idol, loadout)
     policy_name, act = _resolve_policy(policy, env, seed)
     log, total, info, terminated, truncated = _rollout(env, act, seed, max_steps)
     runtime = env.runtime
@@ -280,4 +285,5 @@ def run_produce(
         summary=summary,
         log=log,
         data_version=dump_version(),
+        loadout=preset.name if preset is not None else None,
     )

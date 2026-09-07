@@ -32,6 +32,6 @@
 
 1. A1 完成后跑一遍全量测试 + `tools/masterdata/coverage.py --strict`。
 2. 构造一套合理的 HIF 默认 loadout（从 `SupportCard`/`IdolCard` 里选高等级卡），让 heuristic 能稳定通过選抜。
-3. 自动打牌脚本：对固定 loadout 用 heuristic / 1-ply / MCTS 做分数分布评估，输出 CSV。
+3. ~~自动打牌脚本：对固定 loadout 用 heuristic / 1-ply / MCTS 做分数分布评估，输出 CSV。~~ 已做：`gakumas_arena/policies/`（Random / Heuristic / Search=深度受限 expectimax + rollout 叶子）、`scripts/eval_exam.py`、`scripts/eval_produce.py`，首批数字见 `docs/evaluation.md`。MCTS 未做。
 4. 培育策略搜索：先做 seed 固定的贪心/束搜索，再上 MaskablePPO（`gakumas_rl.training` 已有流程）。
 5. 建立实机录像 → jsonl 的采集格式（`gakumas_rl/manual_exam_setups.py`）用于 A 组验证。

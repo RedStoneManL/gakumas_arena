@@ -4,7 +4,6 @@ from __future__ import annotations
 
 from ..ids import ExamEffect, GrowEffect
 from .context import ExamEffectContext
-from .stance_multiple import stance_lesson_multiple_bonus_factor
 
 
 def resolve_lesson_effect_value(context: ExamEffectContext, effect: dict[str, Any], from_card: bool = False) -> float:
@@ -80,7 +79,7 @@ def resolve_lesson_effect_value(context: ExamEffectContext, effect: dict[str, An
             add_grow_type=GrowEffect.LESSON_ADD,
             reduce_grow_type=GrowEffect.LESSON_REDUCE,
         )
+    # 強気強化 / 全力強化 的加算已并入主管线的指针倍率（runtime._stance_lesson_multiple_additive_permil），
+    # 这里不再后乘，避免双算（见 docs/rules/hif_exam_effects.md §1.5 的接入点提示）。
     modified = context.apply_score_value_modifiers(value)
-    # 強気強化 / 全力強化：把指针基础倍率替换成「基础 + 加算」，见 stance_multiple.py。
-    modified *= stance_lesson_multiple_bonus_factor(context)
     return max(modified, 0.0)

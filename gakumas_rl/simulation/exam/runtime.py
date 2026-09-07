@@ -43,6 +43,22 @@ from .constants import (
 from .effects import apply_exam_effect, resolve_lesson_effect_value
 from .effects.context import ExamEffectContext
 from .ids import ExamEffect, ExamPhase, FieldStatus, GrowEffect, TriggerCheck
+from .replay import ReplayHooks, reorder_by_build_index
+from .scoring import (
+    DEFAULT_SCORING_RULES,
+    PERMIL,
+    ScoringRules,
+    apply_permil_ceil,
+    ceil_int,
+    good_condition_permil,
+    permil_from_ratio,
+    round_genki,
+    scale_by_permils,
+    score_bonus_permil,
+    stamina_consumption_permil,
+    stance_lesson_permil,
+    stance_stamina_permil,
+)
 from .triggers import (
     field_status_value,
     trigger_card_search_matches,
@@ -54,6 +70,11 @@ from .triggers.context import ExamTriggerContext
 EXAM_REWARD_MODES = ('score', 'clear')
 TURN_COLOR_ORDER = ('vocal', 'dance', 'visual')
 TURN_COLOR_INDEX = {color: index for index, color in enumerate(TURN_COLOR_ORDER)}
+TURN_COLOR_LESSON_TYPES = {
+    'vocal': 'ProduceStepLessonType_LessonVocal',
+    'dance': 'ProduceStepLessonType_LessonDance',
+    'visual': 'ProduceStepLessonType_LessonVisual',
+}
 TURN_COLOR_LABELS = {
     'vocal': 'Vocal',
     'dance': 'Dance',
@@ -138,6 +159,8 @@ class RuntimeCard:
     transient_effect_ids: list[str] = field(default_factory=list)
     transient_trigger_ids: list[str] = field(default_factory=list)
     play_count_bonus: int = 0
+    build_index: int = -1
+    """在初始牌组里的构建下标（录像复现钩子用它指定山札顺序）；复制/生成的卡为 -1。"""
 
     def effect_ids(self) -> list[str]:
         """返回这张运行时卡当前生效的出牌效果 id 列表。"""
@@ -378,13 +401,27 @@ class ExamRuntime:
         lesson_perfect_value: float | None = None,
         lesson_perfect_recovery_per_turn: float = 0.0,
         turn_limit: int | None = None,
+        scoring_rules: ScoringRules | None = None,
+        replay_hooks: ReplayHooks | None = None,
     ):
-        """初始化考试运行时，并根据偶像卡选择难度 profile、初始 deck 与开场附魔。"""
+        """初始化考试运行时，并根据偶像卡选择难度 profile、初始 deck 与开场附魔。
+
+        Args:
+            scoring_rules: 取整/倍率规则开关（见 `scoring.ScoringRules`），默认社区共识。
+            replay_hooks: 录像复现钩子（固定山札顺序、回合属性、スコアボーナス、応援），默认不使用。
+        """
 
         if reward_mode not in EXAM_REWARD_MODES:
             raise ValueError(f'Unsupported exam reward mode: {reward_mode}')
 
         self.repository = repository
+        self.scoring_rules: ScoringRules = scoring_rules or DEFAULT_SCORING_RULES
+        self.replay_hooks: ReplayHooks | None = replay_hooks
+        # 回合开始阶段（応援/Pアイテム/抽牌/発動予約）期间挂上的持续状态视为「回合开始时已存在」，
+        # 下一回合开始就会递减；玩家行动期间挂上的则享受 ターン経過減免（§3.5）。
+        self._turn_start_phase_active = False
+        # 好印象/好調 在回合开始快照时是否存在（kjirou `modifierIdsAtTurnStart`）。
+        self._resource_turn_start_snapshot: dict[str, bool] = {}
         self.scenario = scenario
         self.reward_config: RewardConfig = reward_config or build_reward_config(reward_mode)
         self.stage_type = stage_type or scenario.default_stage
@@ -966,6 +1003,11 @@ class ExamRuntime:
             return (self.lesson_sequence[self.turn - 1],)
         if self.battle_kind == 'lesson' and self.clear_state in {'cleared', 'perfect'} and self.lesson_post_clear_types:
             return self.lesson_post_clear_types
+        if self.battle_kind != 'lesson' and self.current_turn_color:
+            # 考试的回合属性等价于「〇〇ターンのみ」条件（Pアイテム【ボーカルレッスン・ボーカルターンのみ】）。
+            mapped = TURN_COLOR_LESSON_TYPES.get(self.current_turn_color)
+            if mapped:
+                return (mapped,)
         return self.default_lesson_types
 
     def _lesson_target_remaining(self) -> float:
@@ -983,6 +1025,13 @@ class ExamRuntime:
             return 0.0
         perfect = self._current_perfect_target()
         return max(perfect - self.score, 0.0) if perfect > 0 else 0.0
+
+    def remaining_turns_including_current(self) -> int:
+        """含当前回合与追加回合的剩余回合数（UI 里的「残りnターン」）。"""
+
+        if self.turn > self.max_turns:
+            return max(int(self.extra_turns), 0) + 1
+        return max(self.max_turns - self.turn + 1, 0) + max(int(self.extra_turns), 0)
 
     def _remaining_turns_after_current_action(self) -> int:
         """当前动作结算后仍然剩余的回合数。"""
@@ -1031,6 +1080,8 @@ class ExamRuntime:
         target = self._current_clear_target()
         perfect = self._current_perfect_target()
         if perfect > 0 and self.score >= perfect:
+            # 课程超过 PERFECT 的分数被截断（gakumas-core `remainingIncrementableScore`）。
+            self._cap_score_to_force_end(perfect)
             self.lesson_cleared = True
             if self.clear_state != 'perfect':
                 recovery = self._perfect_finish_recovery_turns() * self.lesson_perfect_recovery_per_turn
@@ -1064,6 +1115,18 @@ class ExamRuntime:
         self.event_log = []
         deck_cards = self._build_runtime_deck(self.initial_deck_rows)
         self.np_random.shuffle(deck_cards)
+        if self.replay_hooks is not None and self.replay_hooks.initial_deck_order:
+            deck_cards = reorder_by_build_index(
+                deck_cards,
+                self.replay_hooks.initial_deck_order,
+                lambda card: card.build_index,
+            )
+        # 「レッスン開始時手札に入る」（ProduceCard.isInitial）的卡在第 1 回合抽牌前移到山札顶端，相对顺序不变。
+        deck_cards = [card for card in deck_cards if self._is_innate_card(card)] + [
+            card for card in deck_cards if not self._is_innate_card(card)
+        ]
+        self._turn_start_phase_active = False
+        self._resource_turn_start_snapshot = {}
         self.turn = 0
         self.terminated = False
         self.last_info = {}
@@ -1711,7 +1774,7 @@ class ExamRuntime:
         """把主数据卡行转换成可变的运行时卡实例。"""
 
         cards = []
-        for row in card_rows:
+        for build_index, row in enumerate(card_rows):
             grow_effect_ids = [
                 str(value)
                 for value in row.get('produceCardGrowEffectIds', []) or row.get('growEffectIds', [])
@@ -1724,6 +1787,7 @@ class ExamRuntime:
                 base_card=row,
                 grow_effect_ids=list(grow_effect_ids),
                 card_status_enchant_id=str(row.get('produceCardStatusEnchantId') or ''),
+                build_index=build_index,
             )
             cards.append(runtime_card)
             self._record_event('card_acquired', {
@@ -1978,6 +2042,10 @@ class ExamRuntime:
 
         if not self._turn_color_enabled():
             return self.base_score_bonus_multiplier
+        if self.replay_hooks is not None and self.replay_hooks.score_bonus_percent:
+            percent = self.replay_hooks.score_bonus_percent.get(self.current_turn_color)
+            if percent is not None:
+                return max(float(percent) / 100.0, 0.0)
         color_index = TURN_COLOR_INDEX.get(self.current_turn_color)
         if color_index is None:
             return self.base_score_bonus_multiplier
@@ -2009,10 +2077,16 @@ class ExamRuntime:
                 bonus += int(round(self._count_value(timed.effect)))
         return 1 + max(bonus, 0)
 
-    def _score_gain(self, value: float) -> float:
-        """对分数类收益统一套用考试倍率。"""
+    @property
+    def score_bonus_permil(self) -> int:
+        """当前回合的スコアボーナス整数千分比（1794% → 17940）。"""
 
-        return float(value) * self.score_bonus_multiplier
+        return score_bonus_permil(self.score_bonus_multiplier)
+
+    def _score_gain(self, value: float) -> float:
+        """最終スコア = ceil(パラメータ × スコアボーナス%)（§5.1 S3；课程倍率为 1 时恒等）。"""
+
+        return float(apply_permil_ceil(ceil_int(value), self.score_bonus_permil))
 
     def _raw_effect_value(self, effect: dict[str, Any]) -> float:
         """读取效果主数值，不附带运行时修正。"""
@@ -2341,9 +2415,10 @@ class ExamRuntime:
         """统一处理元气增长，固定元气不应用干劲、弱气和元气无效修正。"""
 
         if effect_type == ExamEffect.BLOCK_FIX:
-            delta = max(float(amount), 0.0)
+            delta = float(round_genki(amount, self.scoring_rules))
         else:
-            delta = self._apply_scalar_modifiers(ExamEffect.BLOCK, amount)
+            # 最終元気 = floor(元気上昇 × 元気上昇率 + 加算 − 減少)（§5.5，seesaawiki 転記：元気は切り捨て）
+            delta = float(round_genki(self._apply_scalar_modifiers(ExamEffect.BLOCK, amount), self.scoring_rules))
         self.resources['block'] += delta
         if delta > 0:
             self._dispatch_status_change(delta, [effect_type], origin=status_change_origin)
@@ -2366,6 +2441,8 @@ class ExamRuntime:
         """读取当前考试关卡对应的 gimmick 列表。"""
 
         if self.battle_kind == 'lesson':
+            return []
+        if self.replay_hooks is not None and self.replay_hooks.disable_stage_gimmicks:
             return []
         stage_row = self._selected_audition_row()
         gimmick_id = str(stage_row.get('produceExamGimmickEffectGroupId') or '') if stage_row else ''
@@ -2412,10 +2489,12 @@ class ExamRuntime:
             return
         if self.extra_turns > 0 and self.turn > self.max_turns:
             self.extra_turns -= 1
+        self._turn_start_phase_active = True
         if not self._turn_color_enabled():
             self.current_turn_color = ''
         else:
-            self.current_turn_color = self._roll_turn_color()
+            forced_color = self.replay_hooks.turn_color(self.turn) if self.replay_hooks is not None else None
+            self.current_turn_color = forced_color or self._roll_turn_color()
             self.turn_color_history.append(self.current_turn_color)
             self._record_event('turn_color_assigned', {
                 'color': self.current_turn_color,
@@ -2428,11 +2507,13 @@ class ExamRuntime:
             self._simulate_rival_turn_scores()
             self._update_self_rank()
 
-        # 好印象和好调都会在新回合开始时自然衰减。
-        if self.resources['review'] > 0:
-            self.resources['review'] = max(self.resources['review'] - 1.0, 0.0)
-        if self.resources['parameter_buff'] > 0:
-            self.resources['parameter_buff'] = max(self.resources['parameter_buff'] - 1.0, 0.0)
+        # 好印象和好调都会在新回合开始时自然衰减；上一回合开始时才获得（或回合中新获得）的不减（§3.5 ターン経過減免）。
+        for resource_key in ('review', 'parameter_buff'):
+            if self.resources[resource_key] <= 0:
+                continue
+            if self.scoring_rules.fresh_modifier_no_decay and not self._resource_turn_start_snapshot.get(resource_key, False):
+                continue
+            self.resources[resource_key] = max(self.resources[resource_key] - 1.0, 0.0)
 
         self._decay_turn_effects()
         if self.stance == 'full_power':
@@ -2449,6 +2530,11 @@ class ExamRuntime:
         self._apply_gimmicks_for_turn(self.turn)
         if self.terminated:
             return
+        if self.replay_hooks is not None:
+            for hook in self.replay_hooks.turn_start_hooks.get(self.turn, []):
+                hook(self)
+                if self.terminated:
+                    return
         self._dispatch_phase('ProduceExamPhaseType_ExamStartTurn', phase_value=self.turn)
         if self.terminated:
             return
@@ -2461,15 +2547,62 @@ class ExamRuntime:
 
         draw_count = int(self.exam_setting.get('turnStartDistribute') or 3) - self.start_turn_draw_penalty
         draw_count = max(draw_count, 0)
+        if self.turn == 1:
+            # 第 1 回合把山札顶端的「レッスン開始時手札に入る」卡全部抽入（不超过手牌上限）。
+            hand_limit = int(self.exam_setting.get('handLimit') or 5)
+            innate_top = 0
+            for card in self.deck:
+                if not self._is_innate_card(card):
+                    break
+                innate_top += 1
+            draw_count = max(draw_count, min(innate_top, hand_limit))
         self.start_turn_draw_penalty = 0
         self._draw(draw_count)
         # “次のターン、手札...” 这类链式效果要在新回合抽牌后触发，否则会打到空手牌。
         self._fire_scheduled_effects()
         if self.terminated:
             return
-        self._apply_support_card_support()
+        if self.turn == 1 and self.replay_hooks is not None:
+            for hook in self.replay_hooks.memory_hooks:
+                hook(self)
+        if self.replay_hooks is None or not self.replay_hooks.disable_support_card_random_upgrade:
+            self._apply_support_card_support()
         self._sync_effect_resources()
         self._sync_stance_resources()
+        self._finish_turn_start_phase()
+
+    def _finish_turn_start_phase(self) -> None:
+        """回合开始阶段结束：记录此刻存在的好印象/好調（供下回合递减判定），关闭回合开始标记。"""
+
+        self._turn_start_phase_active = False
+        self._resource_turn_start_snapshot = {
+            'review': self.resources['review'] > 0,
+            'parameter_buff': self.resources['parameter_buff'] > 0,
+        }
+
+    def _effect_applied_turn(self) -> int:
+        """新挂持续状态的「获得回合」：回合开始阶段挂上的算作上一回合（回合开始时已存在）。"""
+
+        if self._turn_start_phase_active and self.scoring_rules.fresh_modifier_no_decay:
+            return self.turn - 1
+        return self.turn
+
+    def apply_effect_as_turn_start(self, effect: dict[str, Any], source: str = 'memory') -> None:
+        """以「回合开始阶段」语义应用一条效果（メモリー アビリティ / 応援 等测试注入用）。"""
+
+        previous = self._turn_start_phase_active
+        self._turn_start_phase_active = True
+        try:
+            self._apply_exam_effect(effect, source=source)
+        finally:
+            self._turn_start_phase_active = previous
+        if not previous:
+            self._finish_turn_start_phase()
+
+    def _is_innate_card(self, card: RuntimeCard) -> bool:
+        """「レッスン開始時手札に入る」判定（ProduceCard.isInitial）。"""
+
+        return bool(card.base_card.get('isInitial'))
 
     def _support_card_matches_current_context(self, support_card) -> bool:
         """判断一张支援卡是否适用于当前课程或轮盘颜色。"""
@@ -2799,9 +2932,9 @@ class ExamRuntime:
 
         if skipped:
             self._dispatch_phase('ProduceExamPhaseType_ExamTurnSkip', phase_value=self.turn)
-        # 好印象发动次数：比例引用型收益，按手册切り上げ规则向上取整
-        review_activation_count = max(1 + self._ceil_positive(self._timed_effect_stack_value('ProduceExamEffectType_ExamReviewCountAdd')), 1)
-        _review_delta = self._score_gain(self._apply_score_value_modifiers(self.resources['review'])) * review_activation_count
+        # 好印象结算（§5.4）：每次发动都走完整分数管线并各自取整，「好印象追加発動+n」重复 n 次。
+        review_activation_count = max(1 + int(self._timed_effect_stack_value('ProduceExamEffectType_ExamReviewCountAdd')), 1)
+        _review_delta = self._review_payout_total(review_activation_count)
         self.score += _review_delta
         if self.current_turn_color in self.score_per_color:
             self.score_per_color[self.current_turn_color] += _review_delta
@@ -2811,6 +2944,13 @@ class ExamRuntime:
         self._clear_support_card_upgrades()
         self._discard_hand_to_grave()
         self.resources['enthusiastic'] = 0.0
+        # 「スキルカード使用数追加」不跨回合（§3.3）：回合结束时全部失效。
+        if any(str(item.effect.get('effectType') or '') == ExamEffect.PLAYABLE_VALUE_ADD for item in self.active_effects):
+            self.active_effects = [
+                item for item in self.active_effects
+                if str(item.effect.get('effectType') or '') != ExamEffect.PLAYABLE_VALUE_ADD
+            ]
+            self._sync_effect_resources()
         recovery = float(self.exam_setting.get('examTurnEndRecoveryStamina') or 0)
         if self.battle_kind != 'lesson' or skipped:
             self.stamina = min(self.max_stamina, self.stamina + recovery)
@@ -2845,44 +2985,36 @@ class ExamRuntime:
         for timed in self._matching_search_stamina_overrides(card):
             base_cost = float(timed.effect.get('effectValue1') or 0)
             force_cost = 0.0
-        for timed in self.active_effects:
-            effect_type = str(timed.effect.get('effectType') or '')
-            if effect_type == 'ProduceExamEffectType_ExamStaminaConsumptionAdd':
-                base_cost *= 2.0
-                force_cost *= 2.0
-            elif effect_type == 'ProduceExamEffectType_ExamStaminaConsumptionDown':
-                base_cost *= 0.5
-                force_cost *= 0.5
-            elif effect_type == 'ProduceExamEffectType_ExamStaminaConsumptionAddFix':
-                delta = self._raw_effect_value(timed.effect)
-                base_cost += delta
-                force_cost += delta
-            elif effect_type == 'ProduceExamEffectType_ExamStaminaConsumptionDownFix':
-                delta = self._raw_effect_value(timed.effect)
-                base_cost -= delta
-                force_cost -= delta
         if self._has_timed_effect('ProduceExamEffectType_ExamPanic'):
             base_cost = self._panic_stamina_value(card)
             force_cost = 0.0
-        base_cost = max(base_cost, 0.0)
-        force_cost = max(force_cost, 0.0)
-        stamina_multiple = 1.0
+        # §4.3：cost' = max(ceil(cost × 指針倍率 × 減少/増加倍率) + Σ追加 − Σ削減, 0)，消耗量向上取整。
+        has_down = False
+        has_add = False
+        fixed_delta = 0.0
+        for timed in self.active_effects:
+            effect_type = str(timed.effect.get('effectType') or '')
+            if effect_type == ExamEffect.STAMINA_CONSUMPTION_ADD:
+                has_add = True
+            elif effect_type == ExamEffect.STAMINA_CONSUMPTION_DOWN:
+                has_down = True
+            elif effect_type == ExamEffect.STAMINA_CONSUMPTION_ADD_FIX:
+                fixed_delta += self._raw_effect_value(timed.effect)
+            elif effect_type == ExamEffect.STAMINA_CONSUMPTION_DOWN_FIX:
+                fixed_delta -= self._raw_effect_value(timed.effect)
+        consumption_permil = stamina_consumption_permil(has_down, has_add, self.exam_setting, self.scoring_rules)
+        stance_permil = stance_stamina_permil(self.stance, self.stance_level, self.exam_setting)
         stance_force_cost = 0.0
         if self.stance == 'concentration':
-            key = f'examConcentrationStaminaMultiplePermil{max(self.stance_level, 1)}'
-            stamina_multiple = float(self.exam_setting.get(key) or 1000) / 1000.0
             penetrate_key = f'examConcentrationStaminaPenetrateReduce{max(self.stance_level, 1)}'
             stance_force_cost = float(self.exam_setting.get(penetrate_key) or 0)
-        elif self.stance == 'preservation':
-            if self.stance_level >= 3:
-                stamina_multiple = float(self.exam_setting.get('examOverPreservationStaminaMultiplePermil') or 1000) / 1000.0
-            else:
-                key = f'examPreservationStaminaMultiplePermil{max(self.stance_level, 1)}'
-                stamina_multiple = float(self.exam_setting.get(key) or 1000) / 1000.0
-        base_cost *= stamina_multiple
-        force_cost *= stamina_multiple
-        force_cost += stance_force_cost
-        return max(base_cost, 0.0), max(force_cost, 0.0)
+        permils = (stance_permil, consumption_permil)
+        scaled_base = scale_by_permils(ceil_int(base_cost), permils) if base_cost > 0 else 0
+        scaled_force = scale_by_permils(ceil_int(force_cost), permils) if force_cost > 0 else 0
+        resolved_base = max(float(scaled_base) + fixed_delta, 0.0) if scaled_base > 0 or fixed_delta > 0 else 0.0
+        resolved_force = max(float(scaled_force) + fixed_delta, 0.0) if scaled_force > 0 or fixed_delta > 0 else 0.0
+        resolved_force += stance_force_cost
+        return max(resolved_base, 0.0), max(resolved_force, 0.0)
 
     def _spend_stamina(
         self,
@@ -2938,11 +3070,13 @@ class ExamRuntime:
         即本回合新挂的效果（applied_turn == self.turn）不减少 remaining_turns。
         """
 
+        # ターン経過減免（§3.5）：上一回合开始时已存在的状态才递减；回合开始阶段挂上的状态
+        # 其 applied_turn 已被记为上一回合（见 _effect_applied_turn），因此这里统一用 `applied_turn < turn - 1`。
+        decay_before_turn = self.turn - 1 if self.scoring_rules.fresh_modifier_no_decay else self.turn
         next_effects: list[TimedExamEffect] = []
         for timed in self.active_effects:
             remaining_turns = timed.remaining_turns
-            # ターン経過減免：本回合新挂的效果不衰减
-            if remaining_turns is not None and timed.applied_turn < self.turn:
+            if remaining_turns is not None and timed.applied_turn < decay_before_turn:
                 remaining_turns -= 1
             if remaining_turns is not None and remaining_turns <= 0:
                 continue
@@ -2953,8 +3087,7 @@ class ExamRuntime:
         next_enchants: list[TriggeredEnchant] = []
         for enchant in self.active_enchants:
             remaining_turns = enchant.remaining_turns
-            # ターン経過減免：本回合新挂的附魔不衰减
-            if remaining_turns is not None and enchant.applied_turn < self.turn:
+            if remaining_turns is not None and enchant.applied_turn < decay_before_turn:
                 remaining_turns -= 1
             if remaining_turns is not None and remaining_turns <= 0:
                 continue
@@ -3515,7 +3648,7 @@ class ExamRuntime:
                 remaining_count=remaining_count,
                 source=source,
                 source_identity=source_identity,
-                applied_turn=self.turn,
+                applied_turn=self._effect_applied_turn(),
             )
         )
 
@@ -3537,7 +3670,7 @@ class ExamRuntime:
                 remaining_turns=remaining_turns,
                 remaining_count=remaining_count,
                 source=source,
-                applied_turn=self.turn,
+                applied_turn=self._effect_applied_turn(),
             )
         )
         self._sync_effect_resources()
@@ -3568,7 +3701,7 @@ class ExamRuntime:
                 remaining_count=remaining_count,
                 source=source,
                 source_identity=source,
-                applied_turn=self.turn,
+                applied_turn=self._effect_applied_turn(),
             )
         )
 
@@ -3866,6 +3999,9 @@ class ExamRuntime:
         if cards:
             if self.exam_setting.get('fixMoveCardShuffleDeckEnable'):
                 self.np_random.shuffle(cards)
+            forced_order = self.replay_hooks.next_reshuffle_order() if self.replay_hooks is not None else None
+            if forced_order:
+                cards = reorder_by_build_index(cards, forced_order, lambda card: card.build_index)
             self.deck = deque(cards)
 
     def _card_label(self, card: RuntimeCard) -> str:
@@ -3970,36 +4106,52 @@ class ExamRuntime:
 
         return resolve_lesson_effect_value(ExamEffectContext(self), effect, from_card=from_card)
 
-    def _apply_score_value_modifiers(self, value: float) -> float:
-        """把集中、熱意、好調、指针和场地 debuff 统一叠加到得分值上。"""
+    def _apply_score_value_modifiers(self, value: float, *, include_additives: bool = True) -> float:
+        """分数管线 S1→S2（§5.1）：集中/熱意 加算 → 各倍率合并一次 ceil。
 
-        updated = max(value, 0.0)
-        updated += self.resources['lesson_buff']
-        updated += self.resources['enthusiastic']
+        ```
+        S1 = ceil(基础值 + 集中 + 熱意)            # 参照值部分已在效果器里各自 ceil
+        S1 = max(S1 − 緊張(GimmickLessonDebuff), 0)
+        S2 = ceil(S1 × 好調倍率 × 指針倍率(+強気強化/全力強化) × (1+Σ上昇量増加+プライド) × max(1−Σ減少,0) × (不調?0.667:1))
+        スランプ → 0
+        ```
+        所有倍率用 `ExamSetting` 的整数千分比运算（好調用整数避免 `0.1×1.4` 浮点误差）。
+        `include_additives=False` 时不加 集中/熱意（好印象结算的开关 §15-2）。
+        """
+
+        base = max(float(value), 0.0)
+        if include_additives:
+            base += self.resources['lesson_buff'] + self.resources['enthusiastic']
+        stage_one = ceil_int(base)
+
+        up_permil = PERMIL
+        down_permil = PERMIL
+        debuff_permil = PERMIL
+        slump = False
         consumed_effects: list[TimedExamEffect] = []
         for timed in list(self.active_effects):
             modifier_type = str(timed.effect.get('effectType') or '')
             used = False
-            if modifier_type == 'ProduceExamEffectType_ExamLessonValueMultiple':
-                updated *= 1.0 + self._ratio_value(timed.effect)
+            if modifier_type == ExamEffect.LESSON_VALUE_MULTIPLE:
+                up_permil += permil_from_ratio(self._ratio_value(timed.effect))
                 used = True
-            elif modifier_type == 'ProduceExamEffectType_ExamLessonValueMultipleDown':
-                updated *= max(1.0 - self._ratio_value(timed.effect), 0.0)
+            elif modifier_type == ExamEffect.LESSON_VALUE_MULTIPLE_DOWN:
+                down_permil -= permil_from_ratio(self._ratio_value(timed.effect))
                 used = True
-            elif modifier_type == 'ProduceExamEffectType_ExamLessonValueMultipleDependReviewOrAggressive':
-                per_stack = float(self.exam_setting.get('examLessonValueMultipleDependReviewOrAggressiveMultiplePermil') or 20) / 1000.0
-                max_ratio = float(self.exam_setting.get('examLessonValueMultipleDependReviewOrAggressiveMaxPermil') or 500) / 1000.0
-                updated *= 1.0 + min(min(self.resources['review'], self.resources['aggressive']) * per_stack, max_ratio)
+            elif modifier_type == ExamEffect.LESSON_VALUE_MULTIPLE_DEPEND_REVIEW_OR_AGGRESSIVE:
+                per_stack = int(self.exam_setting.get('examLessonValueMultipleDependReviewOrAggressiveMultiplePermil') or 20)
+                max_permil = int(self.exam_setting.get('examLessonValueMultipleDependReviewOrAggressiveMaxPermil') or 500)
+                stacks = int(min(self.resources['review'], self.resources['aggressive']))
+                up_permil += min(stacks * per_stack, max_permil)
                 used = True
-            elif modifier_type == 'ProduceExamEffectType_ExamGimmickLessonDebuff':
-                updated = max(updated - self._raw_effect_value(timed.effect), 0.0)
+            elif modifier_type == ExamEffect.GIMMICK_LESSON_DEBUFF:
+                stage_one = max(stage_one - int(self._raw_effect_value(timed.effect)), 0)
                 used = True
-            elif modifier_type == 'ProduceExamEffectType_ExamGimmickParameterDebuff':
-                factor = float(self.exam_setting.get('examGimmickParameterDebuffPermil') or 0) / 1000.0
-                updated *= max(1.0 - factor, 0.0)
+            elif modifier_type == ExamEffect.GIMMICK_PARAMETER_DEBUFF:
+                debuff_permil = max(PERMIL - int(self.exam_setting.get('examGimmickParameterDebuffPermil') or 0), 0)
                 used = True
-            elif modifier_type == 'ProduceExamEffectType_ExamGimmickSlump':
-                updated = 0.0
+            elif modifier_type == ExamEffect.GIMMICK_SLUMP:
+                slump = True
                 used = True
             if used and timed.remaining_count is not None:
                 consumed_effects.append(timed)
@@ -4008,24 +4160,55 @@ class ExamRuntime:
         self.active_effects = [item for item in self.active_effects if item.remaining_count is None or item.remaining_count > 0]
         self._sync_effect_resources()
 
-        if self.resources['parameter_buff'] > 0:
-            parameter_multiple = float(self.exam_setting.get('examParameterBuffPermil') or 1500) / 1000.0
-            if self.resources['parameter_buff_multiple_per_turn'] > 0:
-                extra_ratio = float(self.exam_setting.get('examParameterBuffMultiplePerTurnPermil') or 0) / 1000.0
-                parameter_multiple += self.resources['parameter_buff'] * self.resources['parameter_buff_multiple_per_turn'] * extra_ratio
-            updated *= parameter_multiple
+        if slump:
+            return 0.0
+        good_permil = good_condition_permil(
+            int(self.resources['parameter_buff']),
+            self.resources['parameter_buff_multiple_per_turn'] > 0,
+            self.exam_setting,
+        )
+        stance_permil = stance_lesson_permil(
+            self.stance,
+            self.stance_level,
+            self.exam_setting,
+            additive_permil=self._stance_lesson_multiple_additive_permil(),
+        )
+        stage_two = scale_by_permils(
+            stage_one,
+            (good_permil, stance_permil, up_permil, max(down_permil, 0), debuff_permil),
+        )
+        return float(max(stage_two, 0))
+
+    def _stance_lesson_multiple_additive_permil(self) -> int:
+        """当前指針对应的「強気強化 / 全力強化」持续效果加算（千分比）。"""
+
         if self.stance == 'concentration':
-            key = f'examConcentrationLessonValueMultiplePermil{max(self.stance_level, 1)}'
-            updated *= float(self.exam_setting.get(key) or self.exam_setting.get('examConcentrationLessonValueMultiplePermil') or 1000) / 1000.0
-        elif self.stance == 'preservation':
-            if self.stance_level >= 3:
-                updated *= float(self.exam_setting.get('examOverPreservationLessonValueMultiplePermil') or 1000) / 1000.0
-            else:
-                key = f'examPreservationLessonValueMultiplePermil{max(self.stance_level, 1)}'
-                updated *= float(self.exam_setting.get(key) or 1000) / 1000.0
+            effect_type = ExamEffect.CONCENTRATION_LESSON_MULTIPLE_ADDITIVE
         elif self.stance == 'full_power':
-            updated *= float(self.exam_setting.get('examFullPowerLessonValueMultiplePermil') or 1000) / 1000.0
-        return max(updated, 0.0)
+            effect_type = ExamEffect.FULL_POWER_LESSON_MULTIPLE_ADDITIVE
+        else:
+            return 0
+        total = 0
+        for timed in self.active_effects:
+            if str(timed.effect.get('effectType') or '') == effect_type:
+                total += permil_from_ratio(self._ratio_value(timed.effect))
+        return total
+
+    def _review_payout_total(self, activation_count: int) -> float:
+        """回合结束的好印象结算总分：每次发动 = ceil(管线(好印象) × スコアボーナス)。"""
+
+        review = ceil_int(self.resources['review'])
+        if review <= 0:
+            return 0.0
+        include_additives = self.scoring_rules.review_payout_uses_concentration
+        times = max(int(activation_count), 1)
+        if self.scoring_rules.review_activation_rounds_each:
+            total = 0.0
+            for _ in range(times):
+                total += self._score_gain(self._apply_score_value_modifiers(float(review), include_additives=include_additives))
+            return total
+        single = self._apply_score_value_modifiers(float(review), include_additives=include_additives)
+        return self._score_gain(single * times)
 
     def _apply_scalar_modifiers(self, effect_type: str, amount: float) -> float:
         """对好調、元気、やる気等资源应用场上修饰。

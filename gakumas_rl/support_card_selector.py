@@ -39,6 +39,20 @@ _RARITY_TO_DEFAULT_LEVEL = {
     'SupportCardRarity_SSR': 60,
 }
 
+
+def normalize_support_card_rarity(raw_rarity: str | None) -> str:
+    """把主数据里的稀有度枚举（实际值为 ``SupportCardRarity_Ssr`` 这种混合大小写）归一成 ``SupportCardRarity_SSR``。
+
+    修复前 ``Ssr``/``Sr`` 匹配不到表，SSR 支援卡等级被钳到 R 卡的 40 级上限（对应 ``SupportCardLevelLimit`` 中
+    ``support_card_level_limit-3-001`` 的真实上限是 60）。
+    """
+
+    text = str(raw_rarity or '')
+    if '_' not in text:
+        return text
+    prefix, _, suffix = text.rpartition('_')
+    return f'{prefix}_{suffix.upper()}'
+
 _SUPPORT_EVENT_TYPE_BONUS = {
     'ProduceEventType_SupportCard': 0.45,
 }
@@ -206,7 +220,7 @@ class SupportCardAutoSelector:
     def _resolve_support_card_level(self, card_row: dict, requested_level: int) -> int:
         """把目标等级裁剪到该稀有度能达到的区间。"""
 
-        rarity = str(card_row.get('rarity') or '')
+        rarity = normalize_support_card_rarity(card_row.get('rarity'))
         default_level = _RARITY_TO_DEFAULT_LEVEL.get(rarity, 40)
         return max(1, min(int(requested_level), default_level))
 
@@ -281,7 +295,7 @@ class SupportCardAutoSelector:
             coefficient = coefficients[min(1, len(coefficients) - 1)]
         else:
             coefficient = coefficients[0]
-        rarity = str(card_row.get('rarity') or '')
+        rarity = normalize_support_card_rarity(card_row.get('rarity'))
         rarity_bonus = {
             'SupportCardRarity_R': 0.10,
             'SupportCardRarity_SR': 0.22,

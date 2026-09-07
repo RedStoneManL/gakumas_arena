@@ -653,6 +653,11 @@ def _choose_planning_action(runtime: ProduceRuntime) -> int | None:
         score += candidate.produce_point_delta * 0.05
         score += len(candidate.effect_types) * 0.02
         score += len(candidate.exam_effect_types) * 0.01
+        # 三维成长与 HIF スター性：原版只看 P 点，导致启发式整局只选「差入」（P 点 +10 → +0.5）从不上课，
+        # H.I.F 選抜2 必挂。每 100 点三维 ≈ +1.0、每 10 スター性 ≈ +0.2，使课程稳定优先于差入/活动支给，
+        # 体力不足时课程不可用，自然回落到休息/差入。
+        score += sum(float(value) for value in candidate.stat_deltas) * 0.01
+        score += float(getattr(candidate, 'star_delta', 0.0) or 0.0) * 0.02
         if candidate.action_type == 'refresh' and runtime.state['stamina'] < runtime.state['max_stamina'] * 0.35:
             score += 1.0
         if candidate.action_type.startswith('shop_buy_card_'):

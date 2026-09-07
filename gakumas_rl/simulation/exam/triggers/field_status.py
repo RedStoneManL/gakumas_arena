@@ -20,7 +20,14 @@ def trigger_field_status_matches(context: ExamTriggerContext, trigger: dict[str,
         current_value = field_status_value(context, status_type, search_ids[index] if index < len(search_ids) else '')
         expected_value = status_values[index] if index < len(status_values) else 1.0
         check_type = check_types[index] if index < len(check_types) else TriggerCheck.UNKNOWN
-        reverse_threshold = status_type.endswith('MultipleDown') or 'LessMultiple' in status_type
+        # 「以内/以下」型条件：数值 ≤ 阈值才成立。RemainingTurn 的卡面/触发器说明全部是
+        # 「残りnターン以内」「最終ターン(=残り1ターン以内)」（ProduceExamTrigger e_trigger-*-remaining_turn-n），
+        # 其余场地状态都是「n以上」。
+        reverse_threshold = (
+            status_type.endswith('MultipleDown')
+            or 'LessMultiple' in status_type
+            or status_type == FieldStatus.REMAINING_TURN
+        )
         if check_type == TriggerCheck.NOT:
             if reverse_threshold:
                 if current_value <= expected_value:
@@ -62,7 +69,7 @@ def field_status_value(context: ExamTriggerContext, field_status_type: str, sear
         FieldStatus.PLAY_CARD_SKILL: float(context.turn_counters['play_count']),
         FieldStatus.PRESERVATION_CHANGE_COUNT_UP: float(context.total_counters['stance_preservation']),
         FieldStatus.PRESERVATION_UP: context.resources['preservation'],
-        FieldStatus.REMAINING_TURN: float(max(context.max_turns - context.turn + 1, 0)),
+        FieldStatus.REMAINING_TURN: float(context.remaining_turns_including_current()),
         FieldStatus.REVIEW_UP: context.resources['review'],
         FieldStatus.STAMINA_CONSUMPTION_DOWN: context.resources['stamina_consumption_down'],
         FieldStatus.STAMINA_LESS_MULTIPLE: stamina_ratio,

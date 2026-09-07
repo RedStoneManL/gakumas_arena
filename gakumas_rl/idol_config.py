@@ -25,7 +25,7 @@ from .loadout import (
     ProduceSkillEffect,
     SupportCardSelection,
 )
-from .support_card_selector import auto_select_support_cards, SupportCardAutoSelectConfig
+from .support_card_selector import SupportCardAutoSelectConfig, auto_select_support_cards, normalize_support_card_rarity
 from .repository.master_data import MasterDataRepository, ScenarioSpec
 
 
@@ -415,7 +415,8 @@ def _load_support_card_produce_skills(
 def _resolve_support_card_level(card_row: dict[str, Any], requested_level: int | None) -> int:
     """把手动指定的支援卡等级裁剪到该稀有度允许的区间。"""
 
-    rarity = str(card_row.get('rarity') or '')
+    # 主数据枚举实际为 ``SupportCardRarity_Ssr``（混合大小写），先归一再查表，否则 SSR 会被钳到 40 级。
+    rarity = normalize_support_card_rarity(card_row.get('rarity'))
     default_level = _SUPPORT_CARD_RARITY_TO_DEFAULT_LEVEL.get(rarity, 40)
     if requested_level is None:
         return default_level
