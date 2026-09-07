@@ -66,3 +66,16 @@ Enum/field sets come from a line-oriented scan of the raw YAML (no parse); row d
 with CSafeLoader and key rows by `id`, falling back to a composite key when ids collide
 (e.g. ProduceStepAuditionDifficulty) or are absent (ResultGradePattern, ForceAppVersion).
 Used to write `docs/research/mechanics_timeline.md`.
+
+## coverage.py — new-mechanic detector
+
+```bash
+python tools/masterdata/coverage.py            # writes docs/research/engine_coverage.md + data/coverage.json
+python tools/masterdata/coverage.py --strict   # exit 1 if the dump has enum values gakumas_rl does not handle
+```
+
+Scans `ProduceExamEffectType`, `ProduceEffectType`, trigger phase types, `ProduceExamStatusEnchant`
+(derived from its effects/trigger), `ProduceCardGrowEffectType` and `ProduceStepType`, and compares
+them with what the vendored `gakumas_rl/` handles (its effect registry / `ids` constants /
+`_apply_produce_effect`, with a grep of the source as fallback). Unhandled values are listed with row
+counts and the cards / items / scenarios that use them. Run it after every `fetch.sh`.

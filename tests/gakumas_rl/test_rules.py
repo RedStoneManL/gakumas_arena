@@ -243,6 +243,30 @@ def _first_exam_effect(repository: MasterDataRepository, effect_type: str, **con
     raise AssertionError(f'Effect not found: {effect_type} {conditions}')
 
 
+def _is_zero_cost_card_row(row: dict[str, Any]) -> bool:
+    """判断一张主数据卡是否既不消耗体力也不消耗貫通体力。"""
+
+    return float(row.get('stamina') or 0) == 0 and float(row.get('forceStamina') or 0) == 0
+
+
+def _zero_cost_runtime_card(runtime: ExamRuntime, uid: int = 999002) -> RuntimeCard:
+    """取一张 0 费卡：优先用当前手牌/牌库里的，没有时按主数据动态构造一张（数据漂移防护）。"""
+
+    for card in list(runtime.hand) + list(runtime.deck) + list(runtime.grave):
+        if _is_zero_cost_card_row(card.base_card) and not card.grow_effect_ids:
+            return card
+    row = next(
+        row for row in runtime.repository.produce_cards.rows
+        if row.get('id') and _is_zero_cost_card_row(row)
+    )
+    return RuntimeCard(
+        uid=uid,
+        card_id=str(row['id']),
+        upgrade_count=int(row.get('upgradeCount') or 0),
+        base_card=dict(row),
+    )
+
+
 def _sample_runtime(seed: int = 7, **runtime_kwargs) -> ExamRuntime:
     """构造一个可直接调用内部运行时方法的考试实例。"""
 
@@ -4107,10 +4131,7 @@ def test_exam_runtime_weak_slump_and_panic_follow_game_labels() -> None:
     slump = _first_exam_effect(repository, 'ProduceExamEffectType_ExamGimmickSlump', effectTurn=1)
     panic = _first_exam_effect(repository, 'ProduceExamEffectType_ExamPanic', effectTurn=1)
     block = _first_exam_effect(repository, 'ProduceExamEffectType_ExamBlock', effectValue1=5)
-    zero_cost_card = next(
-        card for card in list(runtime.hand) + list(runtime.deck)
-        if float(card.base_card.get('stamina') or 0) == 0 and float(card.base_card.get('forceStamina') or 0) == 0
-    )
+    zero_cost_card = _zero_cost_runtime_card(runtime)
 
     runtime._apply_exam_effect(weak, source='test')
     runtime._apply_exam_effect(block, source='test')

@@ -198,6 +198,12 @@ class TriggeredEnchant:
     applied_turn: int = 0
     """附魔被挂上的回合号，用于ターン経過減免：本回合新挂的附魔不当回合衰减。"""
     source_identity: str = ''
+    bound_card_uid: int | None = None
+    """再演（ExamStatusEnchantEncore）等绑定到具体运行时卡的附魔所对应的卡 uid；None 表示不绑定。"""
+    once_per_turn: bool = False
+    """是否受「ターン内1回まで」限制。"""
+    last_fired_turn: int = -1
+    """最近一次发动的回合号，配合 once_per_turn 使用。"""
 
 
 @dataclass
@@ -561,6 +567,8 @@ class ExamRuntime:
         self.scheduled_effects: list[ScheduledEffect] = []
         self.gimmick_rows: list[dict[str, Any]] = []
         self._resolving_enchant_uids: set[int] = set()
+        self.resolving_enchant_card: RuntimeCard | None = None
+        """正在结算效果的绑定型附魔（如再演）所绑定的卡，供效果器解析 `isSelf`/`Target` 检索。"""
         self._resolved_gimmick_keys: set[tuple[str, int, int]] = set()
         self.forbidden_card_search_ids: Counter[str] = Counter()
         self.lesson_cleared = False
@@ -1104,6 +1112,7 @@ class ExamRuntime:
         self.scheduled_effects = []
         self.gimmick_rows = self._load_stage_gimmicks()
         self._resolving_enchant_uids = set()
+        self.resolving_enchant_card = None
         self._resolved_gimmick_keys = set()
         self.forbidden_card_search_ids = Counter()
         self.lesson_cleared = False
@@ -2670,29 +2679,36 @@ class ExamRuntime:
                     return True
         return False
 
-    def _play_card(self, card: RuntimeCard) -> None:
-        """执行出牌流程，并分发所有相关 phase 与效果。"""
+    def _play_card(self, card: RuntimeCard, *, pay_cost: bool = True, consume_play_window: bool = True) -> None:
+        """执行出牌流程，并分发所有相关 phase 与效果。
+
+        Args:
+            card: 要打出的运行时卡。
+            pay_cost: 是否支付体力/资源费用。效果驱动的「コストを消費せず使用」（强制使用、再演）传 False。
+            consume_play_window: 是否占用本回合的スキルカード使用数。效果驱动的使用不占用。
+        """
 
         self.current_card = card
         self.playing = [card]
 
-        cost_stamina, cost_force = self._card_stamina_components(card)
-        spent = self._spend_stamina(
-            cost_stamina,
-            cost_force,
-            phase_type='ProduceExamPhaseType_ExamStaminaReduceCard',
-            status_change_origin='card',
-        )
-        # 计数型：stamina_spent 是整数计数量，非收益型，用 int(round()) 是正确的
-        self.total_counters['stamina_spent'] += int(round(spent))
-        self.turn_counters['stamina_spent'] += int(round(spent))
-        self._dispatch_phase('ProduceExamPhaseType_ExamStaminaReduceCard', effect_types=['ProduceExamEffectType_ExamStaminaReduce'])
-        self._dispatch_phase('ProduceExamPhaseType_ExamBuffConsume')
-        for key, value in self._card_resource_costs(card).items():
-            if key == 'parameter_buff_multiple_per_turn':
-                self._consume_parameter_buff_multiple(value)
-            else:
-                self.resources[key] = max(self.resources[key] - value, 0.0)
+        if pay_cost:
+            cost_stamina, cost_force = self._card_stamina_components(card)
+            spent = self._spend_stamina(
+                cost_stamina,
+                cost_force,
+                phase_type='ProduceExamPhaseType_ExamStaminaReduceCard',
+                status_change_origin='card',
+            )
+            # 计数型：stamina_spent 是整数计数量，非收益型，用 int(round()) 是正确的
+            self.total_counters['stamina_spent'] += int(round(spent))
+            self.turn_counters['stamina_spent'] += int(round(spent))
+            self._dispatch_phase('ProduceExamPhaseType_ExamStaminaReduceCard', effect_types=['ProduceExamEffectType_ExamStaminaReduce'])
+            self._dispatch_phase('ProduceExamPhaseType_ExamBuffConsume')
+            for key, value in self._card_resource_costs(card).items():
+                if key == 'parameter_buff_multiple_per_turn':
+                    self._consume_parameter_buff_multiple(value)
+                else:
+                    self.resources[key] = max(self.resources[key] - value, 0.0)
 
         self._dispatch_phase('ProduceExamPhaseType_StartExamPlay', acting_card=card)
         self._dispatch_phase('ProduceExamPhaseType_StartPlay', acting_card=card)
@@ -2738,6 +2754,9 @@ class ExamRuntime:
 
         self.turn_counters['play_count'] += 1
         self.total_counters['play_count'] += 1
+        if not consume_play_window:
+            # 效果驱动的使用不占用本回合出牌窗口：计数照常累加，同时把上限补回 1。
+            self.play_limit += 1
         self.search_history[str(card.card_id)] += 1
         self._dispatch_interval_phase('ProduceExamPhaseType_ExamPlayTurnCountInterval', self.turn_counters['play_count'], acting_card=card)
         self._dispatch_interval_phase('ProduceExamPhaseType_ExamPlayCountInterval', self.total_counters['play_count'], acting_card=card)
@@ -2983,7 +3002,17 @@ class ExamRuntime:
             )
             if enchant.source == 'produce_item' and timing_key in fired_produce_items:
                 continue
-            if trigger and self._trigger_matches(trigger, event):
+            # 绑定型附魔（再演）：绑定卡已不存在则跳过；「ターン内1回まで」同回合只发动一次。
+            bound_card: RuntimeCard | None = None
+            if enchant.bound_card_uid is not None:
+                bound_card = self._card_by_uid(enchant.bound_card_uid)
+                if bound_card is None:
+                    continue
+            if enchant.once_per_turn and enchant.last_fired_turn == self.turn:
+                continue
+            # 绑定型附魔的触发器需要拿到 phase 事件里的行动卡（例如「○○使用後」），非绑定附魔保持旧行为。
+            match_acting_card = acting_card if enchant.bound_card_uid is not None else None
+            if trigger and self._trigger_matches(trigger, event, acting_card=match_acting_card):
                 self._resolving_enchant_uids.add(enchant.uid)
                 self._record_event('enchant_triggered', {
                     'enchant_id': enchant.enchant_id,
@@ -2991,6 +3020,8 @@ class ExamRuntime:
                     'effect_ids': list(enchant.effect_ids),
                     'source': enchant.source,
                 })
+                previous_resolving_card = self.resolving_enchant_card
+                self.resolving_enchant_card = bound_card
                 try:
                     for effect_id in enchant.effect_ids:
                         effect = self.repository.exam_effect_map.get(str(effect_id))
@@ -2998,6 +3029,8 @@ class ExamRuntime:
                             self._apply_exam_effect(effect, source=f'enchant:{enchant.enchant_id}')
                 finally:
                     self._resolving_enchant_uids.discard(enchant.uid)
+                    self.resolving_enchant_card = previous_resolving_card
+                enchant.last_fired_turn = self.turn
                 if enchant.remaining_count is not None:
                     enchant.remaining_count -= 1
                 if enchant.source == 'produce_item':
@@ -3611,16 +3644,7 @@ class ExamRuntime:
                 if upgraded_row is not None:
                     card.base_card = upgraded_row
                     card.upgrade_count = int(upgraded_row.get('upgradeCount') or card.upgrade_count + 1)
-        elif effect_type == 'ProduceExamEffectType_ExamForcePlayCardSearch':
-            selection = self._search_cards(
-                str(effect.get('produceCardSearchId') or ''),
-                limit_count=pick_limit,
-                prefer_high_value=True,
-            )
-            if selection.selected:
-                forced_card = selection.selected[0]
-                self._detach_card(forced_card)
-                self._play_card(forced_card)
+        # 强制使用类（ExamForcePlayCardSearch / ...WithCost）已迁移到 effects/card_operation.py。
 
     def _create_card_by_id(self, effect: dict[str, Any]) -> None:
         """按显式卡牌 id 创建运行时卡并放入目标区域。"""
@@ -3794,6 +3818,15 @@ class ExamRuntime:
             move_phase = ExamPhase.CARD_MOVE_GRAVE
         if move_phase:
             self._dispatch_phase(move_phase, acting_card=card)
+
+    def _card_by_uid(self, uid: int) -> RuntimeCard | None:
+        """按 uid 在所有区域里查找运行时卡；不存在时返回 None。"""
+
+        for zone in (self.hand, self.hold, self.deck, self.grave, self.lost, self.playing):
+            for current in zone:
+                if current.uid == uid:
+                    return current
+        return None
 
     def _detach_card(self, card: RuntimeCard) -> None:
         """把卡牌从当前所在区域摘除。"""
@@ -3995,7 +4028,11 @@ class ExamRuntime:
         return max(updated, 0.0)
 
     def _apply_scalar_modifiers(self, effect_type: str, amount: float) -> float:
-        """对好調、元気、やる気等资源应用场上修饰。"""
+        """对好調、元気、やる気等资源应用场上修饰。
+
+        主数据里「○○増加量増加」（ExamXxxAdditive，千分比）与「○○増加量追加」（ExamXxxAdditiveFix，固定值）
+        是两套并存的修饰：先加固定值，再乘 (1 + Σ千分比)，与 gakumas-engine 的 `(v + Σbonus) × (1 + Σbuffs)` 一致。
+        """
 
         updated = float(amount)
         if effect_type == 'ProduceExamEffectType_ExamBlock':
@@ -4003,31 +4040,48 @@ class ExamRuntime:
                 return 0.0
             updated += self.resources['aggressive']
             updated -= self.resources['sleepy']
+        fixed_bonus = 0.0
+        ratio_multiple = 1.0
         for timed in self.active_effects:
             modifier_type = str(timed.effect.get('effectType') or '')
             if effect_type == 'ProduceExamEffectType_ExamCardPlayAggressive':
-                if modifier_type == 'ProduceExamEffectType_ExamAggressiveAdditive':
-                    updated += self._raw_effect_value(timed.effect)
-                elif modifier_type == 'ProduceExamEffectType_ExamAggressiveValueMultiple':
-                    updated *= 1.0 + self._ratio_value(timed.effect)
+                if modifier_type == ExamEffect.AGGRESSIVE_ADDITIVE:
+                    ratio_multiple += self._ratio_value(timed.effect)
+                elif modifier_type == ExamEffect.AGGRESSIVE_ADDITIVE_FIX:
+                    fixed_bonus += self._raw_effect_value(timed.effect)
+                elif modifier_type == ExamEffect.AGGRESSIVE_VALUE_MULTIPLE:
+                    ratio_multiple += self._ratio_value(timed.effect)
             elif effect_type == 'ProduceExamEffectType_ExamBlock':
                 if modifier_type == 'ProduceExamEffectType_ExamBlockAddDown':
                     updated *= max(1.0 - float(self.exam_setting.get('examBlockAddDownPermil') or 0) / 1000.0, 0.0)
                 elif modifier_type == 'ProduceExamEffectType_ExamBlockValueMultiple':
-                    updated *= 1.0 + self._ratio_value(timed.effect)
-            elif effect_type in {'ProduceExamEffectType_ExamReview', 'ProduceExamEffectType_ExamReviewAdditive'}:
-                if modifier_type == 'ProduceExamEffectType_ExamReviewMultiple':
-                    updated *= 1.0 + self._ratio_value(timed.effect)
+                    ratio_multiple += self._ratio_value(timed.effect)
+            elif effect_type == 'ProduceExamEffectType_ExamReview':
+                if modifier_type == ExamEffect.REVIEW_MULTIPLE:
+                    ratio_multiple += self._ratio_value(timed.effect)
+                elif modifier_type == ExamEffect.REVIEW_ADDITIVE:
+                    ratio_multiple += self._ratio_value(timed.effect)
+                elif modifier_type == ExamEffect.REVIEW_ADDITIVE_FIX:
+                    fixed_bonus += self._raw_effect_value(timed.effect)
             elif effect_type == 'ProduceExamEffectType_ExamParameterBuff':
-                if modifier_type == 'ProduceExamEffectType_ExamParameterBuffAdditive':
-                    updated *= 1.0 + self._ratio_value(timed.effect)
+                if modifier_type == ExamEffect.PARAMETER_BUFF_ADDITIVE:
+                    ratio_multiple += self._ratio_value(timed.effect)
+                elif modifier_type == ExamEffect.PARAMETER_BUFF_ADDITIVE_FIX:
+                    fixed_bonus += self._raw_effect_value(timed.effect)
             elif effect_type == 'ProduceExamEffectType_ExamLessonBuff':
-                if modifier_type == 'ProduceExamEffectType_ExamLessonBuffAdditive':
-                    updated += self._raw_effect_value(timed.effect)
-                elif modifier_type == 'ProduceExamEffectType_ExamLessonBuffMultiple':
-                    updated *= 1.0 + self._ratio_value(timed.effect)
-            elif effect_type == 'ProduceExamEffectType_ExamFullPowerPoint' and modifier_type == 'ProduceExamEffectType_ExamFullPowerPointAdditive':
-                updated += self._raw_effect_value(timed.effect)
+                if modifier_type == ExamEffect.LESSON_BUFF_ADDITIVE:
+                    ratio_multiple += self._ratio_value(timed.effect)
+                elif modifier_type == ExamEffect.LESSON_BUFF_ADDITIVE_FIX:
+                    fixed_bonus += self._raw_effect_value(timed.effect)
+                elif modifier_type == ExamEffect.LESSON_BUFF_MULTIPLE:
+                    ratio_multiple += self._ratio_value(timed.effect)
+            elif effect_type == 'ProduceExamEffectType_ExamFullPowerPoint':
+                if modifier_type == ExamEffect.FULL_POWER_POINT_ADDITIVE:
+                    ratio_multiple += self._ratio_value(timed.effect)
+                elif modifier_type == ExamEffect.FULL_POWER_POINT_ADDITIVE_FIX:
+                    fixed_bonus += self._raw_effect_value(timed.effect)
+        if updated > 0 or fixed_bonus > 0:
+            updated = (updated + fixed_bonus) * ratio_multiple
         return max(updated, 0.0)
 
     def _apply_preservation_release(self, target_stance: str) -> None:

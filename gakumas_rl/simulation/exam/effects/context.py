@@ -193,3 +193,161 @@ class ExamEffectContext:
 
     def apply_score_value_modifiers(self, value: float) -> float:
         return self.runtime.apply_score_value_modifiers(value)
+
+    # ---- 以下为 H.I.F 新增效果类型（再演 / 强制使用 / 指针强化 等）所需的运行时访问接口 ----
+
+    @property
+    def exam_setting(self) -> dict[str, Any]:
+        return self.runtime.exam_setting
+
+    @property
+    def stance(self) -> str:
+        return self.runtime.stance
+
+    @property
+    def stance_level(self) -> int:
+        return self.runtime.stance_level
+
+    @property
+    def turn(self) -> int:
+        return self.runtime.turn
+
+    @property
+    def terminated(self) -> bool:
+        return bool(self.runtime.terminated)
+
+    @property
+    def active_effects(self):
+        return self.runtime.active_effects
+
+    @property
+    def current_card(self):
+        """当前正在结算出牌效果的卡；不在出牌流程中时为 None。"""
+
+        return self.runtime.current_card
+
+    @property
+    def resolving_enchant_card(self):
+        """正在发动的绑定型附魔（再演）所绑定的卡；不在附魔结算中时为 None。"""
+
+        return getattr(self.runtime, 'resolving_enchant_card', None)
+
+    def exam_status_enchant_row(self, enchant_id: str) -> dict[str, Any] | None:
+        """按 id 读取 ProduceExamStatusEnchant 主数据行。"""
+
+        return self.runtime.repository.exam_status_enchant_map.get(str(enchant_id or ''))
+
+    def gain_enthusiastic(self, amount: float) -> float:
+        """按热意修饰结算并增加热意，返回实际增量。"""
+
+        return self.runtime._gain_enthusiastic(amount)
+
+    def dispatch_interval_phase(self, phase_type: str, counter_value: int, acting_card: Any | None = None) -> None:
+        """按主数据里出现过的间隔值分发间隔型 phase。"""
+
+        self.runtime._dispatch_interval_phase(phase_type, counter_value, acting_card=acting_card)
+
+    def search_cards(
+        self,
+        search_id: str,
+        *,
+        acting_card: Any | None = None,
+        target_card: Any | None = None,
+        limit_count: int | None = None,
+        prefer_high_value: bool = False,
+    ):
+        """按 ProduceCardSearch 检索运行时卡，允许指定行动卡/目标卡以解析 `isSelf` 与 `Target` 区域。"""
+
+        return self.runtime._search_cards(
+            search_id,
+            acting_card=acting_card,
+            target_card=target_card,
+            limit_count=limit_count,
+            prefer_high_value=prefer_high_value,
+        )
+
+    def effect_pick_limit(self, effect: dict[str, Any]) -> int | None:
+        """读取效果行的 pickCountMax/pickCountMin。"""
+
+        return self.runtime._effect_pick_limit(effect)
+
+    def rank_card_selection_pool(self, pool: list[Any]) -> list[Any]:
+        """把候选卡按结构价值从高到低排序（复用运行时的自动选卡评分）。"""
+
+        return self.runtime._rank_card_selection_pool(list(pool))
+
+    def random_choice(self, pool: list[Any], count: int) -> list[Any]:
+        """用运行时的随机源从候选里无放回抽取 count 张。"""
+
+        if not pool or count <= 0:
+            return []
+        count = min(count, len(pool))
+        indices = self.runtime.np_random.choice(len(pool), size=count, replace=False)
+        return [pool[int(index)] for index in list(indices)]
+
+    def card_cost_affordable(self, card: Any) -> bool:
+        """判断当前体力/元气/资源是否足以支付这张卡的费用（不检查出牌窗口与禁卡）。"""
+
+        runtime = self.runtime
+        cost_stamina, cost_force = runtime._card_stamina_components(card)
+        if runtime.stamina < cost_force:
+            return False
+        if runtime.stamina + runtime.resources['block'] < cost_stamina + cost_force:
+            return False
+        for resource_key, amount in runtime._card_resource_costs(card).items():
+            if runtime.resources[resource_key] < amount:
+                return False
+        return True
+
+    def force_play_card(self, card: Any, *, pay_cost: bool) -> None:
+        """由效果驱动地使用一张卡：不占用出牌窗口；按 pay_cost 决定是否支付费用。
+
+        嵌套在另一张卡的出牌流程里时（例如「○○使用後、自身を再使用」），结束后恢复外层的 current_card/playing。
+        """
+
+        runtime = self.runtime
+        previous_card = runtime.current_card
+        previous_playing = list(runtime.playing)
+        runtime._detach_card(card)
+        runtime._play_card(card, pay_cost=pay_cost, consume_play_window=False)
+        runtime.current_card = previous_card
+        runtime.playing = previous_playing
+
+    def has_bound_enchant(self, enchant_id: str, bound_card_uid: int) -> bool:
+        """判断某张卡上是否已经挂着同一个绑定型附魔。"""
+
+        return any(
+            item.enchant_id == str(enchant_id) and item.bound_card_uid == int(bound_card_uid)
+            for item in self.runtime.active_enchants
+        )
+
+    def register_bound_enchant(
+        self,
+        enchant_row: dict[str, Any],
+        *,
+        bound_card: Any,
+        remaining_turns: int | None,
+        remaining_count: int | None,
+        once_per_turn: bool,
+        source: str,
+    ) -> None:
+        """挂载一个绑定到具体运行时卡的状态附魔（再演）。"""
+
+        from ..runtime import TriggeredEnchant
+
+        runtime = self.runtime
+        runtime.active_enchants.append(
+            TriggeredEnchant(
+                uid=runtime._next_uid(),
+                enchant_id=str(enchant_row.get('id')),
+                trigger_id=str(enchant_row.get('produceExamTriggerId') or ''),
+                effect_ids=[str(value) for value in enchant_row.get('produceExamEffectIds', []) if value],
+                remaining_turns=remaining_turns,
+                remaining_count=remaining_count,
+                source=source,
+                source_identity=f'{source}:{bound_card.uid}',
+                applied_turn=runtime.turn,
+                bound_card_uid=int(bound_card.uid),
+                once_per_turn=bool(once_per_turn),
+            )
+        )

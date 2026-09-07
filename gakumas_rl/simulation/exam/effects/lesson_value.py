@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from ..ids import ExamEffect, GrowEffect
 from .context import ExamEffectContext
+from .stance_multiple import stance_lesson_multiple_bonus_factor
 
 
 def resolve_lesson_effect_value(context: ExamEffectContext, effect: dict[str, Any], from_card: bool = False) -> float:
@@ -29,6 +30,17 @@ def resolve_lesson_effect_value(context: ExamEffectContext, effect: dict[str, An
         value = context.ceil_positive(context.resources['block'] * ratio_value)
     elif effect_type == ExamEffect.LESSON_DEPEND_PARAMETER_BUFF:
         value = context.ceil_positive(context.resources['parameter_buff'] * ratio_value)
+    elif effect_type == ExamEffect.LESSON_DEPEND_STAMINA:
+        # 「体力の n% 分パラメータ上昇」：参照当前体力（非最大体力），effectValue1 为千分比（8000 = 800%）。
+        value = context.ceil_positive(context.stamina * ratio_value)
+    elif effect_type == ExamEffect.MULTIPLE_ENTHUSIASTIC_LESSON:
+        # 「パラメータ+n（熱意効果を m 倍適用）」：与 ExamMultipleLessonBuffLesson 同构，
+        # effectValue2 千分比为额外倍率，主管线会再加一次热意，合计 (1 + effectValue2/1000) 倍。
+        extra_ratio = float(effect.get('effectValue2') or 0) / 1000.0
+        value = context.compose_referenced_gain(
+            base=max(base_value, 1.0),
+            referenced=context.resources['enthusiastic'] * extra_ratio,
+        )
     elif effect_type == ExamEffect.LESSON_DEPEND_PLAY_CARD_COUNT_SUM:
         value = context.total_counters['play_count'] * max(base_value, 1.0)
     elif effect_type == ExamEffect.LESSON_DEPEND_STAMINA_CONSUMPTION_SUM:
@@ -68,4 +80,7 @@ def resolve_lesson_effect_value(context: ExamEffectContext, effect: dict[str, An
             add_grow_type=GrowEffect.LESSON_ADD,
             reduce_grow_type=GrowEffect.LESSON_REDUCE,
         )
-    return max(context.apply_score_value_modifiers(value), 0.0)
+    modified = context.apply_score_value_modifiers(value)
+    # 強気強化 / 全力強化：把指针基础倍率替换成「基础 + 加算」，见 stance_multiple.py。
+    modified *= stance_lesson_multiple_bonus_factor(context)
+    return max(modified, 0.0)

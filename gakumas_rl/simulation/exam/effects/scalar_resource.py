@@ -2,8 +2,8 @@
 
 from __future__ import annotations
 
-from ..constants import SCALAR_RESOURCE_TYPES
-from ..ids import ExamEffect, GrowEffect
+from ..constants import SCALAR_RESOURCE_TYPES, STATUS_CHANGE_TRIGGER_ORIGINS
+from ..ids import ExamEffect, ExamPhase, GrowEffect
 from .context import ExamEffectContext
 
 
@@ -29,3 +29,8 @@ def apply_scalar_resource(context: ExamEffectContext, effect: dict[str, Any], so
     if resource_key == 'full_power_point':
         context.total_counters['full_power_point_gained'] += context.positive_count(delta)
     context.dispatch_status_change(delta, [effect_type], origin=source)
+    if resource_key == 'aggressive' and delta > 0 and source in STATUS_CHANGE_TRIGGER_ORIGINS:
+        # 「直接効果でやる気が n 回増加時」（ProduceExamPhaseType_ExamAggressiveUpInterval）：
+        # 只统计卡牌/饮料这类直接效果带来的やる気增加次数。
+        context.total_counters['aggressive_up_count'] += 1
+        context.dispatch_interval_phase(ExamPhase.AGGRESSIVE_UP_INTERVAL, context.total_counters['aggressive_up_count'])

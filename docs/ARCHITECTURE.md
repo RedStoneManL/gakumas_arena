@@ -14,30 +14,44 @@
 │ produce/    培育外循环：周程、行动(课程/休息/外出/商店…)、考试调度     │
 │             剧本由 scenarios/*.yaml 驱动，不写死在代码里            │
 ├──────────────────────────────────────────────────────────────┤
-│ engine/     课程/考试卡牌引擎：回合、手牌、效果 DSL 解释器、状态效果    │
+│ gakumas_rl/ vendored 引擎：exam/produce 运行时、效果注册表、Gym env     │
+│             （env/ produce/ 两层实际由它实现，gakumas_arena 只做适配）     │
 ├──────────────────────────────────────────────────────────────┤
-│ masterdata/ 解包 master data(YAML→JSON缓存) 访问层；data/ 类型化视图 │
-│ tools/      拉取/转换 master data、校验、名称翻译映射               │
+│ masterdata/ 解包 master data(YAML→JSON缓存) 访问层（工具/校验用）      │
+│ tools/      拉取/转换/对比 master data、覆盖率(新机制)报告            │
 └──────────────────────────────────────────────────────────────┘
 ```
 
-依赖方向只能向下。`engine` 不知道剧本；`produce` 通过 `ScenarioConfig` 知道剧本；`env` 只做观测/动作编码。
+依赖方向只能向下。引擎（`gakumas_rl`）按 `Produce.id` 装配剧本；`gakumas_arena.env` 只做构造/编码适配，
+剧本专属规则（H.I.F）后续以 `produce/plugins` 形式接入而不改引擎核心。
 
-## 2. 目录
+## 2. 目录（2026-09-07 修订：facade over gakumas_rl）
+
+引擎本体不再自研：`skyfsj/gakumas-rl` 以包 `gakumas_rl/` vendor 进仓库（GPL-3.0，来源与提交见
+`third_party/gakumas_rl_upstream/PROVENANCE.txt`），`gakumas_arena/` 只保留薄适配层。
 
 ```
 gakumas_arena/
-  data/        schema.py（pydantic 模型）, loader.py, registry.py
-  engine/      state.py, cards.py, effects.py(DSL), stage.py(一局课程/考试), rng.py, status.py
-  produce/     scenario.py(配置加载), run.py(一次完整培育), actions.py, idol.py, shop.py, evaluate.py(评级)
-  scenarios/   hajime.yaml, nia.yaml, hif.yaml
-  env/         stage_env.py, produce_env.py, spaces.py(观测/动作编码)
-  agents/      random_agent.py, greedy.py, mcts.py
-data/          skill_cards.json, p_items.json, p_drinks.json, idols.json, support_cards.json, status_effects.json
-tools/         scrapers/, parsers/, validate.py
-tests/
-docs/          rules/ scenarios/ research/
+  masterdata/  store.py —— 我们自己的 dump 加载层（YAML→JSON 缓存，table/by_id/where/enum_values）；工具与校验只经它读数据
+  env/         make_exam_env() / make_produce_env()：剧本别名(first_star/初/nia/hif…→Produce.id)、偶像卡、
+               LoadoutConfig、seed → gakumas_rl 的 GakumasExamEnv / GakumasPlanningEnv；legal_actions(obs)
+  sim/         run_exam() / run_produce()：seeded rollout + 策略(random / gakumas_rl 启发式 / callable) → RolloutResult
+               （score、逐步 log、ExamRuntime.event_log、dump 版本）
+  agents/      random_agent.py（更多 baseline 后续加）
+  produce/     scenario.py + scenarios/hif.yaml：剧本配置 DSL（H.I.F 专属机制的落脚点，尚未接入 gakumas_rl）
+gakumas_rl/    vendored 引擎：repository/master_data.py(表加载+pickle 缓存+ScenarioSpec), simulation/exam/(效果注册表、
+               触发器、ExamRuntime), simulation/produce/(ProduceRuntime、P アイテム解释器), simulation/envs.py(Gym env),
+               interfaces/service.py(装配), training/(MaskablePPO/BC)
+third_party/gakumas_rl_upstream/   LICENSE、PROVENANCE.txt、上游 README/AGENTS/训练指南
+data/          raw/（dump 与缓存，gitignore）、coverage.json（覆盖率报告 JSON）
+tools/masterdata/  fetch.sh, build_cache.py, history_diff.py, inspect_dump.py, coverage.py(新机制探测器)
+tests/         test_facade.py, test_masterdata.py, gakumas_rl/（上游测试原样搬入）
+docs/          rules/ scenarios/ research/（engine_coverage.md 由 coverage.py 生成）
 ```
+
+依赖方向：`gakumas_arena.env/sim → gakumas_rl`；`gakumas_arena.masterdata` 与 `gakumas_rl.repository` 各自读同一份
+`data/raw/gakumasu-diff`（`GAKUMAS_MASTERDATA_DIR` 同时覆盖两者）。不要在 `gakumas_arena` 里复制引擎逻辑；缺的机制
+优先在 `gakumas_rl/` 内补（保持可回溯到上游），剧本专属规则走 `produce/plugins`。
 
 ## 3. 数据与效果表示（核心决定，2026-09-07 修订）
 
@@ -53,8 +67,10 @@ docs/          rules/ scenarios/ research/
   + `chainProduceExamEffectIds` + `produceExamStatusEnchantId`（状态附魔）+ `produceExamTriggerId`（触发条件）。
   `ProduceItem/ProduceDrink` 同样引用效果与触发表；`Produce/ProduceStep*/ProduceStepAuditionDifficulty/ResultGradePattern`
   描述培育外循环和评级；`ProduceExamAutoEvaluation*` 是官方自动出牌 AI 的权重表（可直接做 baseline 策略）。
-- **效果解释器 = 按 `ProduceExamEffectType` 分发**（`engine/effects.py`），每个枚举值一个 handler，未实现的枚举值
-  直接抛错。这样新卡随 dump 更新自动可用，不需要手写卡牌定义。
+- **效果解释器 = 按 `ProduceExamEffectType` 分发**：现由 vendored `gakumas_rl/simulation/exam/effects/registry.py`
+  （`EXAM_EFFECT_REGISTRY`：精确匹配 → `ExamLesson*` 前缀 → fallback 计时效果）与 `simulation/produce/runtime.py::_apply_produce_effect`
+  承担。这样新卡随 dump 更新自动可用，不需要手写卡牌定义。注意上游对未知枚举**不抛错**（走 fallback），
+  所以 `tools/masterdata/coverage.py` 的报告是唯一的"新机制"信号（见 §8）。
 - 之前设计的自研 JSON DSL 降级为「测试/自定义卡」用途，保留但不作为主路径。
 - 校验：`ProduceDescription*` 表把枚举映射到日文说明文案，是效果语义的官方文档；再叠加 seesaawiki 的取整/时序表。
 
@@ -79,11 +95,24 @@ evaluate:
 
 通用部分靠配置；确实无法配置化的剧本特有逻辑放 `produce/plugins/<scenario>.py`，通过固定的 hook 接口接入（`on_week_start`, `on_action`, `on_exam_end` …）。
 
-## 5. RL 接口
+## 5. RL 接口（gakumas_rl 的 env，经 `gakumas_arena.env` 构造）
 
-- **StageEnv**（内层）：一局课程/考试。obs = 手牌编码 + 状态向量 + 牌堆统计；action = 出第 i 张牌 / 用饮料 j / 跳过；动作掩码 `info["action_mask"]`。reward = 分数增量（或终局 clear/perfect）。
-- **ProduceEnv**（外层）：一次完整培育。obs = 周数、三维属性、体力、牌组摘要、道具、剧本状态；action = 周行动 + 选卡/选饮料等子决策。内层可以：a) 交给启发式/已训练的 StageEnv policy；b) 展开成分层动作。
-- 全部随机性来自 `engine/rng.py` 的单个 `numpy.random.Generator`，由 seed 控制，保证可复现；支持 `clone_state()` 给 MCTS 用。
+- **考试/课程（内层）`GakumasExamEnv`** ← `make_exam_env(scenario, idol, loadout, seed, stage_type, battle_kind='exam'|'lesson', reward_mode='score'|'clear')`。
+  `action_space = Discrete(max_hand_cards + max_drinks + 1)`（手牌槽 / 饮料槽 / 结束回合）；
+  `obs = Dict{global: Box(global_dim), action_features: Box(max_actions, feat_dim), action_mask: Box(max_actions)}`，
+  每个动作槽的特征 = `EffectTaxonomy` 对卡牌 `ProduceExamEffectType` 多热 + 触发相位多热 + 类别/稀有度/费用类型 one-hot + 14 个数值；
+  掩码在 obs 里（`legal_actions(obs)`），非法动作返回 `invalid_action_penalty` 而不是异常。reward 由 `RewardConfig` 决定
+  （`score`：势能差分 + 分数增量密集奖励；`clear`：课程 clear/perfect）。终局时 `info` 带 `score`、`rank`、rival 结果。
+- **培育（外层）`GakumasPlanningEnv`** ← `make_produce_env(scenario, idol, loadout, seed)`。动作 = `ProduceRuntime.legal_actions()`
+  的候选列表（lesson_*/refresh/授業/おでかけ/shop_buy_card_i/customize/audition_select_i…）填进固定槽位，同样带掩码；
+  考试子局默认由 gakumas_rl 的启发式（`ProduceExamAutoEvaluation` 先验 + 一步前瞻）自动打，或用 `exam_action_selectors`
+  接入训练好的考试 policy（`PlanningExamCheckpointSelector`），即分层策略。
+- **可复现**：`env.reset(seed)` → gym `np_random` → 派生 `ExamRuntime(seed)` / `ProduceRuntime(seed)` 的
+  `numpy.random.default_rng`；洗牌、回合颜色、随机卡、饮料库存、事件全部走它。`tests/test_facade.py` 断言同 seed 同分。
+  MCTS 用 `ExamRuntime.capture_preview_state()/restore_preview_state()`。
+- **便捷入口** `gakumas_arena.sim.run_exam / run_produce(scenario, idol, seed, policy)` 返回 `RolloutResult`
+  （score、total_reward、逐步 log、event_log、dump commit）；`policy` 可为 `'random' | 'heuristic' | 'end_turn' | callable(obs, info, env) -> int`。
+- 训练：沿用上游 `gakumas_rl.training`（SB3 `MaskablePPO` → 固定 seed 轨迹选优 → masked BC → 微调；可选 extras `.[sb3]`）。
 
 ## 6. 校验策略
 
@@ -108,8 +137,12 @@ evaluate:
 
 - **数据版本可追溯**：`MasterData` 记录 dump 的 commit/日期（`masterdata_json/_meta.json`）；每次模拟结果带上数据版本。
   `tools/masterdata/fetch.sh` 一条命令更新；`tools/masterdata/history_diff.py` 比较两个 commit 之间新增的表/枚举值/配置改动。
-- **未知即报错**：效果类型、触发类型、状态附魔、步骤类型全部走注册表，遇到未注册的枚举值抛 `UnsupportedMechanic`，
-  并有一个 `tools/masterdata/coverage.py` 报告「dump 里出现过但引擎未实现」的枚举值清单。新版本上线后先跑覆盖率报告。
+- **未知即报告**：gakumas_rl 对未注册的 `ProduceExamEffectType` 走 fallback（当作计时效果），未知 `ProduceEffectType`
+  / 相位 / 步骤类型则静默忽略，运行时不会抛错。因此 `tools/masterdata/coverage.py` 是新机制探测器：扫描
+  `ProduceExamEffectType` / `ProduceEffectType` / 触发相位 / `ProduceExamStatusEnchant`（派生）/ `ProduceCardGrowEffectType` /
+  `ProduceStepType`，用 gakumas_rl 的注册表与 `ids` 常量（兜底 grep 源码）判定 handled / referenced / unhandled，
+  列出行数与使用它的卡/道具，写 `docs/research/engine_coverage.md` + `data/coverage.json`；`--strict` 有未处理值即退出 1。
+  **每次 dump 更新后先跑它**。
 - **结算公式版本化**：评价/评级/分数换算不硬编码，放在 `rules/scoring/*.yaml`，带 `effective_from` 日期与来源
   （master 表优先：`ResultGradePattern`、`ProduceExamBattleScoreConfig`、`ProduceStepAuditionDifficulty`；wiki 公式次之）。
 - **剧本以 `Produce.id` 为键**：新剧本 = 新配置 + 可选 plugin，不改引擎核心。

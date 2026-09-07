@@ -436,12 +436,20 @@ def scan_step_types(md: MasterData, graph: ReferenceGraph, caps: EngineCapabilit
                     entry["tables"] = Counter()
                 entry["rows"] += 1
                 entry["tables"][table] += 1
-                row_id = str(row.get("id") or row.get("characterId") or "")
-                if entry["status"] != "handled" and row_id:
-                    entry["owners"][f"{table}:{row_id}"] += 1
-                    # Produce steps: attribute to the produce ids listed on the row
-                    for pid in row.get("produceIds") or []:
+                if entry["status"] == "handled":
+                    continue
+                # Attribute to the produce ids listed on the row when present (ProduceStepTransition
+                # etc. are per-character rows; the scenario is the interesting owner), else the row.
+                produce_ids = [str(p) for p in (row.get("produceIds") or []) if p]
+                if not produce_ids and row.get("produceId"):
+                    produce_ids = [str(row["produceId"])]
+                if produce_ids:
+                    for pid in produce_ids:
                         entry["owners"][f"Produce:{pid}"] += 1
+                else:
+                    row_id = str(row.get("id") or row.get("characterId") or "")
+                    if row_id:
+                        entry["owners"][f"{table}:{row_id}"] += 1
     return values
 
 
@@ -534,7 +542,10 @@ def render_markdown(report: dict[str, Any], graph: ReferenceGraph, max_owners: i
                     f"| `{esc(value)}` | {entry['status']} | {entry['rows']}{esc(tables)} | {esc(entry['reason'])} | {esc(_owner_text(graph, owner_counter, max_owners))} |"
                 )
         handled = sorted(v for v, e in dim["values"].items() if e["status"] == "handled")
-        if handled:
+        if key == "status_enchant":
+            handled_rows = sum(e["rows"] for e in dim["values"].values() if e["status"] == "handled")
+            lines += ["", f"{handled_rows} enchant rows are fully handled."]
+        elif handled:
             lines += ["", "<details><summary>handled values (" + str(len(handled)) + ")</summary>", ""]
             lines.append(", ".join(f"`{esc(v)}`" for v in handled))
             lines += ["", "</details>"]

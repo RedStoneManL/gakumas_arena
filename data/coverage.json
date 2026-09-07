@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-09-07T07:05:11+00:00",
+  "generated_at": "2026-09-07T07:09:57+00:00",
   "dump": {
     "path": "/home/user/gakumas_arena/data/raw/gakumasu-diff",
     "commit": "5b8969e363ae60cd1d9bf64560783b4b445f7da6",
@@ -16,10 +16,10 @@
       "summary": {
         "values": 107,
         "handled": 101,
-        "referenced": 0,
-        "unhandled": 6,
-        "rows_unhandled": 15,
-        "rows_referenced": 0
+        "referenced": 6,
+        "unhandled": 0,
+        "rows_unhandled": 0,
+        "rows_referenced": 15
       },
       "values": {
         "ProduceExamEffectType_ExamAddGrowEffect": {
@@ -51,8 +51,8 @@
           "owner_total": 0
         },
         "ProduceExamEffectType_ExamAggressiveAdditiveFix": {
-          "status": "unhandled",
-          "reason": "falls through to registry fallback (generic timed effect)",
+          "status": "referenced",
+          "reason": "ids.ExamEffect constant only",
           "rows": 1,
           "example_row_ids": [
             "e_effect-exam_aggressive_additive_fix-0001-02"
@@ -357,8 +357,8 @@
           "owner_total": 0
         },
         "ProduceExamEffectType_ExamConcentrationLessonMultipleAdditive": {
-          "status": "unhandled",
-          "reason": "falls through to registry fallback (generic timed effect)",
+          "status": "referenced",
+          "reason": "ids.ExamEffect constant only",
           "rows": 2,
           "example_row_ids": [
             "e_effect-exam_concentration_lesson_multiple_additive-0350-inf",
@@ -459,8 +459,8 @@
           "owner_total": 0
         },
         "ProduceExamEffectType_ExamForcePlayCardSearchWithCost": {
-          "status": "unhandled",
-          "reason": "falls through to registry fallback (generic timed effect)",
+          "status": "referenced",
+          "reason": "ids.ExamEffect constant only",
           "rows": 1,
           "example_row_ids": [
             "e_effect-exam_force_play_card_search_with_cost-p_card_search-not_lost-select-1_1"
@@ -486,8 +486,8 @@
           "owner_total": 0
         },
         "ProduceExamEffectType_ExamFullPowerLessonMultipleAdditive": {
-          "status": "unhandled",
-          "reason": "falls through to registry fallback (generic timed effect)",
+          "status": "referenced",
+          "reason": "ids.ExamEffect constant only",
           "rows": 3,
           "example_row_ids": [
             "e_effect-exam_full_power_lesson_multiple_additive-0200-04",
@@ -994,8 +994,8 @@
           "owner_total": 0
         },
         "ProduceExamEffectType_ExamMultipleEnthusiasticLesson": {
-          "status": "unhandled",
-          "reason": "falls through to registry fallback (generic timed effect)",
+          "status": "referenced",
+          "reason": "ids.ExamEffect constant only",
           "rows": 3,
           "example_row_ids": [
             "e_effect-exam_multiple_enthusiastic_lesson-0001-1000-01",
@@ -1433,8 +1433,8 @@
           "owner_total": 0
         },
         "ProduceExamEffectType_ExamStatusEnchantEncore": {
-          "status": "unhandled",
-          "reason": "falls through to registry fallback (generic timed effect)",
+          "status": "referenced",
+          "reason": "ids.ExamEffect constant only",
           "rows": 5,
           "example_row_ids": [
             "e_effect-exam_status_enchant_encore-0001-02-inf-enchant-p_card-01-ido-3_202-enc02",
@@ -2470,53 +2470,22 @@
       "source": "ProduceExamTrigger.phaseTypes[]",
       "summary": {
         "values": 29,
-        "handled": 28,
+        "handled": 29,
         "referenced": 0,
-        "unhandled": 1,
-        "rows_unhandled": 1,
+        "unhandled": 0,
+        "rows_unhandled": 0,
         "rows_referenced": 0
       },
       "values": {
         "ProduceExamPhaseType_ExamAggressiveUpInterval": {
-          "status": "unhandled",
-          "reason": "never dispatched by ExamRuntime",
+          "status": "handled",
+          "reason": "dispatched in simulation/exam",
           "rows": 1,
           "example_row_ids": [
             "e_trigger-exam_aggressive_up_interval-5-exam_card_play_aggressive"
           ],
-          "owners": [
-            {
-              "id": "p_card-02-ido-3_201",
-              "table": "ProduceCard",
-              "name": "わたしを支える言葉+++",
-              "count": 1
-            },
-            {
-              "id": "pitem_02-0-006-0-030",
-              "table": "ProduceItem",
-              "name": "初星ライト（紫）",
-              "count": 1
-            },
-            {
-              "id": "pitem_02-0-006-0-032",
-              "table": "ProduceItem",
-              "name": "初星ライト（紫）",
-              "count": 1
-            },
-            {
-              "id": "pitem_02-3-314-0",
-              "table": "ProduceItem",
-              "name": "強い意志の輝き",
-              "count": 1
-            },
-            {
-              "id": "pitem_02-3-314-1",
-              "table": "ProduceItem",
-              "name": "強い意志の輝き+",
-              "count": 1
-            }
-          ],
-          "owner_total": 5
+          "owners": [],
+          "owner_total": 0
         },
         "ProduceExamPhaseType_ExamBuffConsume": {
           "status": "handled",
@@ -2875,17 +2844,17 @@
       "title": "ProduceExamStatusEnchant (derived)",
       "source": "ProduceExamStatusEnchant.produceExamEffectIds[].effectType + produceExamTriggerId.phaseTypes[]",
       "summary": {
-        "values": 5,
+        "values": 4,
         "handled": 1,
-        "referenced": 0,
-        "unhandled": 4,
-        "rows_unhandled": 12,
-        "rows_referenced": 0
+        "referenced": 3,
+        "unhandled": 0,
+        "rows_unhandled": 0,
+        "rows_referenced": 7
       },
       "values": {
         "effect:ProduceExamEffectType_ExamConcentrationLessonMultipleAdditive": {
-          "status": "unhandled",
-          "reason": "contains unhandled component(s)",
+          "status": "referenced",
+          "reason": "contains referenced component(s)",
           "rows": 2,
           "example_row_ids": [
             "enchant-p_item_effect_03-3-339-0-enc01",
@@ -2908,8 +2877,8 @@
           "owner_total": 2
         },
         "effect:ProduceExamEffectType_ExamForcePlayCardSearchWithCost": {
-          "status": "unhandled",
-          "reason": "contains unhandled component(s)",
+          "status": "referenced",
+          "reason": "contains referenced component(s)",
           "rows": 1,
           "example_row_ids": [
             "enchant-p_card-03-ido-100_038-enc01"
@@ -2925,8 +2894,8 @@
           "owner_total": 1
         },
         "effect:ProduceExamEffectType_ExamFullPowerLessonMultipleAdditive": {
-          "status": "unhandled",
-          "reason": "contains unhandled component(s)",
+          "status": "referenced",
+          "reason": "contains referenced component(s)",
           "rows": 4,
           "example_row_ids": [
             "enchant-bullet_point-p_exam_gimmick-tour-006-stage-03-enc01",
@@ -2965,7 +2934,7 @@
         "handled": {
           "status": "handled",
           "reason": "all components handled",
-          "rows": 1991,
+          "rows": 1996,
           "example_row_ids": [
             "enchant-bullet_point-p_card-01-men-100_005-enc01",
             "enchant-bullet_point-p_exam_gimmick-tour-006-stage-01-enc01",
@@ -2975,51 +2944,6 @@
           ],
           "owners": [],
           "owner_total": 0
-        },
-        "phase:ProduceExamPhaseType_ExamAggressiveUpInterval": {
-          "status": "unhandled",
-          "reason": "contains unhandled component(s)",
-          "rows": 5,
-          "example_row_ids": [
-            "enchant-p_card-02-ido-3_201-enc01",
-            "enchant-p_item_effect_02-0-006-0-030-enc01",
-            "enchant-p_item_effect_02-0-006-0-032-enc01",
-            "enchant-p_item_effect_02-3-314-0-enc01",
-            "enchant-p_item_effect_02-3-314-1-enc01"
-          ],
-          "owners": [
-            {
-              "id": "p_card-02-ido-3_201",
-              "table": "ProduceCard",
-              "name": "わたしを支える言葉+++",
-              "count": 1
-            },
-            {
-              "id": "pitem_02-0-006-0-030",
-              "table": "ProduceItem",
-              "name": "初星ライト（紫）",
-              "count": 1
-            },
-            {
-              "id": "pitem_02-0-006-0-032",
-              "table": "ProduceItem",
-              "name": "初星ライト（紫）",
-              "count": 1
-            },
-            {
-              "id": "pitem_02-3-314-0",
-              "table": "ProduceItem",
-              "name": "強い意志の輝き",
-              "count": 1
-            },
-            {
-              "id": "pitem_02-3-314-1",
-              "table": "ProduceItem",
-              "name": "強い意志の輝き+",
-              "count": 1
-            }
-          ],
-          "owner_total": 5
         }
       }
     },
@@ -3634,37 +3558,37 @@
               "id": "ProduceStepTransition:amao",
               "table": "ProduceStepTransition",
               "name": null,
-              "count": 4
+              "count": 2
+            },
+            {
+              "id": "ProduceStepTransition:atbm",
+              "table": "ProduceStepTransition",
+              "name": null,
+              "count": 2
+            },
+            {
+              "id": "ProduceStepTransition:fktn",
+              "table": "ProduceStepTransition",
+              "name": null,
+              "count": 2
             },
             {
               "id": "ProduceStepTransition:hmsz",
               "table": "ProduceStepTransition",
               "name": null,
-              "count": 4
+              "count": 2
             },
             {
               "id": "ProduceStepTransition:hrnm",
               "table": "ProduceStepTransition",
               "name": null,
-              "count": 4
+              "count": 2
             },
             {
               "id": "ProduceStepTransition:hski",
               "table": "ProduceStepTransition",
               "name": null,
-              "count": 4
-            },
-            {
-              "id": "ProduceStepTransition:hume",
-              "table": "ProduceStepTransition",
-              "name": null,
-              "count": 4
-            },
-            {
-              "id": "ProduceStepTransition:kcna",
-              "table": "ProduceStepTransition",
-              "name": null,
-              "count": 4
+              "count": 2
             }
           ],
           "owner_total": 15,
@@ -3761,45 +3685,9 @@
               "table": "Produce",
               "name": null,
               "count": 112
-            },
-            {
-              "id": "ProduceStepTransition:amao",
-              "table": "ProduceStepTransition",
-              "name": null,
-              "count": 12
-            },
-            {
-              "id": "ProduceStepTransition:hmsz",
-              "table": "ProduceStepTransition",
-              "name": null,
-              "count": 12
-            },
-            {
-              "id": "ProduceStepTransition:hrnm",
-              "table": "ProduceStepTransition",
-              "name": null,
-              "count": 12
-            },
-            {
-              "id": "ProduceStepTransition:hski",
-              "table": "ProduceStepTransition",
-              "name": null,
-              "count": 12
-            },
-            {
-              "id": "ProduceStepTransition:hume",
-              "table": "ProduceStepTransition",
-              "name": null,
-              "count": 12
-            },
-            {
-              "id": "ProduceStepTransition:kcna",
-              "table": "ProduceStepTransition",
-              "name": null,
-              "count": 12
             }
           ],
-          "owner_total": 12,
+          "owner_total": 2,
           "tables": {
             "ProduceStepTransition": 112
           }
@@ -3821,45 +3709,9 @@
               "table": "Produce",
               "name": null,
               "count": 80
-            },
-            {
-              "id": "ProduceStepTransition:amao",
-              "table": "ProduceStepTransition",
-              "name": null,
-              "count": 8
-            },
-            {
-              "id": "ProduceStepTransition:hmsz",
-              "table": "ProduceStepTransition",
-              "name": null,
-              "count": 8
-            },
-            {
-              "id": "ProduceStepTransition:hrnm",
-              "table": "ProduceStepTransition",
-              "name": null,
-              "count": 8
-            },
-            {
-              "id": "ProduceStepTransition:hski",
-              "table": "ProduceStepTransition",
-              "name": null,
-              "count": 8
-            },
-            {
-              "id": "ProduceStepTransition:hume",
-              "table": "ProduceStepTransition",
-              "name": null,
-              "count": 8
-            },
-            {
-              "id": "ProduceStepTransition:kcna",
-              "table": "ProduceStepTransition",
-              "name": null,
-              "count": 8
             }
           ],
-          "owner_total": 12,
+          "owner_total": 2,
           "tables": {
             "ProduceStepTransition": 80
           }
@@ -3881,45 +3733,9 @@
               "table": "Produce",
               "name": null,
               "count": 112
-            },
-            {
-              "id": "ProduceStepTransition:amao",
-              "table": "ProduceStepTransition",
-              "name": null,
-              "count": 12
-            },
-            {
-              "id": "ProduceStepTransition:hmsz",
-              "table": "ProduceStepTransition",
-              "name": null,
-              "count": 12
-            },
-            {
-              "id": "ProduceStepTransition:hrnm",
-              "table": "ProduceStepTransition",
-              "name": null,
-              "count": 12
-            },
-            {
-              "id": "ProduceStepTransition:hski",
-              "table": "ProduceStepTransition",
-              "name": null,
-              "count": 12
-            },
-            {
-              "id": "ProduceStepTransition:hume",
-              "table": "ProduceStepTransition",
-              "name": null,
-              "count": 12
-            },
-            {
-              "id": "ProduceStepTransition:kcna",
-              "table": "ProduceStepTransition",
-              "name": null,
-              "count": 12
             }
           ],
-          "owner_total": 12,
+          "owner_total": 2,
           "tables": {
             "ProduceStepTransition": 112
           }
@@ -3941,45 +3757,9 @@
               "table": "Produce",
               "name": null,
               "count": 80
-            },
-            {
-              "id": "ProduceStepTransition:amao",
-              "table": "ProduceStepTransition",
-              "name": null,
-              "count": 8
-            },
-            {
-              "id": "ProduceStepTransition:hmsz",
-              "table": "ProduceStepTransition",
-              "name": null,
-              "count": 8
-            },
-            {
-              "id": "ProduceStepTransition:hrnm",
-              "table": "ProduceStepTransition",
-              "name": null,
-              "count": 8
-            },
-            {
-              "id": "ProduceStepTransition:hski",
-              "table": "ProduceStepTransition",
-              "name": null,
-              "count": 8
-            },
-            {
-              "id": "ProduceStepTransition:hume",
-              "table": "ProduceStepTransition",
-              "name": null,
-              "count": 8
-            },
-            {
-              "id": "ProduceStepTransition:kcna",
-              "table": "ProduceStepTransition",
-              "name": null,
-              "count": 8
             }
           ],
-          "owner_total": 12,
+          "owner_total": 2,
           "tables": {
             "ProduceStepTransition": 80
           }
@@ -4001,45 +3781,9 @@
               "table": "Produce",
               "name": null,
               "count": 112
-            },
-            {
-              "id": "ProduceStepTransition:amao",
-              "table": "ProduceStepTransition",
-              "name": null,
-              "count": 12
-            },
-            {
-              "id": "ProduceStepTransition:hmsz",
-              "table": "ProduceStepTransition",
-              "name": null,
-              "count": 12
-            },
-            {
-              "id": "ProduceStepTransition:hrnm",
-              "table": "ProduceStepTransition",
-              "name": null,
-              "count": 12
-            },
-            {
-              "id": "ProduceStepTransition:hski",
-              "table": "ProduceStepTransition",
-              "name": null,
-              "count": 12
-            },
-            {
-              "id": "ProduceStepTransition:hume",
-              "table": "ProduceStepTransition",
-              "name": null,
-              "count": 12
-            },
-            {
-              "id": "ProduceStepTransition:kcna",
-              "table": "ProduceStepTransition",
-              "name": null,
-              "count": 12
             }
           ],
-          "owner_total": 12,
+          "owner_total": 2,
           "tables": {
             "ProduceStepTransition": 112
           }
@@ -4061,45 +3805,9 @@
               "table": "Produce",
               "name": null,
               "count": 80
-            },
-            {
-              "id": "ProduceStepTransition:amao",
-              "table": "ProduceStepTransition",
-              "name": null,
-              "count": 8
-            },
-            {
-              "id": "ProduceStepTransition:hmsz",
-              "table": "ProduceStepTransition",
-              "name": null,
-              "count": 8
-            },
-            {
-              "id": "ProduceStepTransition:hrnm",
-              "table": "ProduceStepTransition",
-              "name": null,
-              "count": 8
-            },
-            {
-              "id": "ProduceStepTransition:hski",
-              "table": "ProduceStepTransition",
-              "name": null,
-              "count": 8
-            },
-            {
-              "id": "ProduceStepTransition:hume",
-              "table": "ProduceStepTransition",
-              "name": null,
-              "count": 8
-            },
-            {
-              "id": "ProduceStepTransition:kcna",
-              "table": "ProduceStepTransition",
-              "name": null,
-              "count": 8
             }
           ],
-          "owner_total": 12,
+          "owner_total": 2,
           "tables": {
             "ProduceStepTransition": 80
           }
@@ -4121,45 +3829,9 @@
               "table": "Produce",
               "name": null,
               "count": 112
-            },
-            {
-              "id": "ProduceStepTransition:amao",
-              "table": "ProduceStepTransition",
-              "name": null,
-              "count": 12
-            },
-            {
-              "id": "ProduceStepTransition:hmsz",
-              "table": "ProduceStepTransition",
-              "name": null,
-              "count": 12
-            },
-            {
-              "id": "ProduceStepTransition:hrnm",
-              "table": "ProduceStepTransition",
-              "name": null,
-              "count": 12
-            },
-            {
-              "id": "ProduceStepTransition:hski",
-              "table": "ProduceStepTransition",
-              "name": null,
-              "count": 12
-            },
-            {
-              "id": "ProduceStepTransition:hume",
-              "table": "ProduceStepTransition",
-              "name": null,
-              "count": 12
-            },
-            {
-              "id": "ProduceStepTransition:kcna",
-              "table": "ProduceStepTransition",
-              "name": null,
-              "count": 12
             }
           ],
-          "owner_total": 12,
+          "owner_total": 2,
           "tables": {
             "ProduceStepTransition": 112
           }
@@ -4181,45 +3853,9 @@
               "table": "Produce",
               "name": null,
               "count": 80
-            },
-            {
-              "id": "ProduceStepTransition:amao",
-              "table": "ProduceStepTransition",
-              "name": null,
-              "count": 8
-            },
-            {
-              "id": "ProduceStepTransition:hmsz",
-              "table": "ProduceStepTransition",
-              "name": null,
-              "count": 8
-            },
-            {
-              "id": "ProduceStepTransition:hrnm",
-              "table": "ProduceStepTransition",
-              "name": null,
-              "count": 8
-            },
-            {
-              "id": "ProduceStepTransition:hski",
-              "table": "ProduceStepTransition",
-              "name": null,
-              "count": 8
-            },
-            {
-              "id": "ProduceStepTransition:hume",
-              "table": "ProduceStepTransition",
-              "name": null,
-              "count": 8
-            },
-            {
-              "id": "ProduceStepTransition:kcna",
-              "table": "ProduceStepTransition",
-              "name": null,
-              "count": 8
             }
           ],
-          "owner_total": 12,
+          "owner_total": 2,
           "tables": {
             "ProduceStepTransition": 80
           }
@@ -4241,45 +3877,9 @@
               "table": "Produce",
               "name": null,
               "count": 112
-            },
-            {
-              "id": "ProduceStepTransition:amao",
-              "table": "ProduceStepTransition",
-              "name": null,
-              "count": 12
-            },
-            {
-              "id": "ProduceStepTransition:hmsz",
-              "table": "ProduceStepTransition",
-              "name": null,
-              "count": 12
-            },
-            {
-              "id": "ProduceStepTransition:hrnm",
-              "table": "ProduceStepTransition",
-              "name": null,
-              "count": 12
-            },
-            {
-              "id": "ProduceStepTransition:hski",
-              "table": "ProduceStepTransition",
-              "name": null,
-              "count": 12
-            },
-            {
-              "id": "ProduceStepTransition:hume",
-              "table": "ProduceStepTransition",
-              "name": null,
-              "count": 12
-            },
-            {
-              "id": "ProduceStepTransition:kcna",
-              "table": "ProduceStepTransition",
-              "name": null,
-              "count": 12
             }
           ],
-          "owner_total": 12,
+          "owner_total": 2,
           "tables": {
             "ProduceStepTransition": 112
           }
@@ -4301,45 +3901,9 @@
               "table": "Produce",
               "name": null,
               "count": 80
-            },
-            {
-              "id": "ProduceStepTransition:amao",
-              "table": "ProduceStepTransition",
-              "name": null,
-              "count": 8
-            },
-            {
-              "id": "ProduceStepTransition:hmsz",
-              "table": "ProduceStepTransition",
-              "name": null,
-              "count": 8
-            },
-            {
-              "id": "ProduceStepTransition:hrnm",
-              "table": "ProduceStepTransition",
-              "name": null,
-              "count": 8
-            },
-            {
-              "id": "ProduceStepTransition:hski",
-              "table": "ProduceStepTransition",
-              "name": null,
-              "count": 8
-            },
-            {
-              "id": "ProduceStepTransition:hume",
-              "table": "ProduceStepTransition",
-              "name": null,
-              "count": 8
-            },
-            {
-              "id": "ProduceStepTransition:kcna",
-              "table": "ProduceStepTransition",
-              "name": null,
-              "count": 8
             }
           ],
-          "owner_total": 12,
+          "owner_total": 2,
           "tables": {
             "ProduceStepTransition": 80
           }
@@ -4361,45 +3925,9 @@
               "table": "Produce",
               "name": null,
               "count": 112
-            },
-            {
-              "id": "ProduceStepTransition:amao",
-              "table": "ProduceStepTransition",
-              "name": null,
-              "count": 12
-            },
-            {
-              "id": "ProduceStepTransition:hmsz",
-              "table": "ProduceStepTransition",
-              "name": null,
-              "count": 12
-            },
-            {
-              "id": "ProduceStepTransition:hrnm",
-              "table": "ProduceStepTransition",
-              "name": null,
-              "count": 12
-            },
-            {
-              "id": "ProduceStepTransition:hski",
-              "table": "ProduceStepTransition",
-              "name": null,
-              "count": 12
-            },
-            {
-              "id": "ProduceStepTransition:hume",
-              "table": "ProduceStepTransition",
-              "name": null,
-              "count": 12
-            },
-            {
-              "id": "ProduceStepTransition:kcna",
-              "table": "ProduceStepTransition",
-              "name": null,
-              "count": 12
             }
           ],
-          "owner_total": 12,
+          "owner_total": 2,
           "tables": {
             "ProduceStepTransition": 112
           }
@@ -4421,45 +3949,9 @@
               "table": "Produce",
               "name": null,
               "count": 80
-            },
-            {
-              "id": "ProduceStepTransition:amao",
-              "table": "ProduceStepTransition",
-              "name": null,
-              "count": 8
-            },
-            {
-              "id": "ProduceStepTransition:hmsz",
-              "table": "ProduceStepTransition",
-              "name": null,
-              "count": 8
-            },
-            {
-              "id": "ProduceStepTransition:hrnm",
-              "table": "ProduceStepTransition",
-              "name": null,
-              "count": 8
-            },
-            {
-              "id": "ProduceStepTransition:hski",
-              "table": "ProduceStepTransition",
-              "name": null,
-              "count": 8
-            },
-            {
-              "id": "ProduceStepTransition:hume",
-              "table": "ProduceStepTransition",
-              "name": null,
-              "count": 8
-            },
-            {
-              "id": "ProduceStepTransition:kcna",
-              "table": "ProduceStepTransition",
-              "name": null,
-              "count": 8
             }
           ],
-          "owner_total": 12,
+          "owner_total": 2,
           "tables": {
             "ProduceStepTransition": 80
           }

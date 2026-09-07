@@ -6,8 +6,9 @@ from ..ids import ExamEffect, GrowEffect
 from .context import ExamEffectContext
 
 
+# 注意：ExamReviewAdditive（好印象増加量増加 +n%、千分比、带回合数）是持续修饰，由 timed.py 挂载，
+# 并在 ExamRuntime._apply_scalar_modifiers 里作用于好印象增量，不再当作即时收益。
 REVIEW_EFFECT_TYPES = {
-    ExamEffect.REVIEW_ADDITIVE,
     ExamEffect.REVIEW_DEPEND_AGGRESSIVE,
     ExamEffect.REVIEW_DEPEND_BLOCK,
     ExamEffect.REVIEW_PER_SEARCH_COUNT,
@@ -20,9 +21,7 @@ def apply_review_effect(context: ExamEffectContext, effect: dict[str, Any], sour
     """处理好印象的增减、倍率和依赖收益。"""
 
     effect_type = str(effect.get('effectType') or '')
-    if effect_type == ExamEffect.REVIEW_ADDITIVE:
-        delta = context.direct_value(effect)
-    elif effect_type == ExamEffect.REVIEW_DEPEND_AGGRESSIVE:
+    if effect_type == ExamEffect.REVIEW_DEPEND_AGGRESSIVE:
         delta = context.ceil_positive(context.resources['aggressive'] * context.ratio_value(effect))
     elif effect_type == ExamEffect.REVIEW_DEPEND_BLOCK:
         delta = context.ceil_positive(context.resources['block'] * context.ratio_value(effect))

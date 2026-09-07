@@ -32,6 +32,13 @@ from ...produce_score import calculate_hajime_produce_rating, calculate_nia_prod
 from ...repository.master_data import MasterDataRepository, ScenarioSpec
 from ...training.reward_config import ProduceRewardConfig, build_produce_reward_config
 from ..exam.runtime import ExamActionCandidate, ExamRuntime, default_audition_row_selector
+from .hif import (
+    HifRuntimeSupport,
+    HifSelectionMemory,
+    is_hif_interval_action,
+    is_hif_open_lesson_action,
+    is_hif_school_action,
+)
 from .items import ActiveProduceItem, ProduceItemInterpreter, RuntimeExamStatusEnchantSpec
 
 
@@ -272,6 +279,8 @@ class ProduceActionCandidate:
     stat_deltas: tuple[float, float, float] = (0.0, 0.0, 0.0)
     # 追込课 boost 触发时的均分参数（成功=三参数均分，失败=用 stat_deltas）
     boost_stat_deltas: tuple[float, float, float] = (0.0, 0.0, 0.0)
+    # H.I.F 公開レッスン 的スター性基础获得量（未乘 StarPermilUp 倍率）
+    star_delta: float = 0.0
     available: bool = True
     source_row_id: str = ''
     resource_type: str = ''
@@ -386,8 +395,13 @@ class ProduceRuntime:
         produce_reward_config: ProduceRewardConfig | None = None,
         exam_action_selectors: dict[str, ExamActionSelector] | None = None,
         force_lowest_audition_route: bool = False,
+        hif_selection_memory: HifSelectionMemory | None = None,
     ):
-        """初始化培育运行时，并预读取事件、课程和卡组相关主数据。"""
+        """初始化培育运行时，并预读取事件、课程和卡组相关主数据。
+
+        Args:
+            hif_selection_memory: H.I.F 本戦 使用的選抜試験メモリー；其他场景忽略。
+        """
 
         self.repository = repository
         self.produce_reward_cfg: ProduceRewardConfig = produce_reward_config or build_produce_reward_config()
@@ -406,6 +420,11 @@ class ProduceRuntime:
         self.lesson_levels = repository.load_table('ProduceStepLessonLevel')
         self.produce_item_interpreter = ProduceItemInterpreter(repository)
         self.checkpoints = self._build_checkpoint_positions()
+        self.hif: HifRuntimeSupport | None = (
+            HifRuntimeSupport(self, scenario.hif, selection_memory=hif_selection_memory)
+            if scenario.hif is not None
+            else None
+        )
 
         self.state: dict[str, Any] = {}
         self.deck: list[dict[str, Any]] = []
@@ -441,8 +460,11 @@ class ProduceRuntime:
         self._selection_card_pool_cache_value: list[dict[str, Any]] = []
 
     def _build_checkpoint_positions(self) -> list[tuple[int, str]]:
-        """按路线考试数量计算阶段性考试触发点。"""
+        """按路线考试数量计算阶段性考试触发点；场景显式给出 `checkpoint_steps` 时优先使用。"""
 
+        explicit_steps = tuple(int(value) for value in (self.scenario.checkpoint_steps or ()))
+        if explicit_steps and len(explicit_steps) == len(self.scenario.audition_sequence):
+            return list(zip(explicit_steps, self.scenario.audition_sequence))
         if len(self.scenario.audition_sequence) == 2:
             ratios = [0.5, 1.0]
         else:
@@ -487,11 +509,13 @@ class ProduceRuntime:
             visual_growth = float(idol_card_row.get('produceVisualGrowthRatePermil') or 0.0) / 1000.0
         if base_stamina <= 0.0:
             raise ValueError(f'Idol stamina missing from master database: produce_id={self.scenario.produce_id}')
-        parameter_limit = self._parameter_growth_limit()
+        parameter_limit = max(float(self.scenario.parameter_growth_limit or 0.0), 0.0)
         if parameter_limit > 0:
             base_stats = np.clip(base_stats, 0.0, parameter_limit)
         customize_slots = int(self.produce_setting.get('customizeProduceCardCount') or 0)
+        hif_fields = self.hif.base_state_fields() if self.hif is not None else {}
         return {
+            **hif_fields,
             'step': 0,
             'max_steps': int(self.scenario.steps),
             'stamina': float(base_stamina),
@@ -549,9 +573,23 @@ class ProduceRuntime:
         }
 
     def _parameter_growth_limit(self) -> float:
-        """返回当前模式主数据里的三维成长上限。"""
+        """返回当前三维成长上限（主数据基础值 + `ProduceEffectType_ParameterLimitUp` 抬升）。"""
 
+        state_limit = self.state.get('parameter_growth_limit') if isinstance(self.state, dict) else None
+        if state_limit is not None:
+            return max(float(state_limit or 0.0), 0.0)
         return max(float(self.scenario.parameter_growth_limit or 0.0), 0.0)
+
+    def _effective_drink_limit(self) -> int:
+        """返回当前 P 饮料持有上限（场景基础值 + `ProduceDrinkPossessLimitUp`，受主数据 MaxLimit 约束）。"""
+
+        base_limit = int(self.scenario.drink_limit)
+        bonus = int(round(float(self.state.get('drink_limit_bonus') or 0.0))) if isinstance(self.state, dict) else 0
+        max_limit = int(self.produce_setting.get('produceDrinkPossessMaxLimit') or 0)
+        limit = base_limit + max(bonus, 0)
+        if max_limit > 0:
+            limit = min(limit, max_limit)
+        return max(limit, 1)
 
     def _clamp_parameter_value(self, value: float) -> float:
         """按当前模式上限裁剪单项三维属性。"""
@@ -762,6 +800,8 @@ class ProduceRuntime:
         self._prev_produce_phi: float = 0.0
         self._apply_loadout_start_effects()
         self._dispatch_produce_item_phase('ProducePhaseType_ProduceStart')
+        if self.hif is not None:
+            self.hif.on_reset()
         self._trim_drinks()
         self._refresh_quality_scores()
         # 初始化势函数快照（确保 state 已就绪）
@@ -1465,10 +1505,21 @@ class ProduceRuntime:
 
         return self.scenario.route_type == 'first_star' and self._remaining_weeks_to_next_audition() == 1
 
+    def _is_forced_pre_audition_refresh_week(self) -> bool:
+        """判断当前周是否为考试日（初路线的考前恢复周，或 H.I.F 的试验日）。
+
+        H.I.F 的试验日本身不提供自由行动，只做 `beforeAuditionRefreshStaminaRecoveryPermil`（50%）的试验前回复，
+        这里复用初路线的「强制恢复周」机制表达。
+        """
+
+        if self._is_first_star_pre_audition_refresh_week():
+            return True
+        return self.hif is not None and self._remaining_weeks_to_next_audition() == 1
+
     def _normal_refresh_has_stamina_value(self) -> bool:
         """判断普通休息是否符合体力未满的选择条件。"""
 
-        if self._is_first_star_pre_audition_refresh_week():
+        if self._is_forced_pre_audition_refresh_week():
             return True
         max_stamina = max(float(self.state.get('max_stamina') or 0.0), 1.0)
         stamina = float(self.state.get('stamina') or 0.0)
@@ -1477,7 +1528,7 @@ class ProduceRuntime:
     def _is_refresh_locked_by_early_schedule(self) -> bool:
         """判断当前周是否处于文档规定的休息锁定期。"""
 
-        if self._is_first_star_pre_audition_refresh_week():
+        if self._is_forced_pre_audition_refresh_week():
             return False
         current_step = int(self.state.get('step') or 0)
         if current_step >= 4:
@@ -2345,7 +2396,11 @@ class ProduceRuntime:
         if not bool(result.get('cleared')):
             # 中间考试不合格时标记失败状态
             self.state['failed'] = True
+            if self.hif is not None:
+                self.hif.apply_accepted_result(result)
             return
+        if self.hif is not None:
+            self.hif.apply_accepted_result(result)
         self.state['fan_votes'] += float(result.get('fan_vote_gain') or 0.0)
         self.state['deck_quality'] += float(result.get('deck_quality_gain') or 0.0)
         self.state['drink_quality'] += float(result.get('drink_quality_gain') or 0.0)
@@ -2388,6 +2443,8 @@ class ProduceRuntime:
             norm_score = math.log1p(max(raw_score, 0.0)) / math.log1p(max(cfg.score_norm_log_base, 1.0))
             grade = str(produce_result.get('rank') or '')
             grade_bonus_map = {
+                'S5': cfg.terminal_grade_s4,
+                'S4+': cfg.terminal_grade_s4,
                 'S4': cfg.terminal_grade_s4,
                 'SSS+': cfg.terminal_grade_sss_plus,
                 'SSS': cfg.terminal_grade_sss,
@@ -2452,6 +2509,11 @@ class ProduceRuntime:
                 nia_param_fallback = 0.0
                 score_term = min(score_term * FAILED_ROUTE_SCORE_SCALE, 0.75)
                 stage_progress_bonus = min(stage_progress_bonus * 0.20, 0.20)
+            elif self.hif is not None and self.hif.is_final and not competitive_top1:
+                # 本戦 未成为一番星：路线名义通过，但终局价值明显低于优胜。
+                route_bonus *= 0.55
+                grade_bonus = min(grade_bonus, cfg.terminal_grade_b_plus)
+                score_term *= 0.72
             elif self.scenario.route_type == 'first_star' and not competitive_pass:
                 # “初” 路线前三外都视作失败；高 produce score 不能覆盖名次失败。
                 route_bonus = min(route_bonus, 0.0) + cfg.terminal_route_fail_penalty
@@ -2673,6 +2735,8 @@ class ProduceRuntime:
 
         if not cleared:
             return 'failed'
+        if self.hif is not None:
+            return self.hif.ending_type(cleared=cleared, final_rank=final_rank)
         if final_rank is None:
             return 'clear'
         if self.scenario.route_type == 'nia':
@@ -2718,12 +2782,14 @@ class ProduceRuntime:
         final_rank = int(final_audition.get('rank') or 0) or None
         final_score = float(final_audition.get('effective_score') or self.state.get('last_exam_score') or 0.0)
         ending_type = self._ending_type(cleared=cleared, final_rank=final_rank)
-        route_label = 'nia' if self.scenario.route_type == 'nia' else 'first_star'
+        route_label = str(self.scenario.route_type) if self.hif is not None else ('nia' if self.scenario.route_type == 'nia' else 'first_star')
         dearness_level = int(self.state.get('dearness_level') or 0)
         ending_grade = self._ending_grade(cleared=cleared, final_rank=final_rank)
         p_live_variation = self._p_live_variation(cleared=cleared, final_rank=final_rank)
         produce_result: dict[str, Any]
-        if self.scenario.route_type == 'nia':
+        if self.hif is not None:
+            produce_result = self.hif.produce_result(cleared=cleared)
+        elif self.scenario.route_type == 'nia':
             score_weights = np.array(self.scenario.score_weights, dtype=np.float32)
             score_weights = score_weights / max(float(score_weights.sum()), 1e-6)
             approx_scores = tuple(float(final_score) * float(w) for w in score_weights)
@@ -2794,7 +2860,11 @@ class ProduceRuntime:
         )
         competitive_top1 = False
         competitive_pass = False
-        if self.scenario.route_type == 'nia':
+        if self.hif is not None:
+            # 選抜試験：三场全部通过即达标；本戦：合计分第一（一番星）才算 top1，通过=cleared。
+            competitive_pass = bool(cleared)
+            competitive_top1 = bool(cleared) and (bool(self.state.get('hif_prima_stella')) if self.hif.is_final else bool(all_auditions_first))
+        elif self.scenario.route_type == 'nia':
             competitive_top1 = bool(cleared) and bool(all_auditions_first) and final_rank == 1
             competitive_pass = competitive_top1
         else:
@@ -2816,6 +2886,7 @@ class ProduceRuntime:
             'final_audition_stage': str(final_audition.get('stage_type') or ''),
             'fan_votes': float(self.state.get('fan_votes') or 0.0),
             'dearness_level': dearness_level,
+            'star_quality': float(self.state.get('star_quality') or 0.0),
             'ending': {
                 'type': ending_type,
                 'grade': ending_grade,
@@ -2881,6 +2952,13 @@ class ProduceRuntime:
             'reward_breakdown': reward_breakdown,
         }
 
+    def export_hif_selection_memory(self) -> HifSelectionMemory:
+        """导出 H.I.F 選抜試験メモリー（仅 HIF 场景可用）。"""
+
+        if self.hif is None:
+            raise ValueError(f'Scenario is not an H.I.F produce: {self.scenario.produce_id}')
+        return self.hif.export_selection_memory()
+
     def legal_actions(self) -> list[ProduceActionCandidate]:
         """采样当前周的所有动作候选，并标记可用性。"""
 
@@ -2913,7 +2991,14 @@ class ProduceRuntime:
             candidate = self._sample_action(action_type)
             candidate.available = self._action_available(candidate)
             candidates.append(candidate)
-        if self._is_first_star_pre_audition_refresh_week():
+        if self.hif is not None and self.hif.is_interval_day():
+            interval_candidates = [candidate for candidate in candidates if is_hif_interval_action(candidate.action_type)]
+            if interval_candidates:
+                for candidate in interval_candidates:
+                    candidate.available = True
+                self._candidates = interval_candidates
+                return interval_candidates
+        if self._is_forced_pre_audition_refresh_week():
             forced_refresh = next((candidate for candidate in candidates if candidate.action_type == ACTION_REFRESH), None)
             if forced_refresh is not None:
                 forced_refresh.available = True
@@ -3108,7 +3193,7 @@ class ProduceRuntime:
             self._dispatch_produce_item_phase('ProducePhaseType_StartLesson', **phase_context)
         elif candidate.action_type == ACTION_PRESENT:
             self._dispatch_produce_item_phase('ProducePhaseType_StartPresent', **phase_context)
-        elif candidate.action_type == ACTION_SCHOOL_CLASS:
+        elif candidate.action_type == ACTION_SCHOOL_CLASS or is_hif_school_action(candidate.action_type):
             self._dispatch_produce_item_phase('ProducePhaseType_StartPresent', **phase_context)
         elif candidate.action_type == ACTION_OUTING:
             self._dispatch_produce_item_phase('ProducePhaseType_StartRefresh', **phase_context)
@@ -3142,9 +3227,14 @@ class ProduceRuntime:
                         if card_id:
                             self.legend_seen_card_ids.add(card_id)
 
-            self._apply_effect_rows(candidate.produce_effect_ids, source_action_type=candidate.action_type)
+            effect_source_action_type = self.hif.effect_source_action_type(candidate.action_type) if self.hif is not None else candidate.action_type
+            self._apply_effect_rows(candidate.produce_effect_ids, source_action_type=effect_source_action_type)
             succeeded = self.np_random.random() <= candidate.success_probability
-            self._apply_effect_rows(candidate.success_effect_ids if succeeded else candidate.fail_effect_ids, source_action_type=candidate.action_type)
+            self._apply_effect_rows(candidate.success_effect_ids if succeeded else candidate.fail_effect_ids, source_action_type=effect_source_action_type)
+            if self.hif is not None and float(candidate.star_delta or 0.0) > 0.0:
+                self.hif.gain_star(float(candidate.star_delta))
+            if self.hif is not None and is_hif_interval_action(candidate.action_type):
+                self.hif.apply_interval(candidate)
             # 追込课：boost 触发（成功）→ 三参数均分；未触发（失败）→ 单参数减半
             if is_hard_lesson:
                 apply_deltas = candidate.boost_stat_deltas if succeeded else candidate.stat_deltas
@@ -3202,7 +3292,7 @@ class ProduceRuntime:
                     self._grant_random_drink()
                 self._dispatch_produce_item_phase('ProducePhaseType_EndStepEventSchool', **phase_context)
                 self._dispatch_produce_item_phase('ProducePhaseType_EndPresent', **phase_context)
-            elif candidate.action_type == ACTION_SCHOOL_CLASS:
+            elif candidate.action_type == ACTION_SCHOOL_CLASS or is_hif_school_action(candidate.action_type):
                 self._dispatch_produce_item_phase('ProducePhaseType_EndStepEventSchool', **phase_context)
             elif candidate.action_type == ACTION_OUTING:
                 # 帮助页：外出概率附带 P 饮料
@@ -3396,7 +3486,7 @@ class ProduceRuntime:
                 if _is_shop_drink_action(candidate.action_type):
                     return (
                         bool(candidate.resource_id)
-                        and len(self.drinks) < max(self.scenario.drink_limit, 1)
+                        and len(self.drinks) < self._effective_drink_limit()
                         and self.state['produce_points'] + candidate.produce_point_delta >= 0.0
                     )
                 if _is_shop_upgrade_action(candidate.action_type) or _is_shop_delete_action(candidate.action_type):
@@ -3432,8 +3522,12 @@ class ProduceRuntime:
             return False
         if self._is_first_star_pre_audition_hard_lesson_week() and candidate.action_type not in HARD_ACTION_TYPES:
             return False
-        if self._is_first_star_pre_audition_refresh_week() and candidate.action_type != ACTION_REFRESH:
+        if self._is_forced_pre_audition_refresh_week() and candidate.action_type != ACTION_REFRESH:
             return False
+        if self.hif is not None:
+            hif_available = self.hif.action_available(candidate)
+            if hif_available is not None:
+                return hif_available
         if (
             self.scenario.produce_id == 'produce-001'
             and candidate.action_type in HARD_ACTION_TYPES
@@ -3536,8 +3630,12 @@ class ProduceRuntime:
             return replace(self.shop_inventory.get(action_type, self._empty_shop_candidate(action_type)))
         if _is_shop_upgrade_action(action_type) or _is_shop_delete_action(action_type):
             return replace(self.shop_inventory.get(action_type, self._empty_shop_candidate(action_type)))
+        if self.hif is not None:
+            hif_candidate = self.hif.sample_action(action_type)
+            if hif_candidate is not None:
+                return hif_candidate
         if action_type == ACTION_REFRESH:
-            is_pre_audition_refresh = self._is_first_star_pre_audition_refresh_week()
+            is_pre_audition_refresh = self._is_forced_pre_audition_refresh_week()
             recovery_setting_key = 'beforeAuditionRefreshStaminaRecoveryPermil' if is_pre_audition_refresh else 'refreshStaminaRecoveryPermil'
             recovery_permille = float(
                 self.produce_setting.get(recovery_setting_key) or 0.0
@@ -3547,7 +3645,10 @@ class ProduceRuntime:
                     'Refresh recovery setting missing from master database: '
                     f'produce_id={self.scenario.produce_id}, setting_key={recovery_setting_key}'
                 )
-            label = '考前恢复' if is_pre_audition_refresh else '休息'
+            if is_pre_audition_refresh and self.hif is not None:
+                label = '試験日(考前恢复)'
+            else:
+                label = '考前恢复' if is_pre_audition_refresh else '休息'
             return ProduceActionCandidate(
                 label=label,
                 action_type=action_type,
@@ -4003,6 +4104,42 @@ class ProduceRuntime:
         if effect_type == 'ProduceEffectType_EventActivityProducePointUp':
             self.state['activity_produce_point_bonus'] += value / 1000.0
             return
+        if effect_type == 'ProduceEffectType_EventActivityProducePointDown':
+            self.state['activity_produce_point_bonus'] -= value / 1000.0
+            return
+        if effect_type == 'ProduceEffectType_StarAddition':
+            # H.I.F スター性 加算（例：H.I.Fワッペン「スキルカード獲得時、スター性+10」）。
+            if self.hif is not None:
+                self.hif.gain_star(value)
+            else:
+                self.state['star_quality'] = float(self.state.get('star_quality') or 0.0) + value
+            return
+        if effect_type == 'ProduceEffectType_StarPermilUp':
+            # 獲得するスター性を X% 増加（親愛度 28~36：50‰~500‰）。
+            self.state['star_gain_rate'] = float(self.state.get('star_gain_rate') or 0.0) + value / 1000.0
+            return
+        if effect_type == 'ProduceEffectType_ParameterLimitUp':
+            # 全属性上限値 +N（H.I.F ボーナス 面板，仅本戦）。
+            self.state['parameter_growth_limit'] = float(self._parameter_growth_limit()) + value
+            return
+        if effect_type == 'ProduceEffectType_ProduceDrinkPossessLimitUp':
+            self.state['drink_limit_bonus'] = float(self.state.get('drink_limit_bonus') or 0.0) + max(value, 1.0)
+            return
+        if effect_type == 'ProduceEffectType_CustomizeProduceCardProducePointDownMultiple':
+            self.state['customize_point_discount'] = float(self.state.get('customize_point_discount') or 0.0) + value / 1000.0
+            return
+        if effect_type == 'ProduceEffectType_ProduceCustomizeItemUpgrade':
+            # カスタムPアイテム 升级（試験2/3 通过后）。TODO(HIF-verify): 具体效果未建模，仅推进层级。
+            self.state['customize_item_tier'] = min(float(self.state.get('customize_item_tier') or 0.0) + 1.0, 3.0)
+            return
+        if effect_type == 'ProduceEffectType_ProduceCardChangeSelect':
+            # セレクトチェンジ：从命中卡里选 1 张换成新卡；这里按随机命中实现（玩家选择 → 随机）。
+            self._replace_matching_cards(
+                str(effect.get('produceCardSearchId') or ''),
+                upgraded=False,
+                source_action_type=source_action_type,
+            )
+            return
         if effect_type == 'ProduceEffectType_EventBusinessVoteCountUp':
             self.state['business_vote_bonus'] += value / 1000.0
             return
@@ -4069,6 +4206,7 @@ class ProduceRuntime:
             'ProduceEffectType_ShopPriceUpMultiple',
             'ProduceEffectType_ShopProduceCardDeletePriceDiscountMultiple',
             'ProduceEffectType_ShopProduceCardPriceDiscountMultiple',
+            'ProduceEffectType_ShopProduceCardPriceDiscountMultiplePermanent',
             'ProduceEffectType_ShopProduceCardUpgradePriceDiscountMultiple',
             'ProduceEffectType_ShopProduceDrinkPriceDiscountMultiple',
         }:
@@ -4172,6 +4310,9 @@ class ProduceRuntime:
         count = int(max(effect.get('pickCountMax') or effect.get('pickCountMin') or 1, 1))
         if resource_type == 'ProduceResourceType_ProduceCard' and (source_action_type == ACTION_PRESENT or _is_lesson_action(source_action_type)):
             count += int(round(self.state['reward_card_count_bonus']))
+        if resource_type == 'ProduceResourceType_ProduceCustomizeItem':
+            self.state['customize_item_tier'] = max(float(self.state.get('customize_item_tier') or 0.0), 1.0)
+            return
         for _ in range(max(count, 0)):
             if resource_type == 'ProduceResourceType_ProduceDrink':
                 candidates = self.repository.build_drink_inventory(
@@ -4206,7 +4347,7 @@ class ProduceRuntime:
     def _grant_random_drink(self) -> bool:
         """从主数据可用 P 饮料池中随机授予一瓶 P 饮料。"""
 
-        if len(self.drinks) >= max(self.scenario.drink_limit, 1):
+        if len(self.drinks) >= self._effective_drink_limit():
             return False
         drink_candidates = self.repository.build_drink_inventory(
             self.scenario,
@@ -4250,6 +4391,9 @@ class ProduceRuntime:
             self._dispatch_produce_item_phase('ProducePhaseType_GetProduceItem')
         elif resource_type == 'ProduceResourceType_ProduceSkill':
             self.support_skills.append(resource_id)
+        elif resource_type == 'ProduceResourceType_ProduceCustomizeItem':
+            # H.I.F カスタムPアイテム：主数据未提供其效果的可执行定义，仅记录层级。TODO(HIF-verify)
+            self.state['customize_item_tier'] = max(float(self.state.get('customize_item_tier') or 0.0), 1.0)
 
     def _matching_deck_indices(self, search_id: str) -> list[int]:
         """查找当前牌组里符合搜索条件的卡牌下标。"""
@@ -4407,13 +4551,14 @@ class ProduceRuntime:
     def _trim_drinks(self) -> None:
         """按场景上限裁剪饮料栏。"""
 
-        if len(self.drinks) <= self.scenario.drink_limit:
+        drink_limit = self._effective_drink_limit()
+        if len(self.drinks) <= drink_limit:
             return
         self.drinks.sort(
             key=lambda row: (len(self.repository.drink_exam_effect_types(row)), str(row.get('rarity') or '')),
             reverse=True,
         )
-        self.drinks = self.drinks[: self.scenario.drink_limit]
+        self.drinks = self.drinks[:drink_limit]
 
     def _refresh_quality_scores(self) -> None:
         """重新估算当前卡组和饮料质量，用于奖励与观测。"""
@@ -4617,6 +4762,9 @@ class ProduceRuntime:
             score_max = max(float(row.get('scoreMax') or score_min), score_min)
             if np.isclose(score_min, score_max):
                 sampled = score_min
+            elif self.hif is not None and self.hif.rival_score_multiplier_mode() == 'midpoint' and bool((selected_row or {}).get('isStaticNpcScore')):
+                # TODO(HIF-verify): 本戦 isStaticNpcScore=true 的对手是否仍在 min/max 区间内随机（hif.md §13-7）。
+                sampled = (score_min + score_max) * 0.5
             else:
                 midpoint = (score_min + score_max) * 0.5
                 sampled = float(self.np_random.triangular(score_min, midpoint, score_max))
@@ -4640,6 +4788,8 @@ class ProduceRuntime:
                     'mid': float(phase_scores[1]),
                     'ed': float(phase_scores[2]),
                     'final': float(final_score),
+                    'character_id': str(row.get('characterId') or ''),
+                    'npc_mob_id': str(row.get('produceExamBattleNpcMobId') or ''),
                 }
             )
         rank = 1 + sum(score > effective_score for score in rival_scores)
@@ -4691,6 +4841,9 @@ class ProduceRuntime:
             ),
         )
         runtime.base_score_bonus_multiplier *= max(1.0 + float(self.state.get('audition_parameter_bonus') or 0.0), 0.0)
+        if self.hif is not None:
+            # スター性 越高，试验スコアボーナス 越高（hif.md §6.6）。通过 ExamRuntime 的公开倍率属性注入，不改考试内核。
+            runtime.base_score_bonus_multiplier *= max(1.0 + self.hif.star_score_bonus_ratio(), 0.0)
         runtime.score_bonus_multiplier = runtime.base_score_bonus_multiplier
         if runtime.battle_kind == 'lesson' and runtime.lesson_perfect_value is not None:
             runtime.lesson_perfect_value *= 1.0 + self._challenge_lesson_perfect_bonus_ratio()
@@ -4713,6 +4866,18 @@ class ProduceRuntime:
         rival_scores, rival_phase_breakdowns, rank, rival_multiplier = self._simulate_rival_scores(runtime, effective_score)
         force_end_score = float(profile.get('force_end_score') or 0.0)
         cleared = (force_end_score > 0 and runtime.score >= force_end_score) or rank <= rank_threshold
+        hif_extra: dict[str, Any] = {}
+        if self.hif is not None:
+            hif_extra = self.hif.adjust_audition_result(
+                stage_type=stage_type,
+                effective_score=effective_score,
+                rival_scores=list(rival_scores),
+                rival_character_ids=[str(item.get('character_id') or '') for item in rival_phase_breakdowns],
+                rank=rank,
+                rank_threshold=rank_threshold,
+            )
+            rank = int(hif_extra.get('rank', rank))
+            cleared = bool(hif_extra.get('cleared', cleared))
         sorted_rivals = sorted(rival_scores, reverse=True)
         threshold_index = min(max(rank_threshold - 1, 0), max(len(sorted_rivals) - 1, 0))
         threshold_rival_score = sorted_rivals[threshold_index] if sorted_rivals else float(profile.get('base_score') or 0.0)
@@ -4779,4 +4944,5 @@ class ProduceRuntime:
             'drink_quality_gain': drink_quality_gain,
             'challenge_lesson_perfect_bonus_ratio': float(self.state.get('challenge_lesson_perfect_bonus_ratio') or 0.0),
             'challenge_audition_npc_bonus_ratio': float(self.state.get('challenge_audition_npc_bonus_ratio') or 0.0),
+            **hif_extra,
         }
