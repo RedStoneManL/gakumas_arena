@@ -64,6 +64,10 @@ class LoadoutConfig:
     support_card_ids: tuple[str, ...] = ()
     support_card_level: int | None = None
     challenge_item_ids: tuple[str, ...] = ()
+    #: ポテンシャル 段数（None = 0 未解放）；プリマステラ（None = 0）；メモリー（``ProduceMemorySpec`` 或 ``MemoryGift`` id）。
+    potential_level: int | None = None
+    prima_stella_level: int | None = None
+    memories: tuple[Any, ...] = ()
     produce_reward_config_path: str | None = None
     produce_reward_overrides: dict[str, Any] | None = None
     force_lowest_audition_route: bool = False
@@ -116,8 +120,11 @@ def resolve_loadout(
     challenge_item_ids: tuple[str, ...] = (),
     produce_reward_config_path: str | None = None,
     produce_reward_overrides: dict[str, Any] | None = None,
+    potential_level: int | None = None,
+    prima_stella_level: int | None = None,
+    memories: tuple[Any, ...] = (),
 ) -> IdolLoadout | None:
-    """按场景和偶像参数解析 loadout，并做 LRU 缓存。"""
+    """按场景和偶像参数解析 loadout，并做 LRU 缓存（``memories`` 需可哈希：``ProduceMemorySpec`` / id 字符串元组）。"""
 
     if not idol_card_id:
         return None
@@ -139,6 +146,9 @@ def resolve_loadout(
         selected_support_card_ids=support_card_ids,
         selected_support_card_level=support_card_level,
         selected_challenge_item_ids=challenge_item_ids,
+        potential_level=potential_level,
+        prima_stella_level=prima_stella_level,
+        memories=tuple(memories),
     )
 
 
@@ -171,6 +181,9 @@ def build_loadout_from_config(scenario_name: str, config: LoadoutConfig | None) 
         support_card_ids=tuple(config.support_card_ids),
         support_card_level=config.support_card_level,
         challenge_item_ids=tuple(config.challenge_item_ids),
+        potential_level=config.potential_level,
+        prima_stella_level=config.prima_stella_level,
+        memories=tuple(config.memories or ()),
     )
 
 
@@ -244,6 +257,9 @@ def build_env_from_config(config: dict[str, Any]):
             for value in (config.get('challenge_item_ids') or [])
             if str(value or '')
         ),
+        potential_level=(int(config['potential_level']) if config.get('potential_level') is not None else None),
+        prima_stella_level=(int(config['prima_stella_level']) if config.get('prima_stella_level') is not None else None),
+        memories=tuple(config.get('memories') or ()),
         produce_reward_config_path=str(config.get('produce_reward_config_path') or '') or None,
         produce_reward_overrides=dict(config.get('produce_reward_overrides') or {}) or None,
         force_lowest_audition_route=bool(config.get('force_lowest_audition_route') or False),
@@ -287,6 +303,9 @@ def build_env_from_config(config: dict[str, Any]):
                     'support_card_ids': loadout_config.support_card_ids,
                     'support_card_level': loadout_config.support_card_level,
                     'challenge_item_ids': loadout_config.challenge_item_ids,
+                    'potential_level': loadout_config.potential_level,
+                    'prima_stella_level': loadout_config.prima_stella_level,
+                    'memories': tuple(loadout_config.memories or ()),
                 },
                 exam_reward_mode='clear',
                 include_action_labels_in_step_info=False,
@@ -321,6 +340,9 @@ def build_env_from_config(config: dict[str, Any]):
                 'support_card_ids': loadout_config.support_card_ids,
                 'support_card_level': loadout_config.support_card_level,
                 'challenge_item_ids': loadout_config.challenge_item_ids,
+                'potential_level': loadout_config.potential_level,
+                'prima_stella_level': loadout_config.prima_stella_level,
+                'memories': tuple(loadout_config.memories or ()),
             },
             include_action_labels_in_step_info=include_action_labels_in_step_info,
             produce_reward_config=produce_reward_config,
@@ -358,6 +380,9 @@ def build_env_from_config(config: dict[str, Any]):
             'support_card_ids': loadout_config.support_card_ids,
             'support_card_level': loadout_config.support_card_level,
             'challenge_item_ids': loadout_config.challenge_item_ids,
+            'potential_level': loadout_config.potential_level,
+            'prima_stella_level': loadout_config.prima_stella_level,
+            'memories': tuple(loadout_config.memories or ()),
         },
         episode_randomization=ExamEpisodeRandomizationConfig(
             enabled=loadout_config.exam_randomize_context,
@@ -408,6 +433,9 @@ def build_env_from_config(config: dict[str, Any]):
                 'support_card_ids': loadout_config.support_card_ids,
                 'support_card_level': loadout_config.support_card_level,
                 'challenge_item_ids': loadout_config.challenge_item_ids,
+                'potential_level': loadout_config.potential_level,
+                'prima_stella_level': loadout_config.prima_stella_level,
+                'memories': tuple(loadout_config.memories or ()),
             },
             episode_randomization=ExamEpisodeRandomizationConfig(
                 enabled=loadout_config.exam_randomize_context,

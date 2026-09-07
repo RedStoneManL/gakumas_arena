@@ -57,4 +57,7 @@ def apply_extra_simple_effect(context: ExamEffectContext, effect: dict[str, Any]
     if effect_type == ExamEffect.FULL_POWER_POINT_REDUCE:
         context.resources['full_power_point'] = max(context.resources['full_power_point'] - context.direct_value(effect), 0.0)
     elif effect_type == ExamEffect.HAND_GRAVE_COUNT_CARD_DRAW:
-        context.draw(len(context.hand) + len(context.grave))
+        # 「手札をすべて入れ替える」（ミックススムージー）：手札全部弃到捨札，再抽同样数量。
+        count = len(context.hand)
+        context.discard_hand()
+        context.draw(count)

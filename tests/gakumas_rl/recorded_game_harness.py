@@ -127,7 +127,59 @@ class RecordedGameReplayer:
         self.card_rows_by_test_id: dict[str, dict[str, Any]] = {}
         self.build_index_by_test_id: dict[str, int] = {}
         self.log: list[str] = []
+        self._patched_card_ids: dict[str, tuple[Any, Any]] = {}
+        self._pending_auto_end = False
+        self._apply_card_overrides()
         self.runtime = self._build_runtime()
+
+    # ------------------------------------------------------------------ 主数据快照覆写
+
+    def _apply_card_overrides(self) -> None:
+        """把夹具 `card_overrides` 里的旧版（录像当时）卡面写进 repository 的按强化次数查表缓存。
+
+        用于「只因已知的平衡调整而与现行主数据不同」的录像：覆写值必须引用主数据仓库的 commit
+        （`docs/rules/scoring_fidelity.md` §5）。回放结束后由 `restore_repository()` 还原。
+        """
+
+        overrides = self.setup.get('card_overrides') or {}
+        for test_id, spec in overrides.items():
+            base_name = next(str(card['name']) for card in self.setup['cards'] if str(card.get('test_id') or card['name']) == test_id)
+            base_row = self.card_row(base_name, 0)
+            card_id = str(base_row['id'])
+            repo = self.repository
+            repo.card_row_by_upgrade(card_id, 0)  # 确保缓存已建立
+            original = (dict(repo._card_row_by_upgrade_cache[card_id]), repo._canonical_card_row_cache.get(card_id))
+            self._patched_card_ids[card_id] = original
+            patched = {up: dict(row) for up, row in original[0].items()}
+            for upgrade_text, fields in (spec.get('rows') or {}).items():
+                row = dict(patched[int(upgrade_text)])
+                for key in ('stamina', 'forceStamina', 'costType', 'costValue'):
+                    if key in fields:
+                        row[key] = fields[key]
+                if 'playEffects' in fields:
+                    play_effects = []
+                    for entry in fields['playEffects']:
+                        effect_id = entry if isinstance(entry, str) else str(entry['effect'])
+                        if effect_id not in repo.exam_effect_map:
+                            raise KeyError(f'override effect not in master data: {effect_id}')
+                        play_effects.append({
+                            'produceExamEffectId': effect_id,
+                            'produceExamTriggerId': '' if isinstance(entry, str) else str(entry.get('trigger') or ''),
+                        })
+                    row['playEffects'] = play_effects
+                patched[int(upgrade_text)] = row
+            repo._card_row_by_upgrade_cache[card_id] = patched
+            repo._canonical_card_row_cache[card_id] = patched[min(patched)]
+            self.log.append(f'card override {test_id} ({card_id}): {spec.get("reason", "")}')
+
+    def restore_repository(self) -> None:
+        """还原被 `card_overrides` 覆写的 repository 缓存。"""
+
+        for card_id, (rows, canonical) in self._patched_card_ids.items():
+            self.repository._card_row_by_upgrade_cache[card_id] = rows
+            if canonical is not None:
+                self.repository._canonical_card_row_cache[card_id] = canonical
+        self._patched_card_ids = {}
 
     # ------------------------------------------------------------------ 主数据定位
 
@@ -414,25 +466,44 @@ class RecordedGameReplayer:
                     f'played={runtime.turn_counters["play_count"]}'
                 )
             score_before = runtime.score
-            runtime.step(ExamActionCandidate(label='play', kind='card', payload={'kind': 'card', 'uid': card.uid}))
+            # 直接走 _play_card：出牌次数用尽时不立刻自动结束回合，让夹具还能在出牌后、回合结束前对照数值
+            # （录像里回合结束是显式操作；`ExamRuntime.step` 会自动结束，结果等价）。
+            runtime._remove_hand_card(card.uid)
+            runtime._play_card(card)
             self.log.append(f'{where}: play {self._test_id_of(card)} score {score_before:g} -> {runtime.score:g}')
+            if not runtime.terminated and not runtime._has_remaining_play_window():
+                self._pending_auto_end = True
             return
         if kind == 'drink':
             available = [index for index, drink in enumerate(runtime.drinks) if not drink.get('_consumed')]
             index = available[int(action[1])]
-            runtime.step(ExamActionCandidate(label='drink', kind='drink', payload={'kind': 'drink', 'index': index}))
+            runtime._use_drink(index)
             self.log.append(f'{where}: drink {self.repository.drink_name(runtime.drinks[index])}')
             return
         if kind in {'end', 'skip'}:
-            runtime.step(ExamActionCandidate(label='end', kind='end_turn', payload={'kind': 'end_turn'}))
-            self.log.append(f'{where}: {kind}')
+            self._end_turn(where, kind)
             return
         if kind == 'expect':
             self.check(dict(action[1]), f'{where} mid-turn')
             return
         raise ValueError(f'unknown action {action}')
 
+    def _end_turn(self, where: str, kind: str = 'end') -> None:
+        runtime = self.runtime
+        self._pending_auto_end = False
+        if runtime.terminated:
+            return
+        skipped = runtime._has_remaining_play_window()
+        runtime._end_turn(skipped=skipped)
+        self.log.append(f'{where}: {kind}{" (skip +2)" if skipped else ""}')
+
     def replay(self) -> None:
+        try:
+            self._replay()
+        finally:
+            self.restore_repository()
+
+    def _replay(self) -> None:
         runtime = self.runtime
         for record in self.fixture.turns:
             turn = int(record['turn'])
@@ -446,15 +517,18 @@ class RecordedGameReplayer:
             if 'expect' in record:
                 self.check(dict(record['expect']), where)
             turn_before = runtime.turn
+            self._pending_auto_end = False
             for action in record.get('actions', []):
-                if runtime.terminated or runtime.turn != turn_before:
+                if runtime.terminated:
                     if str(action[0]) in {'end', 'skip'}:
                         continue
-                    raise AssertionError(f'{where}: turn already ended before action {action}')
+                    raise AssertionError(f'{where}: game already over before action {action}')
+                if self._pending_auto_end and str(action[0]) not in {'expect', 'end', 'skip'}:
+                    raise AssertionError(f'{where}: no play window left before action {action}')
                 self.perform(list(action), where)
             if not runtime.terminated and runtime.turn == turn_before:
                 # 录像里回合结束是显式动作；夹具省略时自动结束回合。
-                self.perform(['end'], where)
+                self._end_turn(where, 'auto-end')
         if self.fixture.final is not None:
             if not runtime.terminated:
                 raise AssertionError(f'[{self.fixture.fixture_id}] expected the game to be over, snapshot={self.snapshot()}')

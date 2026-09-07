@@ -149,17 +149,24 @@ class ExamEffectContext:
     def apply_card_operation(self, effect: dict[str, Any]) -> None:
         self.runtime.apply_card_operation(effect)
 
-    def spend_stamina(self, value: float, *, phase_type: str, status_change_origin: str) -> None:
-        self.runtime.spend_stamina(value, phase_type=phase_type, status_change_origin=status_change_origin)
+    def spend_stamina(self, value: float, *, phase_type: str, status_change_origin: str, force_value: float = 0.0) -> None:
+        self.runtime.spend_stamina(value, phase_type=phase_type, status_change_origin=status_change_origin, force_value=force_value)
 
     def has_timed_effect(self, effect_type: str) -> bool:
         return self.runtime.has_timed_effect(effect_type)
+
+    @property
+    def scoring_rules(self):
+        return self.runtime.scoring_rules
 
     def gain_block(self, delta: float, *, effect_type: str, status_change_origin: str) -> None:
         self.runtime.gain_block(delta, effect_type=effect_type, status_change_origin=status_change_origin)
 
     def consume_parameter_buff_multiple(self, value: float) -> None:
         self.runtime.consume_parameter_buff_multiple(value)
+
+    def discard_hand(self) -> None:
+        self.runtime.discard_hand()
 
     def draw(self, count: int) -> None:
         self.runtime.draw(count)

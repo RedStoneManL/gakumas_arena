@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from .idol_config import build_idol_loadout
 from .interfaces.service import LoadoutConfig, SCENARIO_ALIASES, loadout_summary, simulate_exam, simulate_planning
-from .loadout import DeckArchetype, IdolLoadout, IdolStatProfile, ProduceSkillEffect
+from .loadout import DeckArchetype, IdolLoadout, IdolStatProfile, ProduceMemoryCardSpec, ProduceMemorySpec, ProduceSkillEffect
 from .repository.master_data import EffectTaxonomy, MasterDataRepository, ScenarioSpec
 from .training.backends import TrainingResult, TrainingSpec, run_training
 
@@ -19,6 +19,8 @@ __all__ = [
     'IdolStatProfile',
     'LoadoutConfig',
     'MasterDataRepository',
+    'ProduceMemoryCardSpec',
+    'ProduceMemorySpec',
     'ProduceSkillEffect',
     'SCENARIO_ALIASES',
     'ScenarioSpec',

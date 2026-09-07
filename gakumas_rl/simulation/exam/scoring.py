@@ -36,6 +36,8 @@ class ScoringRules:
     fresh_modifier_no_decay: bool = True
     # §5.4：「好印象追加発動+n」重复结算时，每次结算单独取整（True）还是先乘次数再取整（False）。
     review_activation_rounds_each: bool = True
+    # §15-12：Pアイテム/トラブル 的「体力減少n」是否穿透元気。False = 先扣元気（gakumas-core，[推定]）。
+    stamina_damage_penetrates_genki: bool = False
 
 
 DEFAULT_SCORING_RULES = ScoringRules()

@@ -201,7 +201,16 @@ class HifScenarioConfig:
     growth_panel_sheet_id: str = 'produce_growth_panel_sheet-hif'
     # 是否从 `CharacterDearnessLevel.produceSkills` 读取 HIF 专用亲爱度技能（star_permil_up 等）。
     apply_dearness_hif_skills: bool = True
-    dearness_skill_id_tags: tuple[str, ...] = ('star_permil_up', 'produce_drink_possess_limit_up')
+    # 亲爱度技能里额外读取：相談リフレッシュ回数+1（Lv27 shop_reroll_count_up）、技能卡再抽选回数（produce_card_select_reroll_count_up）
+    dearness_skill_id_tags: tuple[str, ...] = (
+        'star_permil_up',
+        'produce_drink_possess_limit_up',
+        'shop_reroll_count_up',
+        'produce_card_select_reroll_count_up',
+    )
+    # 公開レッスン 结束后是否同样给 3 选 1 技能卡（hif.md §4.7：H.I.Fワッペン「スキルカード獲得時」20 回、
+    # カスタムPアイテム「レッスン終了時」触发，均以课程发卡为前提）。TODO(HIF-verify)
+    open_lesson_card_reward: bool = True
     memory_handoff: HifMemoryHandoffConfig = field(default_factory=HifMemoryHandoffConfig)
     opening_event_detail_id: str = ''
     after_audition_event_detail_ids: dict[str, str] = field(default_factory=dict)
@@ -1387,6 +1396,17 @@ class MasterDataRepository:
         )
         if not is_selection:
             action_types = action_types + ('hif_interval', 'hif_interval_recover')
+        # 相談（hif.md §4.5）：每周动作 consult 进入商店子阶段，商店内动作复用 初/NIA 的 shop_* 槽位，
+        # shop_reroll 为「相談リフレッシュ」（親愛度 27 +1），consult_finish 结束相談并推进周数。
+        action_types = action_types + (
+            'consult',
+            *tuple(f'shop_buy_card_{index}' for index in range(1, 5)),
+            *tuple(f'shop_buy_drink_{index}' for index in range(1, 5)),
+            *tuple(f'shop_upgrade_card_{index}' for index in range(1, 5)),
+            *tuple(f'shop_delete_card_{index}' for index in range(1, 5)),
+            'shop_reroll',
+            'consult_finish',
+        )
         produce_code = scenario_id.replace('-', '_')
         story_prefix = f'event-detail-p_story-003-{scenario_id}'
         after_audition_ids: dict[str, str] = {}

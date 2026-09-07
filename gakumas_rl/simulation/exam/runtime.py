@@ -67,6 +67,21 @@ from .triggers import (
 )
 from .triggers.context import ExamTriggerContext
 
+# 回合数型、同种叠加时按回合数相加的状态（§3.5 EOT_DECREMENT_FIELDS 中的 turns 型；好調/好印象是资源槽，另行处理）。
+DURATION_STACKING_EFFECT_TYPES = {
+    # 注意：ExamParameterBuffMultiplePerTurn（絶好調）在本引擎里按「层数」建模——
+    # 每个实例是一层，ExamParameterBuffMultiplePerTurnReduce 消耗一层，
+    # `_sync_effect_resources` 直接数实例个数，因此不能并入回合数合并。
+    # 实机 絶好調 是回合型状态，两种建模的等价性待实机验证（docs/OPEN_ITEMS.md A9）。
+    ExamEffect.STAMINA_CONSUMPTION_DOWN,
+    ExamEffect.STAMINA_CONSUMPTION_ADD,
+    ExamEffect.BLOCK_RESTRICTION,
+    ExamEffect.BLOCK_ADD_DOWN,
+    ExamEffect.GIMMICK_PARAMETER_DEBUFF,
+    ExamEffect.STANCE_LOCK,
+    ExamEffect.STAMINA_RECOVER_RESTRICTION,
+}
+
 EXAM_REWARD_MODES = ('score', 'clear')
 TURN_COLOR_ORDER = ('vocal', 'dance', 'visual')
 TURN_COLOR_INDEX = {color: index for index, color in enumerate(TURN_COLOR_ORDER)}
@@ -1137,6 +1152,7 @@ class ExamRuntime:
         self.lost = []
         self.playing = []
         self.current_card = None
+        self._current_play_uid_floor = None
         self.drinks = [dict(row) for row in self.initial_drinks]
         self._support_upgrade_original_rows = {}
 
@@ -2051,6 +2067,11 @@ class ExamRuntime:
         color_index = TURN_COLOR_INDEX.get(self.current_turn_color)
         if color_index is None:
             return self.base_score_bonus_multiplier
+        if self.repository.battle_score_config_segments.get(str(self.profile.get('score_config_id') or '')):
+            # 考试的スコアボーナス% 就是 ProduceExamBattleScoreConfig 按当前属性查表得到的千分比（§5.3：
+            # produce-001 最終 parameter 446 → vocalPermil 4402 ≈ 440.2%）。之前的实现在此之外又乘了
+            # 「属性/基准线」与「属性/期望属性」两个比例，H.I.F 高属性下会得到 ×70 的倍率（docs/OPEN_ITEMS.md A8）。
+            return max(self._judging_trend_multiplier(), 0.0)
         stats = np.clip(np.array(self.parameter_stats, dtype=np.float32), 0.0, None)
         if color_index >= len(stats):
             return self.base_score_bonus_multiplier
@@ -2201,10 +2222,13 @@ class ExamRuntime:
     def _consume_card_play_buffs(self, card: RuntimeCard) -> None:
         """在卡牌结算后消费按次数触发的目标卡持续效果。"""
 
+        # 仅在 `_play_card` 过程中按 uid 水位过滤：本次出牌新挂的「次に使用するスキルカード」类效果
+        # 对当前这张卡不生效。非出牌路径（直接调用）不过滤。
+        uid_floor = getattr(self, '_current_play_uid_floor', None)
         consume_uids = {
             timed.uid
             for timed in self._matched_play_count_buff_effects(card) + self._matching_search_stamina_overrides(card)
-            if timed.remaining_count is not None
+            if timed.remaining_count is not None and (uid_floor is None or timed.uid <= uid_floor)
         }
         for uid in sorted(consume_uids):
             self._consume_timed_effect_uid(uid)
@@ -2825,6 +2849,9 @@ class ExamRuntime:
 
         self.current_card = card
         self.playing = [card]
+        # 本次出牌开始前的 uid 水位：本次出牌效果新挂的「追加発動」等目标卡持续效果，对这张卡自身不生效
+        # （「次に使用するスキルカード」指下一张，gakumas-core doubleEffect 同样只作用于之后的卡）。
+        self._current_play_uid_floor = self._uid_counter
 
         if pay_cost:
             cost_stamina, cost_force = self._card_stamina_components(card)
@@ -2896,6 +2923,7 @@ class ExamRuntime:
         self._move_runtime_card(card, self._card_move_destination(card))
         self.playing = []
         self.current_card = None
+        self._current_play_uid_floor = None
 
     def _use_drink(self, index: int) -> None:
         """消耗一瓶饮料并应用其考试效果。"""
@@ -3374,10 +3402,10 @@ class ExamRuntime:
 
         self._apply_card_operation(effect)
 
-    def spend_stamina(self, value: float, *, phase_type: str, status_change_origin: str) -> None:
-        """扣除体力并按需要触发状态变化。"""
+    def spend_stamina(self, value: float, *, phase_type: str, status_change_origin: str, force_value: float = 0.0) -> None:
+        """扣除体力并按需要触发状态变化；`force_value` 为穿透元気的部分（体力消費）。"""
 
-        self._spend_stamina(value, phase_type=phase_type, status_change_origin=status_change_origin)
+        self._spend_stamina(value, force_value, phase_type=phase_type, status_change_origin=status_change_origin)
 
     def has_timed_effect(self, effect_type: str) -> bool:
         """判断指定持续效果是否存在。"""
@@ -3393,6 +3421,11 @@ class ExamRuntime:
         """消耗指定层数的参数强化倍率。"""
 
         self._consume_parameter_buff_multiple(value)
+
+    def discard_hand(self) -> None:
+        """公开给效果器：把当前手牌全部弃到捨札（手札入れ替え）。"""
+
+        self._discard_hand_to_grave()
 
     def draw(self, count: int) -> None:
         """抽取指定张数卡牌。"""
@@ -3658,6 +3691,20 @@ class ExamRuntime:
         remaining_count = int(effect.get('effectCount') or 0)
         if remaining_count <= 0:
             remaining_count = None
+        effect_type = str(effect.get('effectType') or '')
+        if remaining_turns is not None and remaining_count is None and effect_type in DURATION_STACKING_EFFECT_TYPES:
+            # 同种回合数型状态叠加为回合数相加（§6：好調3 + 好調2 = 5 回合；录像：魅惑の視線+ 消費体力減少5 +
+            # アイドル宣言+ 消費体力減少1 → 显示 6）。沿用既有实例的获得回合（kjirou 按 modifier id 递减）。
+            for timed in self.active_effects:
+                if (
+                    str(timed.effect.get('effectType') or '') == effect_type
+                    and timed.remaining_turns is not None
+                    and timed.remaining_count is None
+                    and float(timed.effect.get('effectValue1') or 0) == float(effect.get('effectValue1') or 0)
+                ):
+                    timed.remaining_turns += remaining_turns
+                    self._sync_effect_resources()
+                    return
         self.active_effects.append(
             TimedExamEffect(
                 uid=self._next_uid(),
@@ -3768,11 +3815,31 @@ class ExamRuntime:
                 prefer_high_value=True,
             )
             for card in selection.selected:
-                upgraded_row = self._lookup_card_upgrade_row(card.card_id, card.upgrade_count + 1)
-                if upgraded_row is not None:
-                    card.base_card = upgraded_row
-                    card.upgrade_count = int(upgraded_row.get('upgradeCount') or card.upgrade_count + 1)
+                self._apply_lesson_card_upgrade(card)
         # 强制使用类（ExamForcePlayCardSearch / ...WithCost）已迁移到 effects/card_operation.py。
+
+    def _apply_lesson_card_upgrade(self, card: RuntimeCard) -> bool:
+        """レッスン中強化：把一张未强化的卡在本局内升到 +。
+
+        プロデュース中強化（+）与レッスン中強化互斥（§10）：已经是 + 的卡不再被レッスン中強化改写
+        （录像：魅惑の視線+ 在「薄れゆく壁」的手札全强化后仍只是 +，叠加レッスンサポート后为 ++）。
+        レッスンサポート（蓝色 +，回合内临时）可以叠在上面：若当前正带着临时强化，则把临时强化平移到新的永久等级上，
+        并更新回合结束时的还原行。
+        """
+
+        if int(card.upgrade_count) >= 1:
+            return False
+        original_row = self._support_upgrade_original_rows.get(card.uid)
+        temporary_upgrade = max(int(card.base_card.get('upgradeCount') or 0) - int(card.upgrade_count), 0)
+        permanent_row = self._lookup_card_upgrade_row(card.card_id, card.upgrade_count + 1)
+        if permanent_row is None:
+            return False
+        card.upgrade_count = int(permanent_row.get('upgradeCount') or card.upgrade_count + 1)
+        if original_row is not None:
+            self._support_upgrade_original_rows[card.uid] = permanent_row
+        combined_row = self._lookup_card_upgrade_row(card.card_id, card.upgrade_count + temporary_upgrade) if temporary_upgrade else permanent_row
+        card.base_card = combined_row if combined_row is not None else permanent_row
+        return True
 
     def _create_card_by_id(self, effect: dict[str, Any]) -> None:
         """按显式卡牌 id 创建运行时卡并放入目标区域。"""

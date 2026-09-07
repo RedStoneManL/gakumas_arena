@@ -22,6 +22,8 @@ from .loadout import (
     IdolLoadout,
     IdolStatProfile,
     ProduceCardConversionSpec,
+    ProduceMemoryCardSpec,
+    ProduceMemorySpec,
     ProduceSkillEffect,
     SupportCardSelection,
 )
@@ -313,42 +315,362 @@ def _load_seed_exam_deck_rows(repository: MasterDataRepository, loadout: IdolLoa
     return seed_rows
 
 
-def _load_produce_skills(repository: MasterDataRepository, idol_card_row: dict[str, Any], idol_rank: int) -> tuple[ProduceSkillEffect, ...]:
-    """解析偶像卡随 rank 解锁的培育技能。"""
+_POTENTIAL_EFFECT_PRODUCE_SKILL = 'IdolCardPotentialEffectType_ProduceSkill'
+_POTENTIAL_EFFECT_ITEM_CHANGE = 'IdolCardPotentialEffectType_InitialProduceItemChange'
+_POTENTIAL_EFFECT_STAMINA = 'IdolCardPotentialEffectType_ProduceStamina'
+_POTENTIAL_EFFECT_GROWTH_RATE = 'IdolCardPotentialEffectType_ProduceVoDaViGrowthRatePermil'
+
+_MEMORY_CARD_PHASE_PRODUCE_START = 'ProduceMemoryProduceCardPhaseType_ProduceStart'
+_MEMORY_CARD_PHASE_END_AUDITION_MID = 'ProduceMemoryProduceCardPhaseType_EndAuditionMid'
+
+_UNSCOPED_PRODUCE_TYPES = {'', 'ProduceType_Unknown'}
+_UNSCOPED_SPLIT_TYPES = {'', 'ProduceSplitType_Unknown'}
+
+
+def _produce_skill_applies_to_scenario(skill_row: dict[str, Any], scenario: ScenarioSpec | None) -> bool:
+    """按 ``ProduceSkill.produceType / produceSplitType`` 判断技能是否对当前剧本生效。
+
+    大多数技能两项都是 Unknown（全剧本通用）；プリマステラ 技能标为 H.I.F + Final（仅本戦），
+    H.I.F 専用メモリーアビリティ 标为 H.I.F + Unknown。``scenario=None`` 时不过滤。
+    """
+
+    if scenario is None:
+        return True
+    skill_produce_type = str(skill_row.get('produceType') or '')
+    if skill_produce_type not in _UNSCOPED_PRODUCE_TYPES and skill_produce_type != str(scenario.produce_type or ''):
+        return False
+    skill_split_type = str(skill_row.get('produceSplitType') or '')
+    if skill_split_type not in _UNSCOPED_SPLIT_TYPES and skill_split_type != str(scenario.produce_split_type or ''):
+        return False
+    return True
+
+
+def _resolve_produce_skill_row(repository: MasterDataRepository, skill_id: str, skill_level: int) -> dict[str, Any] | None:
+    """取 ``ProduceSkill`` 指定等级的行；没有该等级时退回第一行。"""
+
+    if not skill_id:
+        return None
+    produce_skills = repository.load_table('ProduceSkill')
+    candidates = [item for item in produce_skills.all(skill_id) if int(item.get('level') or 1) == int(skill_level)]
+    return candidates[0] if candidates else produce_skills.first(skill_id)
+
+
+def _produce_skill_effect_from_row(skill_row: dict[str, Any], skill_id: str, skill_level: int, source: str) -> ProduceSkillEffect:
+    """把 ``ProduceSkill`` 行压成 loadout 用的 ``ProduceSkillEffect``（ProduceEffect id 列表 + 首个触发器）。"""
+
+    effect_ids = tuple(
+        str(effect_id)
+        for effect_id in (
+            skill_row.get('produceEffectId1'),
+            skill_row.get('produceEffectId2'),
+            skill_row.get('produceEffectId3'),
+        )
+        if effect_id
+    )
+    return ProduceSkillEffect(
+        skill_id=skill_id,
+        level=int(skill_level),
+        trigger_id=str(skill_row.get('produceTriggerId1') or ''),
+        effect_ids=effect_ids,
+        source=source,
+    )
+
+
+def _resolve_ranked_skill_rows(
+    rows: list[dict[str, Any]],
+    unlocked_rank: int,
+) -> list[tuple[str, int]]:
+    """把「rank → (produceSkillId, produceSkillLevel)」表按已解锁段数收敛成每个技能一条（取最高等级）。
+
+    主数据里同一技能在低段给 Lv1、高段给 Lv2（如 SP レッスン発生率 +5% → +10%），
+    ``ProduceSkill`` 每级的数值是总量而非增量，所以只能注册最高一级，否则会叠加生效。
+    """
+
+    best_level: dict[str, int] = {}
+    order: list[str] = []
+    for row in sorted(rows, key=lambda item: (_rank_value(str(item.get('rank') or '')), int(item.get('order') or 0))):
+        if _rank_value(str(row.get('rank') or '')) > unlocked_rank:
+            continue
+        skill_id = str(row.get('produceSkillId') or '')
+        if not skill_id:
+            continue
+        skill_level = int(row.get('produceSkillLevel') or 1)
+        if skill_id not in best_level:
+            order.append(skill_id)
+        best_level[skill_id] = max(best_level.get(skill_id, 0), skill_level)
+    return [(skill_id, best_level[skill_id]) for skill_id in order]
+
+
+def _build_ranked_skill_effects(
+    repository: MasterDataRepository,
+    scenario: ScenarioSpec | None,
+    rows: list[dict[str, Any]],
+    unlocked_rank: int,
+    source: str,
+) -> tuple[ProduceSkillEffect, ...]:
+    """通用：rank 表 → 已解锁且对当前剧本生效的 ``ProduceSkillEffect``。"""
+
+    resolved: list[ProduceSkillEffect] = []
+    for skill_id, skill_level in _resolve_ranked_skill_rows(rows, unlocked_rank):
+        skill_row = _resolve_produce_skill_row(repository, skill_id, skill_level)
+        if skill_row is None or not _produce_skill_applies_to_scenario(skill_row, scenario):
+            continue
+        resolved.append(_produce_skill_effect_from_row(skill_row, skill_id, skill_level, source))
+    return tuple(resolved)
+
+
+def _load_produce_skills(
+    repository: MasterDataRepository,
+    idol_card_row: dict[str, Any],
+    idol_rank: int,
+    scenario: ScenarioSpec | None = None,
+) -> tuple[ProduceSkillEffect, ...]:
+    """解析偶像卡随 才能開花 rank 解锁的培育技能（``IdolCardLevelLimitProduceSkill``）。"""
 
     level_limit_skill_id = str(idol_card_row.get('idolCardLevelLimitProduceSkillId') or '')
     if not level_limit_skill_id:
         return ()
-    skill_rows = repository.load_table('IdolCardLevelLimitProduceSkill').all(level_limit_skill_id)
-    produce_skills = repository.load_table('ProduceSkill')
-    resolved: list[ProduceSkillEffect] = []
-    for row in skill_rows:
-        if _rank_value(str(row.get('rank') or '')) > idol_rank:
+    rows = repository.load_table('IdolCardLevelLimitProduceSkill').all(level_limit_skill_id)
+    return _build_ranked_skill_effects(repository, scenario, rows, idol_rank, source='level_limit')
+
+
+def max_potential_level(repository: MasterDataRepository, idol_card_id: str) -> int:
+    """偶像卡 ポテンシャル 的最高段数（``IdolCardPotential`` 里该卡的最大 rank，当前主数据均为 4）。"""
+
+    idol_card_row = repository.load_table('IdolCard').first(idol_card_id)
+    if idol_card_row is None:
+        raise KeyError(f'Unknown idol card: {idol_card_id}')
+    potential_id = str(idol_card_row.get('idolCardPotentialId') or '')
+    if not potential_id:
+        return 0
+    return max((_rank_value(str(row.get('rank') or '')) for row in repository.load_table('IdolCardPotential').all(potential_id)), default=0)
+
+
+def max_prima_stella_level(repository: MasterDataRepository, idol_card_id: str) -> int:
+    """偶像卡 プリマステラ 的最高解放段（有 ``idolCardPrimaStellaProduceSkillId`` 的 H.I.F 卡为 1，否则 0）。"""
+
+    idol_card_row = repository.load_table('IdolCard').first(idol_card_id)
+    if idol_card_row is None:
+        raise KeyError(f'Unknown idol card: {idol_card_id}')
+    prima_stella_id = str(idol_card_row.get('idolCardPrimaStellaProduceSkillId') or '')
+    if not prima_stella_id:
+        return 0
+    rows = repository.load_table('IdolCardPrimaStellaProduceSkill').all(prima_stella_id)
+    return max((int(row.get('produceSkillLevel') or 1) for row in rows), default=0)
+
+
+def _resolve_potential_level(repository: MasterDataRepository, idol_card_row: dict[str, Any], potential_level: int | None) -> int:
+    """把请求的 ポテンシャル 段数裁到 ``[0, 该卡最高段]``；``None`` 视为 0（未解放）。"""
+
+    if potential_level is None:
+        return 0
+    return max(0, min(int(potential_level), max_potential_level(repository, str(idol_card_row.get('id') or ''))))
+
+
+def _load_potential_status(
+    repository: MasterDataRepository,
+    idol_card_row: dict[str, Any],
+    potential_level: int,
+) -> dict[str, Any]:
+    """汇总 ポテンシャル 已解放段的数值效果（``IdolCardPotential``）。
+
+    返回 ``growth_permil``（三维成长率千分比加成）、``stamina``（体力加成）、
+    ``item_change``（是否已解放「初期Pアイテム変更」= 使用 + 版固有道具）。
+    """
+
+    result: dict[str, Any] = {'growth_permil': (0.0, 0.0, 0.0), 'stamina': 0.0, 'item_change': False}
+    potential_id = str(idol_card_row.get('idolCardPotentialId') or '')
+    if not potential_id or potential_level <= 0:
+        return result
+    vocal = dance = visual = 0.0
+    stamina = 0.0
+    item_change = False
+    for row in repository.load_table('IdolCardPotential').all(potential_id):
+        if _rank_value(str(row.get('rank') or '')) > potential_level:
             continue
+        effect_types = {str(value) for value in row.get('effectTypes', []) or []}
+        if _POTENTIAL_EFFECT_GROWTH_RATE in effect_types:
+            vocal += float(row.get('produceVocalGrowthRatePermil') or 0)
+            dance += float(row.get('produceDanceGrowthRatePermil') or 0)
+            visual += float(row.get('produceVisualGrowthRatePermil') or 0)
+        if _POTENTIAL_EFFECT_STAMINA in effect_types:
+            stamina += float(row.get('effectValue') or 0)
+        if _POTENTIAL_EFFECT_ITEM_CHANGE in effect_types:
+            item_change = True
+    result['growth_permil'] = (vocal, dance, visual)
+    result['stamina'] = stamina
+    result['item_change'] = item_change
+    return result
+
+
+def _load_potential_skills(
+    repository: MasterDataRepository,
+    scenario: ScenarioSpec | None,
+    idol_card_row: dict[str, Any],
+    potential_level: int,
+) -> tuple[ProduceSkillEffect, ...]:
+    """解析 ポテンシャル 已解放段的培育技能（``IdolCardPotentialProduceSkill`` → ``ProduceSkill``）。"""
+
+    skill_table_id = str(idol_card_row.get('idolCardPotentialProduceSkillId') or '')
+    if not skill_table_id or potential_level <= 0:
+        return ()
+    rows = repository.load_table('IdolCardPotentialProduceSkill').all(skill_table_id)
+    return _build_ranked_skill_effects(repository, scenario, rows, potential_level, source='potential')
+
+
+def _load_prima_stella_skills(
+    repository: MasterDataRepository,
+    scenario: ScenarioSpec | None,
+    idol_card_row: dict[str, Any],
+    prima_stella_level: int,
+) -> tuple[ProduceSkillEffect, ...]:
+    """解析 プリマステラ（一番星）技能（``IdolCardPrimaStellaProduceSkill``）。
+
+    主数据里这些 ``ProduceSkill`` 标为 ``ProduceType_HatsuboshiIdolFestival`` + ``ProduceSplitType_Final``，
+    所以只有 H.I.F 本戦（produce-008）剧本会得到它（培育开始时获得专属「一番星」卡）。
+    """
+
+    prima_stella_id = str(idol_card_row.get('idolCardPrimaStellaProduceSkillId') or '')
+    if not prima_stella_id or prima_stella_level <= 0:
+        return ()
+    resolved: list[ProduceSkillEffect] = []
+    rows = sorted(repository.load_table('IdolCardPrimaStellaProduceSkill').all(prima_stella_id), key=lambda row: int(row.get('order') or 0))
+    for row in rows:
         skill_id = str(row.get('produceSkillId') or '')
         skill_level = int(row.get('produceSkillLevel') or 1)
-        skill_candidates = [item for item in produce_skills.all(skill_id) if int(item.get('level') or 1) == skill_level]
-        skill_row = skill_candidates[0] if skill_candidates else produce_skills.first(skill_id)
-        if skill_row is None:
+        if not skill_id or skill_level > prima_stella_level:
             continue
-        effect_ids = tuple(
-            str(effect_id)
-            for effect_id in (
-                skill_row.get('produceEffectId1'),
-                skill_row.get('produceEffectId2'),
-                skill_row.get('produceEffectId3'),
-            )
-            if effect_id
-        )
-        resolved.append(
-            ProduceSkillEffect(
-                skill_id=skill_id,
-                level=skill_level,
-                trigger_id=str(skill_row.get('produceTriggerId1') or ''),
-                effect_ids=effect_ids,
-            )
-        )
+        skill_row = _resolve_produce_skill_row(repository, skill_id, skill_level)
+        if skill_row is None or not _produce_skill_applies_to_scenario(skill_row, scenario):
+            continue
+        resolved.append(_produce_skill_effect_from_row(skill_row, skill_id, skill_level, source='prima_stella'))
     return tuple(resolved)
+
+
+def memory_spec_from_gift(repository: MasterDataRepository, memory_gift_id: str) -> ProduceMemorySpec:
+    """把主数据 ``MemoryGift`` 行（配布メモリー）转成 ``ProduceMemorySpec``。"""
+
+    row = repository.load_table('MemoryGift').first(memory_gift_id)
+    if row is None:
+        raise KeyError(f'Unknown memory gift: {memory_gift_id}')
+    card_row = row.get('produceCard') or {}
+    produce_card = None
+    if str(card_row.get('id') or ''):
+        produce_card = ProduceMemoryCardSpec(
+            card_id=str(card_row.get('id') or ''),
+            upgrade_count=int(card_row.get('upgradeCount') or 0),
+            customize_ids=tuple(str(item.get('id') or '') for item in card_row.get('customizes', []) or [] if item.get('id')),
+            phase_type=str(row.get('produceCardPhaseType') or _MEMORY_CARD_PHASE_PRODUCE_START),
+        )
+    abilities = [item for item in row.get('memoryAbilities', []) or [] if str(item.get('id') or '')]
+    return ProduceMemorySpec(
+        memory_id=str(row.get('id') or memory_gift_id),
+        idol_card_id=str(row.get('idolCardId') or ''),
+        grade=str(row.get('grade') or ''),
+        produce_card=produce_card,
+        ability_ids=tuple(str(item.get('id')) for item in abilities),
+        ability_levels=tuple(int(item.get('level') or 1) for item in abilities),
+        vocal=int(row.get('vocal') or 0),
+        dance=int(row.get('dance') or 0),
+        visual=int(row.get('visual') or 0),
+        stamina=int(row.get('stamina') or 0),
+        exam_battle_produce_card_ids=tuple(str(item.get('id') or '') for item in row.get('examBattleProduceCards', []) or [] if item.get('id')),
+        exam_battle_produce_item_ids=tuple(str(value) for value in row.get('examBattleProduceItemIds', []) or [] if value),
+    )
+
+
+def _resolve_memories(
+    repository: MasterDataRepository,
+    idol_card_row: dict[str, Any],
+    memories: tuple[ProduceMemorySpec | str, ...] | list[ProduceMemorySpec | str],
+) -> tuple[ProduceMemorySpec, ...]:
+    """把 ``memories``（``ProduceMemorySpec`` 或 ``MemoryGift`` id）解析成结构化メモリー并校验。
+
+    游戏内メモリー按アイドル（角色）归属，只能带同角色的メモリー；``idol_card_id`` 为空的自定义メモリー不校验。
+    """
+
+    resolved: list[ProduceMemorySpec] = []
+    character_id = str(idol_card_row.get('characterId') or '')
+    idol_cards = repository.load_table('IdolCard')
+    ability_table = repository.load_table('MemoryAbility')
+    for entry in memories:
+        spec = memory_spec_from_gift(repository, entry) if isinstance(entry, str) else entry
+        if not isinstance(spec, ProduceMemorySpec):
+            raise TypeError(f'Unsupported memory spec: {type(entry).__name__}')
+        if spec.idol_card_id:
+            memory_card_row = idol_cards.first(spec.idol_card_id)
+            memory_character = str((memory_card_row or {}).get('characterId') or '')
+            if memory_card_row is None or (character_id and memory_character != character_id):
+                raise ValueError(
+                    f'Memory {spec.memory_id or "<custom>"} belongs to idol {spec.idol_card_id} ({memory_character}), '
+                    f'which is not the same character as {idol_card_row.get("id")} ({character_id})'
+                )
+        for ability_id in spec.ability_ids:
+            if ability_table.first(ability_id) is None:
+                raise KeyError(f'Unknown memory ability: {ability_id}')
+        if spec.produce_card is not None and _canonical_card_row(repository, spec.produce_card.card_id) is None:
+            raise KeyError(f'Unknown memory produce card: {spec.produce_card.card_id}')
+        resolved.append(spec)
+    return tuple(resolved)
+
+
+def _load_memory_skills(
+    repository: MasterDataRepository,
+    scenario: ScenarioSpec | None,
+    memories: tuple[ProduceMemorySpec, ...],
+) -> tuple[ProduceSkillEffect, ...]:
+    """把メモリーアビリティ（``MemoryAbility.skillId`` → ``ProduceSkill p_memory_skill-*``）解析成培育技能。
+
+    ``MemoryAbility.produceGroupIds`` 非空时只对列出的 ``ProduceGroup``（如 H.I.F 専用 = produce_group-003）生效；
+    ``isUniqueActivation``（重複発動不可）的同名アビリティ跨メモリー只注册一次。
+    """
+
+    if not memories:
+        return ()
+    ability_table = repository.load_table('MemoryAbility')
+    resolved: list[ProduceSkillEffect] = []
+    seen_unique: set[str] = set()
+    for memory in memories:
+        levels = tuple(memory.ability_levels) + (1,) * max(len(memory.ability_ids) - len(memory.ability_levels), 0)
+        for ability_id, ability_level in zip(memory.ability_ids, levels):
+            ability_rows = [row for row in ability_table.all(ability_id) if int(row.get('level') or 1) == int(ability_level)]
+            ability_row = ability_rows[0] if ability_rows else ability_table.first(ability_id)
+            if ability_row is None:
+                continue
+            group_ids = {str(value) for value in ability_row.get('produceGroupIds', []) or [] if value}
+            if group_ids and scenario is not None and str(scenario.group_id or '') not in group_ids:
+                continue
+            skill_id = str(ability_row.get('skillId') or '')
+            skill_level = int(ability_row.get('level') or ability_level or 1)
+            skill_row = _resolve_produce_skill_row(repository, skill_id, skill_level)
+            if skill_row is None or not _produce_skill_applies_to_scenario(skill_row, scenario):
+                continue
+            if ability_row.get('isUniqueActivation'):
+                if skill_id in seen_unique:
+                    continue
+                seen_unique.add(skill_id)
+            resolved.append(_produce_skill_effect_from_row(skill_row, skill_id, skill_level, source='memory'))
+    return tuple(resolved)
+
+
+def _load_memory_deck_rows(
+    repository: MasterDataRepository,
+    loadout: IdolLoadout,
+    phase_type: str = _MEMORY_CARD_PHASE_PRODUCE_START,
+) -> list[dict[str, Any]]:
+    """取メモリー在指定阶段入组的技能卡行（按 ``upgradeCount`` 解析具体卡面）。"""
+
+    rows: list[dict[str, Any]] = []
+    for memory in loadout.memories:
+        card = memory.produce_card
+        if card is None or str(card.phase_type or _MEMORY_CARD_PHASE_PRODUCE_START) != phase_type:
+            continue
+        row = resolve_produce_card_row(repository, card.card_id, loadout=loadout, upgrade_count=int(card.upgrade_count))
+        if row is None:
+            row = _canonical_card_row(repository, card.card_id)
+        if row is not None:
+            rows.append(dict(row))
+    return rows
 
 
 def _load_support_card_produce_skills(
@@ -365,7 +687,6 @@ def _load_support_card_produce_skills(
         repository.support_card_skill_level_visual,
         repository.support_card_skill_level_assist,
     )
-    produce_skills = repository.load_table('ProduceSkill')
     resolved: list[ProduceSkillEffect] = []
     seen_keys: set[tuple[str, int, str]] = set()
     level_by_card_id = {
@@ -383,32 +704,15 @@ def _load_support_card_produce_skills(
             skill_level = int(row.get('produceSkillLevel') or 1)
             if not skill_id:
                 continue
-            skill_candidates = [item for item in produce_skills.all(skill_id) if int(item.get('level') or 1) == skill_level]
-            skill_row = skill_candidates[0] if skill_candidates else produce_skills.first(skill_id)
+            skill_row = _resolve_produce_skill_row(repository, skill_id, skill_level)
             if skill_row is None:
                 continue
-            effect_ids = tuple(
-                str(effect_id)
-                for effect_id in (
-                    skill_row.get('produceEffectId1'),
-                    skill_row.get('produceEffectId2'),
-                    skill_row.get('produceEffectId3'),
-                )
-                if effect_id
-            )
             trigger_id = str(skill_row.get('produceTriggerId1') or '')
             key = (skill_id, skill_level, trigger_id)
             if key in seen_keys:
                 continue
             seen_keys.add(key)
-            resolved.append(
-                ProduceSkillEffect(
-                    skill_id=skill_id,
-                    level=skill_level,
-                    trigger_id=trigger_id,
-                    effect_ids=effect_ids,
-                )
-            )
+            resolved.append(_produce_skill_effect_from_row(skill_row, skill_id, skill_level, source='support_card'))
     return tuple(resolved)
 
 
@@ -621,16 +925,44 @@ def build_idol_loadout(
     selected_support_card_ids: tuple[str, ...] = (),
     selected_support_card_level: int | None = None,
     selected_challenge_item_ids: tuple[str, ...] = (),
+    potential_level: int | None = None,
+    prima_stella_level: int | None = None,
+    memories: tuple[ProduceMemorySpec | str, ...] = (),
 ) -> IdolLoadout:
-    """把偶像卡、rank、亲爱度等外部配置整理成统一 loadout。"""
+    """把偶像卡、rank、亲爱度等外部配置整理成统一 loadout。
+
+    - ``idol_rank``：才能開花 段数 → ``IdolCardLevelLimitStatusUp``（三维/体力）+ ``IdolCardLevelLimitProduceSkill``。
+    - ``potential_level``：ポテンシャル 段数（``None`` = 0 未解放；超过该卡上限时裁到上限）→ ``IdolCardPotential``
+      （成长率千分比 / 体力 / 初期Pアイテム変更）+ ``IdolCardPotentialProduceSkill``。
+    - ``prima_stella_level``：プリマステラ（``None`` = 0）→ ``IdolCardPrimaStellaProduceSkill``，仅 H.I.F 本戦 剧本生效。
+    - ``memories``：带入培育的メモリー（``ProduceMemorySpec`` 或 ``MemoryGift`` id）→ アビリティ 并入 ``produce_skills``，
+      ProduceStart 阶段的卡进入初始卡组（``build_initial_exam_deck``）。
+    - ``use_after_item`` 为 ``None`` 时：显式给了 ``potential_level`` 就按主数据（ポテンシャル 2 段「初期Pアイテム変更」）决定
+      是否用 + 版固有道具；否则沿用旧规则 ``idol_rank >= 4``。
+    """
 
     idol_card_row = repository.load_table('IdolCard').first(idol_card_id)
     if idol_card_row is None:
         raise KeyError(f'Unknown idol card: {idol_card_id}')
 
     bonus_vocal, bonus_dance, bonus_visual, bonus_stamina = _status_bonus(repository, idol_card_row, idol_rank)
-    resolved_use_after_item = bool(use_after_item) if use_after_item is not None else idol_rank >= 4
+    resolved_potential_level = _resolve_potential_level(repository, idol_card_row, potential_level)
+    potential_status = _load_potential_status(repository, idol_card_row, resolved_potential_level)
+    resolved_prima_stella_level = (
+        max(0, min(int(prima_stella_level), max_prima_stella_level(repository, idol_card_id)))
+        if prima_stella_level is not None
+        else 0
+    )
+    if use_after_item is not None:
+        resolved_use_after_item = bool(use_after_item)
+    elif potential_level is not None:
+        resolved_use_after_item = bool(potential_status['item_change'])
+    else:
+        resolved_use_after_item = idol_rank >= 4
     item_id = str(idol_card_row.get('afterProduceItemId') if resolved_use_after_item else idol_card_row.get('beforeProduceItemId') or '')
+    growth_permil_vocal, growth_permil_dance, growth_permil_visual = potential_status['growth_permil']
+    bonus_stamina += float(potential_status['stamina'])
+    resolved_memories = _resolve_memories(repository, idol_card_row, tuple(memories))
     base_vocal, base_dance, base_visual = _clamp_parameter_stats(
         scenario,
         float(idol_card_row.get('produceVocal') or 0) + bonus_vocal,
@@ -649,9 +981,9 @@ def build_idol_loadout(
         vocal=base_vocal,
         dance=base_dance,
         visual=base_visual,
-        vocal_growth_rate=float(idol_card_row.get('produceVocalGrowthRatePermil') or 0) / 1000.0,
-        dance_growth_rate=float(idol_card_row.get('produceDanceGrowthRatePermil') or 0) / 1000.0,
-        visual_growth_rate=float(idol_card_row.get('produceVisualGrowthRatePermil') or 0) / 1000.0,
+        vocal_growth_rate=(float(idol_card_row.get('produceVocalGrowthRatePermil') or 0) + growth_permil_vocal) / 1000.0,
+        dance_growth_rate=(float(idol_card_row.get('produceDanceGrowthRatePermil') or 0) + growth_permil_dance) / 1000.0,
+        visual_growth_rate=(float(idol_card_row.get('produceVisualGrowthRatePermil') or 0) + growth_permil_visual) / 1000.0,
         stamina=float(idol_card_row.get('produceStamina') or 0) + bonus_stamina,
     )
     resolved_score_bonus = (
@@ -668,6 +1000,12 @@ def build_idol_loadout(
         producer_level,
         selected_produce_card_conversion_after_ids,
     )
+    idol_kit_skills = (
+        *_load_produce_skills(repository, idol_card_row, idol_rank, scenario=scenario),
+        *_load_potential_skills(repository, scenario, idol_card_row, resolved_potential_level),
+        *_load_prima_stella_skills(repository, scenario, idol_card_row, resolved_prima_stella_level),
+        *_load_memory_skills(repository, scenario, resolved_memories),
+    )
     provisional_loadout = IdolLoadout(
         idol_card_id=idol_card_id,
         producer_level=producer_level,
@@ -676,7 +1014,7 @@ def build_idol_loadout(
         use_after_item=resolved_use_after_item,
         stat_profile=profile,
         deck_archetype=_load_deck_archetype(repository, idol_card_id, producer_level),
-        produce_skills=_load_produce_skills(repository, idol_card_row, idol_rank),
+        produce_skills=idol_kit_skills,
         produce_card_conversions=produce_card_conversions,
         produce_item_id=item_id,
         extra_produce_item_ids=extra_produce_item_ids,
@@ -685,10 +1023,17 @@ def build_idol_loadout(
         exam_status_enchant_specs=tuple(exam_status_enchant_specs),
         exam_score_bonus_multiplier=resolved_score_bonus,
         assist_mode=bool(assist_mode),
+        potential_level=resolved_potential_level,
+        prima_stella_level=resolved_prima_stella_level,
+        memories=resolved_memories,
         metadata={
             'idol_name': str(idol_card_row.get('name') or idol_card_id),
             'rarity': str(idol_card_row.get('rarity') or ''),
             'exam_effect_type': str(idol_card_row.get('examEffectType') or ''),
+            'potential_level': resolved_potential_level,
+            'prima_stella_level': resolved_prima_stella_level,
+            'memory_count': len(resolved_memories),
+            'memory_ids': ','.join(memory.memory_id for memory in resolved_memories),
         },
     )
     manual_support_cards = _resolve_selected_support_cards(
@@ -1001,10 +1346,12 @@ def build_initial_exam_deck(
         )
 
     seed_card_rows = _load_seed_exam_deck_rows(repository, loadout)
+    # メモリー 在 ProduceStart 阶段入组的卡：与固定底牌一样先放进去（EndAuditionMid 阶段的卡需要运行时钩子，见 docs/loadouts.md）。
+    memory_card_rows = _load_memory_deck_rows(repository, loadout, _MEMORY_CARD_PHASE_PRODUCE_START)
     if not seed_card_rows:
         if loadout.stat_profile.initial_exam_deck_id and repository.exam_initial_decks.first(loadout.stat_profile.initial_exam_deck_id) is None:
             raise RuntimeError(f'Unknown initial exam deck: {loadout.stat_profile.initial_exam_deck_id}')
-        base_deck = _apply_loadout_card_conversions(
+        base_deck = memory_card_rows + _apply_loadout_card_conversions(
             repository,
             repository.build_initial_exam_deck(
                 scenario,
@@ -1048,6 +1395,8 @@ def build_initial_exam_deck(
         return True
 
     for card_row in _apply_loadout_card_conversions(repository, seed_card_rows, loadout=loadout):
+        _append_card(card_row)
+    for card_row in memory_card_rows:
         _append_card(card_row)
 
     unique_card_id = loadout.stat_profile.unique_produce_card_id

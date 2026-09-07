@@ -136,9 +136,11 @@ def make_loadout_config(
     an explicit ``idol`` overrides the preset's idol card."""
     preset = resolve_preset(scenario, idol, loadout)
     if preset is not None:
-        cfg = preset.to_loadout_config()
         if idol and idol != AUTO and idol != preset.idol_card_id:
-            cfg = replace(cfg, idol_card_id=idol)
+            # 显式偶像覆盖：ポテンシャル / プリマステラ 上限按覆盖后的偶像卡查主数据
+            cfg = preset.to_loadout_config(idol_card_id=idol)
+        else:
+            cfg = preset.to_loadout_config()
         return replace(cfg, **overrides) if overrides else cfg
     if idol == AUTO:
         idol = DEFAULT_IDOL
@@ -157,6 +159,9 @@ def make_loadout_config(
                 str(card.support_card_id) for card in getattr(loadout, "support_cards", ()) or ()
             ),
             challenge_item_ids=tuple(getattr(loadout, "extra_produce_item_ids", ()) or ()),
+            potential_level=int(getattr(loadout, "potential_level", 0) or 0),
+            prima_stella_level=int(getattr(loadout, "prima_stella_level", 0) or 0),
+            memories=tuple(getattr(loadout, "memories", ()) or ()),
         )
     elif isinstance(loadout, dict):
         cfg = LoadoutConfig(**{"idol_card_id": idol or "", **loadout})
@@ -205,6 +210,9 @@ def _base_loadout_config(scenario_id: str, cfg: LoadoutConfig) -> dict[str, Any]
         "support_card_ids": cfg.support_card_ids,
         "support_card_level": cfg.support_card_level,
         "challenge_item_ids": cfg.challenge_item_ids,
+        "potential_level": cfg.potential_level,
+        "prima_stella_level": cfg.prima_stella_level,
+        "memories": tuple(cfg.memories or ()),
     }
 
 

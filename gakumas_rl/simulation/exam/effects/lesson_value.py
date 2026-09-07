@@ -41,7 +41,9 @@ def resolve_lesson_effect_value(context: ExamEffectContext, effect: dict[str, An
             referenced=context.resources['enthusiastic'] * extra_ratio,
         )
     elif effect_type == ExamEffect.LESSON_DEPEND_PLAY_CARD_COUNT_SUM:
-        value = context.total_counters['play_count'] * max(base_value, 1.0)
+        # 「パラメータ+v1（レッスン中に使用したスキルカード1枚につき、パラメータ上昇量+v2）」：v1 + 使用枚数 × v2
+        # （effectValue2 是固定值不是千分比；录像：ときめきのいっぱい 3 + 3×16 + 集中22 → ×1.5 = 110）。
+        value = base_value + context.total_counters['play_count'] * float(effect.get('effectValue2') or 0)
     elif effect_type == ExamEffect.LESSON_DEPEND_STAMINA_CONSUMPTION_SUM:
         value = context.ceil_positive(context.total_counters['stamina_spent'] * ratio_value)
     elif effect_type == ExamEffect.LESSON_DEPEND_BLOCK_CONSUMPTION_SUM:

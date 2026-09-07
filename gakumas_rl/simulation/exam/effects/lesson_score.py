@@ -4,7 +4,8 @@ from __future__ import annotations
 
 from typing import Any
 
-from ..ids import GrowEffect
+from ..ids import ExamEffect, GrowEffect
+from ..scoring import floor_int
 from .context import ExamEffectContext
 
 
@@ -26,8 +27,17 @@ def apply_lesson_score_effect(context: ExamEffectContext, effect: dict[str, Any]
     中途达到 PERFECT/强制结束时停止。
     """
 
+    effect_type = str(effect.get('effectType') or '')
     for _ in range(lesson_hit_count(context, effect, source)):
         lesson_value = context.resolve_lesson_effect_value(effect, from_card=source == 'card')
+        if effect_type == ExamEffect.LESSON_DEPEND_BLOCK:
+            # 「元気の n% 分パラメータ上昇させ、元気を半分/0にする」：分数按减少前的元気计算，
+            # 之后减少 floor(元気 × effectValue2/1000)（gakumas-core performLeveragingVitality）。
+            reduction_ratio = float(effect.get('effectValue2') or 0) / 1000.0
+            if reduction_ratio > 0:
+                context.resources['block'] = max(
+                    context.resources['block'] - floor_int(context.resources['block'] * reduction_ratio), 0.0
+                )
         lesson_delta = context.score_gain(lesson_value)
         context.score += lesson_delta
         if context.current_turn_color in context.score_per_color:

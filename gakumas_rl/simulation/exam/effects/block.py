@@ -34,7 +34,8 @@ def apply_block_effect(context: ExamEffectContext, effect: dict[str, Any], sourc
         context.resources['block'] *= max(1.0 - context.ratio_value(effect), 0.0)
         return
     elif effect_type == ExamEffect.BLOCK_PER_USE_CARD_COUNT:
-        delta = context.turn_counters['play_count'] * context.raw_value(effect)
+        # 「元気+v1（レッスン中に使用したスキルカード1枚につき、元気増加量+v2）」：v1 + 使用枚数 × v2（与 LessonDependPlayCardCountSum 同构）
+        delta = context.raw_value(effect) + context.total_counters['play_count'] * float(effect.get('effectValue2') or 0)
     elif effect_type == ExamEffect.BLOCK_DEPEND_REVIEW:
         delta = context.ceil_positive(context.resources['review'] * context.ratio_value(effect))
     else:

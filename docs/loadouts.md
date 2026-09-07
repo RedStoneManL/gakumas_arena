@@ -167,3 +167,76 @@ describe_loadout("hif_sense_default")                                   # 含日
 4. 启发式培育只堆单一维度、不看 スター性 目标（≥700）、不会为了卡组去差入/活動支給。改进方向：让 `_choose_planning_action` 看考试权重与最低属性、卡组大小；或直接上 `gakumas_arena/policies` 的搜索。
 
 以上 1–3 修好后请重跑 §4（`python -m pytest tests/test_loadouts.py` + 20 seeds 测量），并考虑重新筛卡（§5）。
+
+## 7. 偶像卡完整套件：才能開花 / ポテンシャル / プリマステラ / メモリー（OPEN_ITEMS B7）
+
+> 代码：`gakumas_rl/idol_config.py`（解析）、`gakumas_rl/loadout.py`（数据结构）、`gakumas_arena/loadouts.py`（预设选项）；
+> 测试：`tests/gakumas_rl/test_idol_kit.py`。全部数据驱动：主数据行 → `ProduceSkill` → `ProduceEffect` id，
+> 交给培育运行时已有的 `_register_produce_skill` / `_apply_effect_rows` 路径，本节没有硬编码任何效果数值。
+
+### 7.1 loadout 选项
+
+| 选项（`LoadoutConfig` / `LoadoutPreset` / `run_produce(loadout=dict(...))`） | 含义 | 默认 |
+|---|---|---|
+| `idol_rank` | 才能開花 段数（原有） | `LoadoutConfig` 0；预设 6 |
+| `potential_level` | ポテンシャル 段数 0~4（`IdolCardPotential`） | `LoadoutConfig` `None`=0（未解放）；预设 `None`=**主数据上限**（4） |
+| `prima_stella_level` | プリマステラ 解放 0/1（`IdolCardPrimaStellaProduceSkill`） | `LoadoutConfig` `None`=0；预设 `None`=**主数据上限**（一番星卡 1，其余 0） |
+| `memories` | 带入培育的メモリー：`MemoryGift` id 字符串或 `gakumas_rl.loadout.ProduceMemorySpec` 的元组 | `()` |
+
+`LoadoutPreset.resolved_potential_level(idol)` / `resolved_prima_stella_level(idol)` 给出实际值；`run_produce("hif", idol="i_card-hmsz-3-016", loadout="hif_sense_default")`
+这类显式偶像覆盖会按覆盖后的偶像查上限。解析结果记录在 `IdolLoadout.potential_level / prima_stella_level / memories` 与 `metadata`，
+每条 `ProduceSkillEffect` 新增 `source`（`level_limit` / `potential` / `prima_stella` / `memory` / `support_card`）便于追溯；`describe_loadout()` 的 `idol_kit_skills` 列出前四类。
+
+### 7.2 主数据 → 效果的映射
+
+| 来源 | 主数据 | 解析成 | 备注 |
+|---|---|---|---|
+| 才能開花 三维/体力 | `IdolCardLevelLimitStatusUp`（rank ≤ `idol_rank`） | `stat_profile.vocal/dance/visual/stamina` | 原有，已验证 |
+| 才能開花 技能 | `IdolCardLevelLimitProduceSkill` → `ProduceSkill p_idol_skill-*` | `produce_skills[source=level_limit]` | **修正**：同一技能 rank2 给 Lv1、rank6 给 Lv2（SP 発生率 +5% → +10%），`ProduceSkill` 每级是总量，旧代码两级都注册会叠成 +15%；现在每个技能只注册已解锁的最高一级 |
+| ポテンシャル 1 段 / 4 段 | `IdolCardPotential[effectTypes=ProduceSkill]` + `IdolCardPotentialProduceSkill` | `produce_skills[source=potential]` | 例 `hmsz-3-016`：1 段 獲得スキルカード再抽選+1（Lv1）→ 4 段 +2（Lv2，同样只保留最高级）；`ttmr-3-000`：1 段「基本」卡 2 张强化开局、4 段 再抽選+1 |
+| ポテンシャル 2 段 | `IdolCardPotentialEffectType_InitialProduceItemChange` | `use_after_item`（+ 版固有 P 道具） | 仅当 `use_after_item=None` **且显式给了** `potential_level` 时按此决定；没给 `potential_level` 沿用旧规则 `idol_rank >= 4`（保持既有测试/训练行为） |
+| ポテンシャル 3 段 | `produceVocal/Dance/VisualGrowthRatePermil` | `stat_profile.*_growth_rate += permil/1000` | 例 `hmsz-3-016` vo +40‰ / vi +20‰ |
+| ポテンシャル 4 段 | `IdolCardPotentialEffectType_ProduceStamina.effectValue` | `stat_profile.stamina += 3` | 全库 151 张都是 +3 |
+| プリマステラ | `IdolCardPrimaStellaProduceSkill` → `ProduceSkill p_primastella_skill-*`（`produceType=HIF`, `produceSplitType=Final`） | `produce_skills[source=prima_stella]` | 效果 `ProduceEffectType_ProduceReward` → 培育开始获得专属「一番星」Legend 卡；**只在 produce-008（本戦）注册**，選抜 / 初 / NIA 按 `produceType/produceSplitType` 过滤掉（hif.md §9） |
+| メモリー アビリティ | `MemoryAbility.skillId` → `ProduceSkill p_memory_skill-*` | `produce_skills[source=memory]` | `MemoryAbility.produceGroupIds` 非空时只对该 `ProduceGroup` 生效（H.I.F 専用アビリティ = produce_group-003）；`isUniqueActivation` 的同名アビリティ跨メモリー只注册一次 |
+| メモリー 技能卡 | `MemoryGift.produceCard`（id / upgradeCount / customizes）+ `produceCardPhaseType` | `build_initial_exam_deck` 把 **ProduceStart** 阶段的卡放进初始卡组（与固定底牌同级，先于随机补牌） | `EndAuditionMid` 阶段的卡需要运行时钩子（§7.5）；`customizes` 保留未应用 |
+| メモリー 三维/体力/コンテスト卡与道具 | `MemoryGift.vocal/dance/visual/stamina/examBattleProduceCards/examBattleProduceItemIds` | `ProduceMemorySpec` 字段，只记录 | 这些是メモリー对战（コンテスト）用数值，培育里不生效 |
+
+`ProduceSkill.produceType / produceSplitType` 的过滤对四类偶像/メモリー技能统一生效（`_produce_skill_applies_to_scenario`）；支援卡技能全库都是 Unknown，未改动其加载逻辑。
+
+### 7.3 メモリー配置
+
+```python
+from gakumas_rl.loadout import ProduceMemorySpec, ProduceMemoryCardSpec
+from gakumas_rl.idol_config import memory_spec_from_gift
+from gakumas_arena.sim import run_produce
+
+# 配布メモリー（MemoryGift 21 行；按角色归属，hski 的配布只能给 hski 的卡）
+run_produce("first_star", idol="i_card-hski-1-000", loadout=dict(idol_rank=4, memories=("memory_gift-20260516-hif-plan1-1",)))
+
+# 自定义メモリー：任意 MemoryAbility（575 行）+ 任意技能卡；idol_card_id 留空则不做角色校验
+custom = ProduceMemorySpec(
+    memory_id="my_sss",
+    produce_card=ProduceMemoryCardSpec(card_id="p_card-01-act-2_001", upgrade_count=1),
+    ability_ids=("ability-p_cd-memory-vocal-450-001-p_memory_skill-common-p_trigger-produce_start-initial-vocal_addition-02-001",),
+)
+run_produce("hif", loadout=dict(memories=(custom,)))
+```
+
+校验：`MemoryGift` / `MemoryAbility` / 卡 id 不存在 → `KeyError`；配布メモリー角色与偶像不符 → `ValueError`。
+メモリー数量上限（游戏内 2 枠）主数据未给出，未强制。
+
+### 7.4 三套预设的实际变化
+
+`hif_sense/logic/anomaly_default` 现在都是 rank6 + ポテンシャル 4（成长率 + 体力 +3 + 两条 `p_idol_skill` + 初期Pアイテム変更 → 用 + 版固有道具）；
+`hif_anomaly_default`（`hmsz-3-016`）在 `run_produce("produce-008")`（本戦）时额外获得「星々を見下ろす一番星」`p_card-03-ido-100_047`。
+预设不带メモリー（配布行没有这三张卡的角色）。§4 的测量数字是在这之前跑的，未重测。
+
+### 7.5 仍需 `simulation/produce/runtime.py` 钩子（本任务未改运行时）
+
+1. `ProduceMemoryProduceCardPhaseType_EndAuditionMid` 的メモリー卡：应在中期試験结束后加入卡组。`idol_config._load_memory_deck_rows(repository, loadout, phase_type=...)`
+   已能给出这些卡行；运行时在 `AuditionMid` 结算处调用并 `_append_card` 即可。
+2. `_register_produce_skill` 用 `'p_support_skill-' in skill_id` 判定 `source='support_skill'`，メモリーアビリティ（`p_memory_skill-*`）现在落到 `idol_skill`，
+   于是 `_is_support_or_memory_ability_source` 的连锁保护（`{'support_skill','memory_skill'}`）对它不生效。建议改成读 `ProduceSkillEffect.source`
+   （`'memory'` → `'memory_skill'`，`'support_card'` → `'support_skill'`）。
+3. 选抜試験メモリー → 本戦 的交接（`HifSelectionMemory`）与本节的「编成メモリー」是两回事，未合并。

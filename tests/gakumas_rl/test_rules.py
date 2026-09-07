@@ -605,10 +605,12 @@ def test_exam_turn_color_changes_effective_score_bonus_multiplier() -> None:
     runtime._refresh_turn_score_bonus_multiplier()
     visual_multiplier = runtime.score_bonus_multiplier
 
-    assert vocal_multiplier > 1.0
-    assert dance_multiplier < 1.0
+    # 考试的スコアボーナス% 只由 ProduceExamBattleScoreConfig 按当前属性查表决定（§5.3），
+    # 不再叠乘「属性/基准线」比例：倍率应等于对应属性千分率 / 1000。
+    assert vocal_multiplier == pytest.approx(runtime._lookup_score_permil(900.0, 'vocal') / 1000.0)
+    assert dance_multiplier == pytest.approx(runtime._lookup_score_permil(300.0, 'dance') / 1000.0)
+    assert visual_multiplier == pytest.approx(runtime._lookup_score_permil(300.0, 'visual') / 1000.0)
     assert vocal_multiplier > dance_multiplier
-    # 审查基准使不同属性的千分率不同，dance 和 visual 倍率可能不再相等
     assert dance_multiplier > 0.0
     assert visual_multiplier > 0.0
 

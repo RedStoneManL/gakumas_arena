@@ -6,12 +6,13 @@
 - SSR 偶像卡，``idol_rank`` 取 ``IdolCard.maxIdolCardLevelLimitRank``（当前主数据为 6）；
 - 6 张支援卡（由 ``gakumas_rl.support_card_selector`` 按偶像プラン/三维挑选，结果固化在本文件里，
   ``suggest_support_cards`` 可重新生成），等级取该稀有度上限（SSR=60，见 ``SupportCardLevelLimit``）；
-- H.I.F ボーナス 成长面板等级（``ProduceGrowthPanel``，剧本级配置，见 ``HifScenarioConfig.growth_panel_levels``）。
-
-引擎目前 **不支持** 的账号要素（预设里无法表达，见 docs/loadouts.md）：
-- 偶像卡 ポテンシャル（``IdolCard.idolCardPotentialId`` / ``idolCardPotentialProduceSkillId`` 未被 ``idol_config`` 读取）；
-- プリマステラ 技能（``idolCardPrimaStellaProduceSkillId`` 未被读取）；
-- 培育メモリー（``IdolLoadout`` 没有メモリー字段；引擎里只有 選抜試験メモリー → 本戦 的交接）。
+- H.I.F ボーナス 成长面板等级（``ProduceGrowthPanel``，剧本级配置，见 ``HifScenarioConfig.growth_panel_levels``）；
+- ``potential_level`` ポテンシャル 段数与 ``prima_stella_level`` プリマステラ（默认 ``None`` = 该卡主数据上限：
+  ``IdolCardPotential`` 4 段；有 ``idolCardPrimaStellaProduceSkillId`` 的 H.I.F 卡 1，否则 0），由
+  ``gakumas_rl.idol_config`` 解析成 ``ProduceSkill`` 效果 / 成长率 / 体力 / + 版固有道具；
+- ``memories``：带入培育的メモリー（``MemoryGift`` id 或 ``gakumas_rl.loadout.ProduceMemorySpec``），默认为空——
+  配布メモリー按角色归属（如 ``memory_gift-20260516-hif-plan1-1`` 属于 hski），预设偶像没有对应的配布行，
+  自定义メモリー请用 ``LoadoutPreset(..., memories=(ProduceMemorySpec(...),))`` 或 ``run_produce(..., loadout=dict(memories=...))``。
 
 用法::
 
@@ -29,7 +30,7 @@ from pathlib import Path
 from typing import Any
 
 from gakumas_rl.interfaces.service import LoadoutConfig
-from gakumas_rl.loadout import DEFAULT_DEARNESS_LEVEL
+from gakumas_rl.loadout import DEFAULT_DEARNESS_LEVEL, ProduceMemorySpec
 from gakumas_rl.repository.master_data import ScenarioSpec
 from gakumas_rl.support_card_selector import SupportCardAutoSelectConfig, auto_select_support_cards
 
@@ -77,11 +78,38 @@ class LoadoutPreset:
     support_card_level: int = 60
     use_after_item: bool | None = None
     challenge_item_ids: tuple[str, ...] = ()
+    #: ポテンシャル 段数（``None`` = 该卡主数据上限，见 ``resolved_potential_level``）。
+    potential_level: int | None = None
+    #: プリマステラ 解放段（``None`` = 该卡主数据上限：H.I.F 一番星卡 1，其余 0）。
+    prima_stella_level: int | None = None
+    #: 带入培育的メモリー：``MemoryGift`` id 或 ``ProduceMemorySpec``。
+    memories: tuple[ProduceMemorySpec | str, ...] = ()
     #: 剧本级覆盖：H.I.F ボーナス 成长面板等级（仅对 produce-007/008 生效）。
     hif_growth_panel_levels: dict[str, int] = field(default_factory=dict)
     description: str = ""
 
+    def resolved_potential_level(self, idol_card_id: str | None = None) -> int:
+        """预设实际使用的 ポテンシャル 段数（``None`` 时查主数据上限；显式偶像覆盖时按该偶像算）。"""
+
+        if self.potential_level is not None:
+            return int(self.potential_level)
+        from gakumas_arena.env import get_repository
+        from gakumas_rl.idol_config import max_potential_level
+
+        return max_potential_level(get_repository(), idol_card_id or self.idol_card_id)
+
+    def resolved_prima_stella_level(self, idol_card_id: str | None = None) -> int:
+        """预设实际使用的 プリマステラ 段数（``None`` 时查主数据：有一番星技能的卡为 1）。"""
+
+        if self.prima_stella_level is not None:
+            return int(self.prima_stella_level)
+        from gakumas_arena.env import get_repository
+        from gakumas_rl.idol_config import max_prima_stella_level
+
+        return max_prima_stella_level(get_repository(), idol_card_id or self.idol_card_id)
+
     def to_loadout_config(self, **overrides: Any) -> LoadoutConfig:
+        idol_card_id = str(overrides.get("idol_card_id") or self.idol_card_id)
         cfg = LoadoutConfig(
             idol_card_id=self.idol_card_id,
             producer_level=int(self.producer_level),
@@ -92,6 +120,9 @@ class LoadoutPreset:
             support_card_ids=tuple(self.support_card_ids),
             support_card_level=int(self.support_card_level),
             challenge_item_ids=tuple(self.challenge_item_ids),
+            potential_level=self.resolved_potential_level(idol_card_id),
+            prima_stella_level=self.resolved_prima_stella_level(idol_card_id),
+            memories=tuple(self.memories),
         )
         return replace(cfg, **overrides) if overrides else cfg
 
@@ -156,21 +187,21 @@ PRESETS: dict[str, LoadoutPreset] = {
             "sense",
             "i_card-ttmr-3-000",
             ('s_card-3-0010', 's_card-3-0001', 's_card-3-0098', 's_card-3-0030', 's_card-3-0070', 's_card-3-0093'),
-            "篠澤広 SSR「Luna say maybe」（センス・ExamLessonBuff） rank6 + 6 张 SSR 支援卡 Lv60 + H.I.F ボーナス 面板全满",
+            "月村手毬 SSR「Luna say maybe」（センス・ExamLessonBuff） rank6 + ポテンシャル4 + 6 张 SSR 支援卡 Lv60 + H.I.F ボーナス 面板全满",
         ),
         _hif_preset(
             "hif_logic_default",
             "logic",
             "i_card-kllj-3-000",
             ('s_card-3-0074', 's_card-3-0007', 's_card-3-0035', 's_card-3-0040', 's_card-3-0050', 's_card-3-0010'),
-            "葛城リーリヤ SSR「白線」（ロジック・ExamReview） rank6 + 6 张 SSR 支援卡 Lv60 + H.I.F ボーナス 面板全满",
+            "葛城リーリヤ SSR「白線」（ロジック・ExamReview） rank6 + ポテンシャル4 + 6 张 SSR 支援卡 Lv60 + H.I.F ボーナス 面板全满",
         ),
         _hif_preset(
             "hif_anomaly_default",
             "anomaly",
             "i_card-hmsz-3-016",
             ('s_card-3-0054', 's_card-3-0007', 's_card-3-0051', 's_card-3-0043', 's_card-3-0062', 's_card-3-0108'),
-            "姫崎莉波 SSR「VEIL」（アノマリー・ExamConcentration） rank6 + 6 张 SSR 支援卡 Lv60 + H.I.F ボーナス 面板全满",
+            "秦谷美鈴 SSR「VEIL」（アノマリー・ExamConcentration） rank6 + ポテンシャル4 + プリマステラ（本戦） + 6 张 SSR 支援卡 Lv60 + H.I.F ボーナス 面板全满",
         ),
     )
 }
@@ -227,12 +258,18 @@ def _character_name(character_id: str) -> str:
 def describe_loadout(name: str) -> dict[str, Any]:
     """预设内容（含日文原名 + 中文译名，译名来自 data/raw/GakumasTranslationData）。"""
 
-    from gakumas_arena.env import get_repository
+    from gakumas_arena.env import build_loadout, get_repository
 
     preset = get_loadout(name)
     repo = get_repository()
     idol_row = repo.load_table("IdolCard").first(preset.idol_card_id) or {}
     idol_zh = (_translation("IdolCard").get(preset.idol_card_id) or {}).get("name")
+    kit_loadout = build_loadout(preset.scenario, loadout=preset)
+    kit_skills = [
+        {"source": skill.source, "skill_id": skill.skill_id, "level": skill.level, "effect_ids": list(skill.effect_ids)}
+        for skill in (kit_loadout.produce_skills if kit_loadout is not None else ())
+        if skill.source in {"level_limit", "potential", "prima_stella", "memory"}
+    ]
     supports = []
     for card_id in preset.support_card_ids:
         row = repo.support_cards.first(card_id) or {}
@@ -262,7 +299,12 @@ def describe_loadout(name: str) -> dict[str, Any]:
             "stats": [idol_row.get("produceVocal"), idol_row.get("produceDance"), idol_row.get("produceVisual")],
             "stamina": idol_row.get("produceStamina"),
             "exam_effect_type": idol_row.get("examEffectType"),
+            "potential_level": preset.resolved_potential_level(),
+            "prima_stella_level": preset.resolved_prima_stella_level(),
+            "has_prima_stella": bool(idol_row.get("idolCardPrimaStellaProduceSkillId")),
         },
+        "idol_kit_skills": kit_skills,
+        "memories": [memory if isinstance(memory, str) else memory.memory_id or "<custom>" for memory in preset.memories],
         "producer_level": preset.producer_level,
         "dearness_level": preset.dearness_level,
         "support_cards": supports,

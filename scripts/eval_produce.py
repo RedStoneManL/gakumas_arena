@@ -18,7 +18,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
-from gakumas_arena.env import DEFAULT_IDOL  # noqa: E402
+from gakumas_arena.env import AUTO  # noqa: E402
 from gakumas_arena.policies.evaluation import (  # noqa: E402
     PRODUCE_COLUMNS,
     evaluate_produce,
@@ -32,8 +32,8 @@ from gakumas_arena.policies.evaluation import (  # noqa: E402
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("--scenario", default="first_star")
-    parser.add_argument("--idol", default=DEFAULT_IDOL)
-    parser.add_argument("--loadout", default=None, help="JSON 字符串或 .json/.yaml 文件（LoadoutConfig 字段）")
+    parser.add_argument("--idol", default=AUTO, help="偶像卡 id；默认 AUTO = 预设的偶像（无预设时为 花海咲季 R）")
+    parser.add_argument("--loadout", default=None, help="预设名（如 hif_sense_default）、JSON 字符串或 .json/.yaml 文件（LoadoutConfig 字段）")
     parser.add_argument("--policy", default="heuristic", help="外层策略：heuristic | random")
     parser.add_argument("--compare", default=None, help="逗号分隔的多个外层策略，相同 seed 对比")
     parser.add_argument("--exam-policy", default="builtin", help="培育内考试打牌：builtin | search | search:d1k2 ...")

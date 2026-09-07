@@ -14,11 +14,17 @@ from ...constants.game.action_types import (
     ACTION_ACTIVITY,
     ACTION_ACTIVITY_SUPPLY,
     ACTION_BUSINESS,
+    ACTION_CARD_REWARD_REROLL,
+    ACTION_CARD_REWARD_SKIP,
+    ACTION_CONSULT,
+    ACTION_CONSULT_FINISH,
     ACTION_OUTING,
     ACTION_PRE_AUDITION_CONTINUE,
     ACTION_PRESENT,
     ACTION_REFRESH,
     ACTION_SCHOOL_CLASS,
+    ACTION_SHOP_REROLL,
+    CARD_REWARD_PICK_ACTION_TYPES,
 )
 from ...idol_config import (
     build_initial_exam_deck,
@@ -36,6 +42,7 @@ from .hif import (
     HifRuntimeSupport,
     HifSelectionMemory,
     is_hif_interval_action,
+    is_hif_open_lesson_action,
     is_hif_school_action,
 )
 from .items import ActiveProduceItem, ProduceItemInterpreter, RuntimeExamStatusEnchantSpec
@@ -60,6 +67,26 @@ SHOP_CARD_ACTION_TYPES = tuple(f'shop_buy_card_{index}' for index in range(1, 5)
 SHOP_DRINK_ACTION_TYPES = tuple(f'shop_buy_drink_{index}' for index in range(1, 5))
 SHOP_UPGRADE_ACTION_TYPES = tuple(f'shop_upgrade_card_{index}' for index in range(1, 5))
 SHOP_DELETE_ACTION_TYPES = tuple(f'shop_delete_card_{index}' for index in range(1, 5))
+SHOP_SLOT_ACTION_TYPES = (*SHOP_CARD_ACTION_TYPES, *SHOP_DRINK_ACTION_TYPES, *SHOP_UPGRADE_ACTION_TYPES, *SHOP_DELETE_ACTION_TYPES)
+# 相談 子阶段（每周动作 consult 进入）里可用的动作集合
+CONSULT_PHASE_ACTION_TYPES = {*SHOP_SLOT_ACTION_TYPES, ACTION_SHOP_REROLL, ACTION_CONSULT_FINISH}
+# 课程结束技能卡奖励（3 选 1）子阶段里可用的动作集合
+CARD_REWARD_ACTION_TYPES = {*CARD_REWARD_PICK_ACTION_TYPES, ACTION_CARD_REWARD_SKIP, ACTION_CARD_REWARD_REROLL}
+# 课程奖励候选卡的成员集合：主数据 ProduceCardPool `p_random_pool-all-upgrade_1`（164 张 R/SR/SSR，含全流派、
+# 不含 N/Legend/偶像固有/支援卡来源）。主数据里没有专门的「课程发卡池」——ProduceStepLesson/ProduceStepLessonLevel/
+# ProduceStepOpenLesson 只有回合数与数值，ProduceStepEventSuggestion 的课程行 produceEffectIds 为空，
+# ProduceCardPool 的其余 9 个池都是 P 道具/效果的生成池——所以课程 3 选 1 由客户端代码驱动，这里按该「全卡池」成员 + 流派过滤复现。
+LESSON_CARD_REWARD_POOL_ID = 'p_random_pool-all-upgrade_1'
+LESSON_CARD_REWARD_CANDIDATE_COUNT = 3
+# 课程奖励稀有度权重（按下一场试验下标分档：試験1 前 / 試験2 前 / 之后）。
+# 主数据无此表，`docs/rules/produce_loop.md` §3.1 也只记「3 选 1」；按社区印象「前期多 R、中后期 SR/SSR 增多」给近似值。TODO(verify)
+LESSON_CARD_REWARD_RARITY_WEIGHTS: tuple[dict[str, float], ...] = (
+    {'ProduceCardRarity_R': 60.0, 'ProduceCardRarity_Sr': 35.0, 'ProduceCardRarity_Ssr': 5.0},
+    {'ProduceCardRarity_R': 40.0, 'ProduceCardRarity_Sr': 45.0, 'ProduceCardRarity_Ssr': 15.0},
+    {'ProduceCardRarity_R': 25.0, 'ProduceCardRarity_Sr': 50.0, 'ProduceCardRarity_Ssr': 25.0},
+)
+# 候选直接以强化版（+）出现的基础概率；支援卡 `SupportCardProduceCardUpgradeProbabilityUp`（レッスン後強化確率）叠加。TODO(verify)
+LESSON_CARD_REWARD_UPGRADE_BASE_RATE = 0.0
 FAILED_ROUTE_SCORE_SCALE = 0.25
 PARAM_TARGET_STAGE_BASE_RATIO = 0.45
 PARAM_TARGET_STAGE_PROGRESS_RATIO = 0.35
@@ -169,6 +196,12 @@ ACTION_EFFECT_TYPES = {
     ACTION_ACTIVITY_SUPPLY: ['ProduceEffectType_ProduceReward', 'ProduceEffectType_ProduceRewardSet'],
     ACTION_REFRESH: ['ProduceEffectType_StaminaRecoverMultiple'],
     ACTION_PRE_AUDITION_CONTINUE: [],
+    ACTION_CONSULT: [],
+    ACTION_CONSULT_FINISH: [],
+    ACTION_SHOP_REROLL: [],
+    ACTION_CARD_REWARD_SKIP: [],
+    ACTION_CARD_REWARD_REROLL: [],
+    **{action_type: ['ProduceEffectType_ProduceReward'] for action_type in CARD_REWARD_PICK_ACTION_TYPES},
     **{action_type: [] for action_type in SHOP_CARD_ACTION_TYPES},
     **{action_type: [] for action_type in SHOP_DRINK_ACTION_TYPES},
     **{action_type: [] for action_type in SHOP_UPGRADE_ACTION_TYPES},
@@ -214,6 +247,8 @@ PARAMETER_EFFECT_INDEX = {
 PARAMETER_GROWTH_KEYS = ('vocal_growth', 'dance_growth', 'visual_growth')
 PRE_AUDITION_ACTION_TYPES = {
     ACTION_PRE_AUDITION_CONTINUE,
+    ACTION_CONSULT_FINISH,
+    ACTION_SHOP_REROLL,
     'customize_apply',
     'audition_select_1',
     'audition_select_2',
@@ -298,6 +333,8 @@ class ProduceActionCandidate:
     route_param_margin: float = 0.0
     is_business_excellent: bool = False
     """是否为营业大成功变体（isBusinessExcellent=true 的 EventDetail 行）。"""
+    card_evaluation: float = 0.0
+    """技能卡候选的估值（ProduceCard.evaluation + 客户端自动出牌先验），供启发式 3 选 1 / 购买使用。"""
 
 
 @dataclass(frozen=True)
@@ -442,6 +479,11 @@ class ProduceRuntime:
         self.initial_deck_card_ids: set[str] = set()
         self.shop_inventory: dict[str, ProduceActionCandidate] = {}
         self.pre_audition_action_inventory: dict[str, ProduceActionCandidate] = {}
+        # 课程结束后待选的技能卡奖励（3 选 1），以及等待选卡/相談结束后再推进周数的「本周收尾」上下文
+        self.pending_card_reward: dict[str, Any] | None = None
+        self.pending_week_close: dict[str, Any] | None = None
+        self._lesson_reward_pool_cache_key: tuple[Any, ...] | None = None
+        self._lesson_reward_pool_cache_value: list[dict[str, Any]] = []
         self.action_samples = self._build_action_samples()
         self.audition_history: list[dict[str, Any]] = []
         self.final_summary: dict[str, Any] = {}
@@ -552,6 +594,14 @@ class ProduceRuntime:
             'customize_slots': float(customize_slots),
             'exclude_count_bonus': 0.0,
             'reroll_count_bonus': 0.0,
+            # 相談リフレッシュ回数（ProduceSetting 无基础值 → 0；親愛度 27 `shop_reroll_count_up` +1）与
+            # 技能卡再抽选回数（`produce_card_select_reroll_count_up`，亲爱度/ポテンシャル），按整局计数。TODO(verify) 每局 vs 每次相談
+            'shop_reroll_count_bonus': 0.0,
+            'card_select_reroll_count_bonus': 0.0,
+            'shop_rerolls_used': 0.0,
+            'card_reward_rerolls_used': 0.0,
+            'lesson_card_rewards_taken': 0.0,
+            'consult_visits': 0.0,
             'shop_discount': 0.0,
             'card_upgrade_probability_bonus': 0.0,
             'shop_card_modify_count': 0.0,
@@ -786,6 +836,8 @@ class ProduceRuntime:
         self.remaining_customize_actions = 0
         self.shop_inventory = {}
         self.pre_audition_action_inventory = {}
+        self.pending_card_reward = None
+        self.pending_week_close = None
         self._candidates = []
         self.audition_history = []
         self.final_summary = {}
@@ -2341,8 +2393,11 @@ class ProduceRuntime:
             self._refresh_pre_audition_inventory()
 
     def _refresh_pre_audition_inventory(self) -> None:
-        """按当前考试前阶段重建相谈/特训/试镜候选。"""
+        """按当前考试前阶段（或每周相談子阶段）重建相谈/特训/试镜候选。"""
 
+        if self.pre_audition_phase == 'consult':
+            self._refresh_consult_inventory()
+            return
         if not self.pending_audition_stage:
             self.pre_audition_action_inventory = {}
             self._candidates = []
@@ -2637,7 +2692,7 @@ class ProduceRuntime:
     def _supports_pre_audition_actions(self) -> bool:
         """判断当前场景是否真的把相谈前置动作暴露给训练环境。"""
 
-        return any(action_type in PRE_AUDITION_ACTION_TYPES for action_type in self.scenario.action_types)
+        return ACTION_PRE_AUDITION_CONTINUE in self.scenario.action_types
 
     def _advance_pre_audition_flow(self) -> tuple[float, bool, dict[str, Any]]:
         """结束相谈并推进到考试。"""
@@ -3110,6 +3165,11 @@ class ProduceRuntime:
                 self.state['produce_points'] = max(self.state['produce_points'] + candidate.produce_point_delta, 0.0)
                 self._grant_resource(candidate.resource_type, candidate.resource_id, candidate.resource_level)
                 self.pre_audition_action_inventory[candidate.action_type] = self._empty_shop_candidate(candidate.action_type)
+                self._dispatch_produce_item_phase(
+                    'ProducePhaseType_BuyShopItemProduceCard',
+                    stage_type=self.pending_audition_stage or '',
+                    card_id=candidate.resource_id,
+                )
             elif _is_shop_drink_action(candidate.action_type):
                 self.state['produce_points'] = max(self.state['produce_points'] + candidate.produce_point_delta, 0.0)
                 self._grant_resource(candidate.resource_type, candidate.resource_id, candidate.resource_level)
@@ -4207,7 +4267,13 @@ class ProduceRuntime:
             self.state['exclude_count_bonus'] += max(value / 1000.0, 1.0)
             return
         if effect_type in {'ProduceEffectType_ProduceCardSelectRerollCountUp', 'ProduceEffectType_ShopRerollCountUp'}:
-            self.state['reroll_count_bonus'] += max(value / 1000.0, 1.0)
+            # effectValue 直接是次数（p_effect-produce_card_select_reroll_count_up-0003_0003 = +3）
+            reroll_count = max(float(value), 1.0)
+            self.state['reroll_count_bonus'] += reroll_count
+            if effect_type == 'ProduceEffectType_ShopRerollCountUp':
+                self.state['shop_reroll_count_bonus'] += reroll_count
+            else:
+                self.state['card_select_reroll_count_bonus'] += reroll_count
             return
         if effect_type in {
             'ProduceEffectType_ShopPriceDiscountMultiple',

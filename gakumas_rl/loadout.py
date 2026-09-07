@@ -31,12 +31,50 @@ class IdolStatProfile:
 
 @dataclass(frozen=True)
 class ProduceSkillEffect:
-    """偶像卡随 rank 解锁的培育技能效果。"""
+    """一条已解析的培育技能（ProduceSkill 行 → ProduceEffect id），来源可以是偶像卡/支援卡/メモリー。"""
 
     skill_id: str
     level: int
     trigger_id: str
     effect_ids: tuple[str, ...] = ()
+    #: 来源标签（``level_limit`` 才能開花 / ``potential`` ポテンシャル / ``prima_stella`` プリマステラ /
+    #: ``memory`` メモリーアビリティ / ``support_card`` 支援卡）；仅用于追溯与统计，运行时不区分。
+    source: str = ''
+
+
+@dataclass(frozen=True)
+class ProduceMemoryCardSpec:
+    """メモリー携带的技能卡（主数据 ``MemoryGift.produceCard`` 结构）。"""
+
+    card_id: str
+    upgrade_count: int = 0
+    #: ``ProduceCardCustomize`` id 列表（定制），引擎目前不应用，仅保留。
+    customize_ids: tuple[str, ...] = ()
+    #: ``ProduceMemoryProduceCardPhaseType_ProduceStart``（培育开始入组）或 ``_EndAuditionMid``（中期试验后入组）。
+    phase_type: str = 'ProduceMemoryProduceCardPhaseType_ProduceStart'
+
+
+@dataclass(frozen=True)
+class ProduceMemorySpec:
+    """培育メモリー（编成时带入培育的メモリー），字段与主数据 ``MemoryGift`` 行一一对应。
+
+    培育内生效的部分：``produce_card``（按 ``phase_type`` 入组）与 ``ability_ids``
+    （``MemoryAbility`` → ``ProduceSkill p_memory_skill-*`` → ``ProduceEffect``，作为培育技能注册）。
+    三维 / 体力 / ``exam_battle_*`` 是コンテスト（メモリー对战）用数值，培育里不使用，只作记录。
+    """
+
+    memory_id: str = ''
+    idol_card_id: str = ''
+    grade: str = ''
+    produce_card: ProduceMemoryCardSpec | None = None
+    ability_ids: tuple[str, ...] = ()
+    ability_levels: tuple[int, ...] = ()
+    vocal: int = 0
+    dance: int = 0
+    visual: int = 0
+    stamina: int = 0
+    exam_battle_produce_card_ids: tuple[str, ...] = ()
+    exam_battle_produce_item_ids: tuple[str, ...] = ()
 
 
 @dataclass(frozen=True)
@@ -112,4 +150,10 @@ class IdolLoadout:
     exam_status_enchant_specs: tuple[ExamStatusEnchantSpec, ...] = ()
     exam_score_bonus_multiplier: float = 1.0
     assist_mode: bool = False
+    #: ポテンシャル 段数（0~4，``IdolCardPotential``）；``produce_skills`` / 成长率 / 体力已按此解析。
+    potential_level: int = 0
+    #: プリマステラ 解放（0/1，``IdolCardPrimaStellaProduceSkill``）；技能只在 H.I.F 本戦 剧本里进入 ``produce_skills``。
+    prima_stella_level: int = 0
+    #: 带入培育的メモリー（已解析的结构化配置，卡与アビリティ已分别并入初始卡组与 ``produce_skills``）。
+    memories: tuple[ProduceMemorySpec, ...] = ()
     metadata: dict[str, str | int | float] = field(default_factory=dict)

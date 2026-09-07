@@ -63,13 +63,19 @@ def make_policy(name: str, seed: int | None = None, *, depth: int = 2, samples: 
     raise ValueError(f"unknown policy {name!r}; choose from {POLICY_NAMES}")
 
 
-def parse_loadout(spec: str | None) -> dict[str, Any] | None:
-    """``--loadout``：JSON 字符串，或 .json / .yaml 文件路径；内容是 ``LoadoutConfig`` 的字段字典。"""
+def parse_loadout(spec: str | None) -> dict[str, Any] | str | None:
+    """``--loadout``：预设名（``gakumas_arena.loadouts.list_loadouts()``）、JSON 字符串，或 .json / .yaml 文件路径；
+    文件/JSON 内容是 ``LoadoutConfig`` 的字段字典。"""
     if not spec:
         return None
     text = spec.strip()
     if text.startswith("{"):
         return dict(json.loads(text))
+    # 预设名（gakumas_arena.loadouts，如 hif_sense_default）直接透传给 make_produce_env
+    from ..loadouts import list_loadouts
+
+    if text in list_loadouts():
+        return text
     path = Path(text)
     if not path.exists():
         raise FileNotFoundError(f"loadout file not found: {path}")

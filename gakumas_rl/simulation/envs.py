@@ -366,6 +366,9 @@ class GakumasPlanningEnv(gym.Env):
             tuple(str(value) for value in (config.get('support_card_ids') or ()) if str(value or '')),
             config.get('support_card_level'),
             tuple(str(value) for value in (config.get('challenge_item_ids') or ()) if str(value or '')),
+            config.get('potential_level'),
+            config.get('prima_stella_level'),
+            tuple(config.get('memories') or ()),
         )
         cached = self._idol_loadout_cache.get(cache_key)
         if cached is not None:
@@ -396,6 +399,9 @@ class GakumasPlanningEnv(gym.Env):
                 for value in (config.get('challenge_item_ids') or ())
                 if str(value or '')
             ),
+            potential_level=(int(config['potential_level']) if config.get('potential_level') is not None else None),
+            prima_stella_level=(int(config['prima_stella_level']) if config.get('prima_stella_level') is not None else None),
+            memories=tuple(config.get('memories') or ()),
         )
         self._idol_loadout_cache[cache_key] = loadout
         return loadout
@@ -1306,6 +1312,9 @@ class GakumasExamEnv(gym.Env):
                 tuple(str(value) for value in (config.get('support_card_ids') or ()) if str(value or '')),
                 config.get('support_card_level'),
                 tuple(str(value) for value in (config.get('challenge_item_ids') or ()) if str(value or '')),
+                config.get('potential_level'),
+                config.get('prima_stella_level'),
+                tuple(config.get('memories') or ()),
             )
             loadout = self._idol_loadout_cache.get(cache_key)
             if loadout is None:
@@ -1334,6 +1343,9 @@ class GakumasExamEnv(gym.Env):
                         for value in (config.get('challenge_item_ids') or ())
                         if str(value or '')
                     ),
+                    potential_level=(int(config['potential_level']) if config.get('potential_level') is not None else None),
+                    prima_stella_level=(int(config['prima_stella_level']) if config.get('prima_stella_level') is not None else None),
+                    memories=tuple(config.get('memories') or ()),
                 )
                 self._idol_loadout_cache[cache_key] = loadout
         return loadout
