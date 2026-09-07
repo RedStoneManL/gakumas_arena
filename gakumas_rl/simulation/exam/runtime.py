@@ -2865,22 +2865,13 @@ class ExamRuntime:
             resolved_effect_specs.append(play_effect)
 
         card_repeat_total = 1 + self._card_repeat_bonus(card)
-        # 计数型：lesson_repeat_bonus 是出牌次数加成，整数语义
-        lesson_repeat_bonus = int(round(self._current_card_grow_total('ProduceCardGrowEffectType_LessonCountAdd')))
-        lesson_repeat_bonus -= int(round(self._current_card_grow_total('ProduceCardGrowEffectType_LessonCountReduce')))
+        # 「（n回）」与成長「上昇回数増加」的多次上昇由打分效果器自己处理（effects/lesson_score.lesson_hit_count）。
         for _ in range(max(card_repeat_total, 1)):
             for play_effect in resolved_effect_specs:
                 effect = self.repository.exam_effect_map.get(str(play_effect['effect_id']))
                 if not effect:
                     continue
-                effect_type = str(effect.get('effectType') or '')
-                apply_times = 1
-                if effect_type in LESSON_EFFECT_TYPES:
-                    apply_times = max(1 + lesson_repeat_bonus, 1)
-                for _ in range(apply_times):
-                    self._apply_exam_effect(effect, source='card')
-                    if self.terminated:
-                        break
+                self._apply_exam_effect(effect, source='card')
                 if self.terminated:
                     break
             if self.terminated:

@@ -154,23 +154,23 @@ PRESETS: dict[str, LoadoutPreset] = {
         _hif_preset(
             "hif_sense_default",
             "sense",
-            "i_card-hski-3-019",
-            ("s_card-3-0010", "s_card-3-0001", "s_card-3-0098", "s_card-3-0030", "s_card-3-0070", "s_card-3-0093"),
-            "花海咲季 SSR「GO MY WAY!!」（センス）rank6 + 6 张 SSR 支援卡 Lv60 + H.I.F ボーナス 面板全满",
+            "i_card-ttmr-3-000",
+            ('s_card-3-0010', 's_card-3-0001', 's_card-3-0098', 's_card-3-0030', 's_card-3-0070', 's_card-3-0093'),
+            "篠澤広 SSR「Luna say maybe」（センス・ExamLessonBuff） rank6 + 6 张 SSR 支援卡 Lv60 + H.I.F ボーナス 面板全满",
         ),
         _hif_preset(
             "hif_logic_default",
             "logic",
-            "i_card-atbm-3-000",
-            ("s_card-3-0010", "s_card-3-0001", "s_card-3-0037", "s_card-3-0030", "s_card-3-0070", "s_card-3-0093"),
-            "SSR「理論武装して」（ロジック）rank6 + 6 张 SSR 支援卡 Lv60 + H.I.F ボーナス 面板全满",
+            "i_card-kllj-3-000",
+            ('s_card-3-0074', 's_card-3-0007', 's_card-3-0035', 's_card-3-0040', 's_card-3-0050', 's_card-3-0010'),
+            "葛城リーリヤ SSR「白線」（ロジック・ExamReview） rank6 + 6 张 SSR 支援卡 Lv60 + H.I.F ボーナス 面板全满",
         ),
         _hif_preset(
             "hif_anomaly_default",
             "anomaly",
             "i_card-hmsz-3-016",
-            ("s_card-3-0010", "s_card-3-0001", "s_card-3-0037", "s_card-3-0030", "s_card-3-0070", "s_card-3-0093"),
-            "SSR「VEIL」（アノマリー）rank6 + 6 张 SSR 支援卡 Lv60 + H.I.F ボーナス 面板全满",
+            ('s_card-3-0054', 's_card-3-0007', 's_card-3-0051', 's_card-3-0043', 's_card-3-0062', 's_card-3-0108'),
+            "姫崎莉波 SSR「VEIL」（アノマリー・ExamConcentration） rank6 + 6 张 SSR 支援卡 Lv60 + H.I.F ボーナス 面板全满",
         ),
     )
 }
