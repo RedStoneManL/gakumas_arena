@@ -175,15 +175,34 @@ def load_rows(dump: str, rev: str, table: str) -> list[dict] | None:
     return data if isinstance(data, list) else []
 
 
-def row_key(row: dict) -> tuple:
-    if "id" in row:
+KEYISH = ("number", "level", "grade", "upgradeCount", "order", "rarity", "produceCardId")
+
+
+def row_key(row: dict, composite: bool = False) -> tuple:
+    """Identity of a row: `id` when the table has unique ids; otherwise (or when
+    `composite` is set because ids collide, e.g. ProduceStepAuditionDifficulty) the tuple of
+    id + every *Id / *Type field + a few key-like scalar fields."""
+    if "id" in row and not composite:
         return ("id", row["id"])
-    return tuple((k, v) for k, v in row.items() if isinstance(v, str))
+    key = []
+    for k, v in row.items():
+        if k == "id" or k.endswith(("Id", "Type", "Types")) or k in KEYISH:
+            key.append((k, json.dumps(v, sort_keys=True, default=str)))
+    if not key:
+        key = [(k, v) for k, v in row.items() if isinstance(v, str)]
+    return tuple(key)
+
+
+def ids_unique(rows: list[dict] | None) -> bool:
+    rows = rows or []
+    ids = [r.get("id") for r in rows if "id" in r]
+    return len(ids) == len(set(ids))
 
 
 def diff_rows(old: list[dict] | None, new: list[dict] | None) -> dict[str, Any]:
-    old_map = {row_key(r): r for r in (old or [])}
-    new_map = {row_key(r): r for r in (new or [])}
+    composite = not (ids_unique(old) and ids_unique(new))
+    old_map = {row_key(r, composite): r for r in (old or [])}
+    new_map = {row_key(r, composite): r for r in (new or [])}
     added = [new_map[k] for k in new_map if k not in old_map]
     removed = [old_map[k] for k in old_map if k not in new_map]
     modified = []

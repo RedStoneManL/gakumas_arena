@@ -5,3 +5,7 @@ __pycache__/
 .pytest_cache/
 .ruff_cache/
 data/raw/
+runs/
+trajectories/
+checkpoints/
+.gakumas_rl_cache/
