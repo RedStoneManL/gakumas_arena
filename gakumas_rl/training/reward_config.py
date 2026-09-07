@@ -8,6 +8,28 @@ from pathlib import Path
 from typing import Any
 
 
+_PACKAGE_ROOT = Path(__file__).resolve().parents[1]
+
+
+def resolve_config_path(path: str | Path) -> Path:
+    """解析奖励配置路径：先按原样/当前目录查找，找不到时回退到包内 `gakumas_rl/configs/`。
+
+    上游仓库把 `configs/` 放在仓库根目录；vendored 之后它位于包内，此处保持两种写法都可用。
+    """
+
+    candidate = Path(path)
+    if candidate.exists():
+        return candidate
+    in_package = _PACKAGE_ROOT / candidate
+    if in_package.exists():
+        return in_package
+    by_name = _PACKAGE_ROOT / 'configs' / candidate.name
+    if by_name.exists():
+        return by_name
+    return candidate
+
+
+
 @dataclass
 class RewardConfig:
     """统一奖励参数集。
@@ -96,7 +118,7 @@ class RewardConfig:
     @classmethod
     def from_json(cls, path: str | Path) -> 'RewardConfig':
         """从 JSON 文件加载。"""
-        with open(path, 'r', encoding='utf-8') as f:
+        with open(resolve_config_path(path), 'r', encoding='utf-8') as f:
             return cls.from_dict(json.load(f))
 
     def save_json(self, path: str | Path) -> None:
@@ -280,7 +302,7 @@ class ProduceRewardConfig:
     def from_json(cls, path: str | Path) -> 'ProduceRewardConfig':
         """从 JSON 文件加载培育奖励配置。"""
 
-        with open(path, 'r', encoding='utf-8') as handle:
+        with open(resolve_config_path(path), 'r', encoding='utf-8') as handle:
             return cls.from_dict(json.load(handle))
 
     def save_json(self, path: str | Path) -> None:
