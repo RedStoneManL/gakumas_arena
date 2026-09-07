@@ -33,7 +33,8 @@ import os
 import pickle
 import re
 import sys
-from typing import Any, Iterable
+from collections.abc import Iterable
+from typing import Any
 
 try:
     import yaml
@@ -156,7 +157,7 @@ def scalars(v: Any) -> Iterable[Any]:
 
 
 class FieldStat:
-    __slots__ = ("types", "n", "empty", "distinct", "samples", "enum_values", "track_enums")
+    __slots__ = ("distinct", "empty", "enum_values", "n", "samples", "track_enums", "types")
 
     def __init__(self, track_enums: bool = True) -> None:
         self.track_enums = track_enums
@@ -257,7 +258,7 @@ def enum_fields(stats):
 
 
 def grep(tables, pattern: str):
-    rx = re.compile(pattern, re.I)
+    rx = re.compile(pattern, re.IGNORECASE)
     hits: collections.Counter = collections.Counter()
     examples: dict = {}
     for t, rows in tables.items():

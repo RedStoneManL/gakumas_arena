@@ -1,5 +1,5 @@
 """Second half of the hand-written annotations (tables F-J) + per-value notes for key enums."""
-from atlas_annotations import add, T, COMMON, NESTED  # noqa: F401
+from atlas_annotations import COMMON, NESTED, T, add  # noqa: F401
 
 # =========================================================================== F. 偶像 / 角色 / 支援卡
 add("IdolCard",

@@ -23,9 +23,9 @@ import sys
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
-import inspect_dump as ins  # noqa: E402
-import atlas_annotations as A  # noqa: E402
-import atlas_annotations_more as A2  # noqa: E402
+import atlas_annotations as A
+import atlas_annotations_more as A2
+import inspect_dump as ins
 
 # --------------------------------------------------------------------------- proto parsing
 
