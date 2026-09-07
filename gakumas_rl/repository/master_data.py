@@ -9,7 +9,7 @@ import os
 import pickle
 import re
 from collections import Counter, defaultdict
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from functools import cached_property
 from pathlib import Path
 from statistics import median
@@ -110,6 +110,108 @@ class TableIndex:
         return list(self.by_id.get(item_id, []))
 
 
+HIF_PRODUCE_TYPE = 'ProduceType_HatsuboshiIdolFestival'
+HIF_ROUTE_SELECTION = 'hif_selection'
+HIF_ROUTE_FINAL = 'hif_final'
+HIF_ROUTE_TYPES = (HIF_ROUTE_SELECTION, HIF_ROUTE_FINAL)
+HIF_SELECTION_PRODUCE_ID = 'produce-007'
+HIF_FINAL_PRODUCE_ID = 'produce-008'
+
+# 選抜試験 三场试验的分数→スター性 封顶分数（网络实测，hif.md §5）。
+# TODO(HIF-verify): starScoreBonusBaseLine 的真实换算公式未知，此处按线性封顶实现。
+HIF_SELECTION_STAR_SCORE_CAPS = (14000.0, 150000.0, 390000.0)
+# 選抜試験 / 本戦 试验日（1-based，hif.md §3.1 / §3.2）。
+HIF_SELECTION_AUDITION_STEPS = (7, 13, 20)
+HIF_FINAL_AUDITION_STEPS = (7, 9)
+HIF_FINAL_INTERVAL_STEP = 8
+# 公開レッスン 数值表阶段 id（ProduceStepOpenLesson id 中段），按「下一场试验」的下标索引。
+HIF_SELECTION_OPEN_LESSON_STAGES = ('produce_007-01', 'produce_007-02', 'produce_007-03')
+# TODO(HIF-verify): 本戦准备期使用 produce_007-04 为推断（hif.md §4.1）。
+HIF_FINAL_OPEN_LESSON_STAGES = ('produce_007-04', 'produce_007-04')
+# 授業 事件池标签，按「下一场试验」下标索引；主数据没有 before_2nd 授業池，复用 before_3rd（hif.md §4.2 [推断]）。
+HIF_SELECTION_SCHOOL_POOL_TAGS = ('before_1st', 'before_3rd', 'before_3rd')
+HIF_SELECTION_ACTIVITY_POOL_TAGS = ('before_2nd', 'before_2nd', 'before_3rd')
+
+
+@dataclass(frozen=True)
+class HifAuditionSpec:
+    """H.I.F 单场试验（選抜 1~3 / 本戦 Round1~2）的主数据快照。"""
+
+    stage_type: str
+    step: int
+    label: str
+    rank_threshold: int
+    base_score: float
+    parameter_baseline: float
+    star_score_bonus_baseline: float
+    turns: int
+    is_static_npc_score: bool
+    star_score_cap: float
+
+
+@dataclass(frozen=True)
+class HifMemoryHandoffConfig:
+    """選抜試験メモリー → 本戦 的继承开关。
+
+    主数据只说明本戦必须用選抜試験メモリー进入（`Produce.selectionMemoryEmbedProduceCardId`），
+    评价公式需要 6000 级的合计属性与 1100 级的スター性，说明属性与スター性必须随メモリー继承。
+    # TODO(HIF-verify): 具体继承项（饮料、P 道具剩余次数、カスタムPアイテム）未在主数据中确认。
+    """
+
+    carry_parameters: bool = True
+    carry_star_quality: bool = True
+    carry_deck: bool = True
+    carry_produce_items: bool = True
+    carry_customize_item: bool = True
+    carry_drinks: bool = False
+    carry_max_stamina: bool = True
+
+
+@dataclass(frozen=True)
+class HifScenarioConfig:
+    """H.I.F 剧本专用配置（由主数据装配，含标注为 TODO(HIF-verify) 的可调推断项）。"""
+
+    split_type: str
+    auditions: tuple[HifAuditionSpec, ...]
+    open_lesson_stage_ids: tuple[str, ...]
+    school_pool_tags: tuple[str, ...]
+    activity_pool_tags: tuple[str, ...]
+    interval_step: int = 0
+    round1_score_multiplier: float = 1.2
+    star_quality_cap: float = 1335.0
+    star_quality_cap_before_round2: float = 1110.0
+    # スター性 → 试验スコアボーナス：g(star) = star / star_quality_cap × max_ratio（线性，hif.md §6.6 [推断]）
+    # TODO(HIF-verify): 真实曲线未知。
+    star_score_bonus_max_ratio: float = 0.25
+    # 公開レッスン SP 基础发生率（主数据未给出；HIF ボーナス面板最多 +5%）。TODO(HIF-verify)
+    open_lesson_sp_base_rate: float = 0.15
+    # 成长率是否同时作用于副属性（hif.md §4.1 [推断]）。TODO(HIF-verify)
+    open_lesson_growth_applies_to_sub: bool = True
+    # 副属性选择策略：'lowest' = 自动选另两项中较低者。TODO(HIF-verify)
+    open_lesson_sub_parameter_policy: str = 'lowest'
+    # Round1 的スター性换算是否使用 ×1.2 后的分数（由「R1 50万 ≈ +180」反推成立）。TODO(HIF-verify)
+    round1_star_gain_uses_adjusted_score: bool = True
+    # 本戦 isStaticNpcScore=true 的对手分数：'sample'（区间内三角分布）或 'midpoint'。TODO(HIF-verify)
+    static_npc_score_mode: str = 'sample'
+    # インターバル：Pポイント10 → 体力2（网络说明）。TODO(HIF-verify)
+    interval_recover_point_cost: float = 10.0
+    interval_recover_stamina: float = 2.0
+    # H.I.F ボーナス 成长面板等级（sheet 序号 01..09 → 等级 0..6），默认全 0。
+    growth_panel_levels: dict[str, int] = field(default_factory=dict)
+    growth_panel_sheet_id: str = 'produce_growth_panel_sheet-hif'
+    memory_handoff: HifMemoryHandoffConfig = field(default_factory=HifMemoryHandoffConfig)
+    opening_event_detail_id: str = ''
+    after_audition_event_detail_ids: dict[str, str] = field(default_factory=dict)
+
+    def audition_for_stage(self, stage_type: str) -> HifAuditionSpec | None:
+        """按 stepType 查找试验配置。"""
+
+        for item in self.auditions:
+            if item.stage_type == stage_type:
+                return item
+        return None
+
+
 @dataclass(frozen=True)
 class ScenarioSpec:
     """训练环境共享的场景配置快照。"""
@@ -131,6 +233,17 @@ class ScenarioSpec:
     exam_turns: int
     default_stage: str
     reward_weights: dict[str, float]
+    produce_type: str = ''
+    produce_split_type: str = ''
+    split_pair_produce_id: str = ''
+    checkpoint_steps: tuple[int, ...] = ()
+    hif: HifScenarioConfig | None = None
+
+    @property
+    def is_hif(self) -> bool:
+        """是否属于 H.I.F（選抜試験 / 本戦）路线。"""
+
+        return self.route_type in HIF_ROUTE_TYPES
 
 
 @dataclass(frozen=True)
@@ -1072,7 +1185,10 @@ class MasterDataRepository:
         if group is None:
             raise KeyError(f'Unable to find produce group for {scenario_id}')
         setting = self.produce_settings.first(str(produce.get('produceSettingId')))
-        route_type = 'nia' if str(group.get('type')) == 'ProduceType_NextIdolAudition' else 'first_star'
+        produce_type = str(group.get('type') or '')
+        if produce_type == HIF_PRODUCE_TYPE:
+            return self._build_hif_scenario(scenario_id, produce, group, setting or {})
+        route_type = 'nia' if produce_type == 'ProduceType_NextIdolAudition' else 'first_star'
         audition_sequence = (
             'ProduceStepType_AuditionMid1',
             'ProduceStepType_AuditionMid2',
@@ -1166,12 +1282,183 @@ class MasterDataRepository:
                 'stamina': 0.015,
                 'clear': 1.2 if route_type == 'nia' else 0.9,
             },
+            produce_type=produce_type,
+            produce_split_type=str(produce.get('produceSplitType') or ''),
+            split_pair_produce_id=str(produce.get('splitPairProduceId') or ''),
+        )
+
+    def hif_audition_specs(self, produce_id: str) -> tuple[HifAuditionSpec, ...]:
+        """从 `ProduceStepAuditionDifficulty` / `ProduceExamBattleConfig` 汇总 H.I.F 各场试验参数。
+
+        HIF 每场试验按偶像卡有多行（vovi/davi 与 vida/davo/voda 两组数值），
+        这里对 baseScore/parameterBaseLine 取中位数、对 rankThreshold/starScoreBonusBaseLine/turn 取众数，
+        作为场景级快照；实际对局仍按偶像卡绑定的难度行运行。
+
+        Args:
+            produce_id: `produce-007` 或 `produce-008`。
+
+        Returns:
+            按试验顺序排列的 `HifAuditionSpec`。
+        """
+
+        is_selection = produce_id == HIF_SELECTION_PRODUCE_ID
+        if is_selection:
+            stage_types = ('ProduceStepType_AuditionMid1', 'ProduceStepType_AuditionMid2', 'ProduceStepType_AuditionFinal')
+            steps = HIF_SELECTION_AUDITION_STEPS
+            labels = ('選抜試験1', '選抜試験2', '選抜試験3')
+            star_caps = HIF_SELECTION_STAR_SCORE_CAPS
+        else:
+            stage_types = ('ProduceStepType_AuditionMid1', 'ProduceStepType_AuditionFinal')
+            steps = HIF_FINAL_AUDITION_STEPS
+            labels = ('Round1', 'Round2')
+            # 本戦 的スター性换算走 produce_score.calculate_hif_round2_star_gain 分段表，封顶分数字段仅作记录。
+            star_caps = (1000000.0 * 1.2, 1000000.0)
+        specs: list[HifAuditionSpec] = []
+        for index, stage_type in enumerate(stage_types):
+            rows = [
+                row
+                for row in self.audition_difficulties.rows
+                if str(row.get('produceId')) == produce_id and str(row.get('stepType')) == stage_type
+            ]
+            if not rows:
+                raise KeyError(f'HIF audition rows missing from master database: produce_id={produce_id}, stage_type={stage_type}')
+            turns: list[int] = []
+            for row in rows:
+                config = self.battle_config_map.get(str(row.get('produceExamBattleConfigId') or '')) or {}
+                if config.get('turn'):
+                    turns.append(int(config.get('turn') or 0))
+            rank_thresholds = [int(row.get('rankThreshold') or 0) for row in rows]
+            star_baselines = [float(row.get('starScoreBonusBaseLine') or 0.0) for row in rows]
+            specs.append(
+                HifAuditionSpec(
+                    stage_type=stage_type,
+                    step=int(steps[index]),
+                    label=labels[index],
+                    rank_threshold=int(max(set(rank_thresholds), key=rank_thresholds.count)),
+                    base_score=float(np.median([float(row.get('baseScore') or 0.0) for row in rows])),
+                    parameter_baseline=float(np.median([float(row.get('parameterBaseLine') or 0.0) for row in rows])),
+                    star_score_bonus_baseline=float(max(set(star_baselines), key=star_baselines.count)),
+                    turns=int(max(set(turns), key=turns.count)) if turns else 0,
+                    is_static_npc_score=bool(rows[0].get('isStaticNpcScore')),
+                    star_score_cap=float(star_caps[index]),
+                )
+            )
+        return tuple(specs)
+
+    def _build_hif_scenario(
+        self,
+        scenario_id: str,
+        produce: dict[str, Any],
+        group: dict[str, Any],
+        setting: dict[str, Any],
+    ) -> ScenarioSpec:
+        """装配 H.I.F（produce-007 選抜試験 / produce-008 本戦）场景。
+
+        日程骨架、试验参数、公開レッスン 阶段与事件池均来自主数据；逐日行动菜单在主数据中不是表驱动，
+        沿用 hif.md §3 的固定试验日（7/13/20 与 7/[8]/9），其余日为自由行动。
+        """
+
+        split_type = str(produce.get('produceSplitType') or '')
+        is_selection = split_type == 'ProduceSplitType_Selection' or scenario_id == HIF_SELECTION_PRODUCE_ID
+        route_type = HIF_ROUTE_SELECTION if is_selection else HIF_ROUTE_FINAL
+        auditions = self.hif_audition_specs(scenario_id)
+        audition_sequence = tuple(item.stage_type for item in auditions)
+        checkpoint_steps = tuple(item.step for item in auditions)
+        steps = int(produce.get('steps') or 0)
+        if checkpoint_steps and checkpoint_steps[-1] != steps:
+            raise ValueError(f'HIF schedule mismatch: produce_id={scenario_id}, steps={steps}, checkpoints={checkpoint_steps}')
+        action_types: tuple[str, ...] = (
+            'lesson_vocal_open',
+            'lesson_dance_open',
+            'lesson_visual_open',
+            'lesson_vocal_open_star',
+            'lesson_dance_open_star',
+            'lesson_visual_open_star',
+            'school_class_vocal',
+            'school_class_dance',
+            'school_class_visual',
+            'activity_supply',
+            'outing',
+            'present',
+            'refresh',
+        )
+        if not is_selection:
+            action_types = action_types + ('hif_interval', 'hif_interval_recover')
+        produce_code = scenario_id.replace('-', '_')
+        story_prefix = f'event-detail-p_story-003-{scenario_id}'
+        after_audition_ids: dict[str, str] = {}
+        for stage_type, suffix in (
+            ('ProduceStepType_AuditionMid1', 'after_audition_mid1-1'),
+            ('ProduceStepType_AuditionMid2', 'after_audition_mid2-1'),
+            ('ProduceStepType_AuditionFinal', 'after_audition_final-1'),
+        ):
+            detail_id = f'{story_prefix}-{suffix}'
+            if self.produce_step_event_details.first(detail_id) is not None:
+                after_audition_ids[stage_type] = detail_id
+        opening_id = f'{story_prefix}-opening-1'
+        hif_config = HifScenarioConfig(
+            split_type='selection' if is_selection else 'final',
+            auditions=auditions,
+            open_lesson_stage_ids=HIF_SELECTION_OPEN_LESSON_STAGES if is_selection else HIF_FINAL_OPEN_LESSON_STAGES,
+            school_pool_tags=HIF_SELECTION_SCHOOL_POOL_TAGS if is_selection else (produce_code, produce_code),
+            activity_pool_tags=HIF_SELECTION_ACTIVITY_POOL_TAGS if is_selection else (produce_code, produce_code),
+            interval_step=0 if is_selection else HIF_FINAL_INTERVAL_STEP,
+            opening_event_detail_id=opening_id if self.produce_step_event_details.first(opening_id) is not None else '',
+            after_audition_event_detail_ids=after_audition_ids,
+        )
+        first_stage = self.stage_thresholds.get((scenario_id, audition_sequence[0]), {})
+        weight_vector = np.array(
+            [
+                first_stage.get('vocal_weight', 1.0 / 3.0),
+                first_stage.get('dance_weight', 1.0 / 3.0),
+                first_stage.get('visual_weight', 1.0 / 3.0),
+            ],
+            dtype=np.float32,
+        )
+        return ScenarioSpec(
+            scenario_id=scenario_id,
+            produce_id=scenario_id,
+            produce_name=self.produce_name(scenario_id),
+            group_id=str(group.get('id')),
+            route_type=route_type,
+            parameter_growth_limit=float(produce.get('idolCardParameterGrowthLimit') or 0.0),
+            steps=steps,
+            action_point_quantity=int(produce.get('actionPointQuantity') or 0),
+            max_refresh_count=int(produce.get('maxRefreshCount') or 0),
+            drink_limit=int(setting.get('produceDrinkPossessLimit') or 3),
+            audition_sequence=audition_sequence,
+            action_types=action_types,
+            focus_effect_types=(
+                'ProduceExamEffectType_ExamParameterBuff',
+                'ProduceExamEffectType_ExamLessonBuff',
+                'ProduceExamEffectType_ExamReview',
+                'ProduceExamEffectType_ExamCardPlayAggressive',
+                'ProduceExamEffectType_ExamConcentration',
+            ),
+            score_weights=(float(weight_vector[0]), float(weight_vector[1]), float(weight_vector[2])),
+            exam_turns=int(first_stage.get('turns') or auditions[0].turns or 10),
+            default_stage=audition_sequence[-1],
+            reward_weights={
+                'stat': 0.003,
+                'vote': 0.0,
+                'points': 0.0010,
+                'deck': 0.09,
+                'drink': 0.06,
+                'stamina': 0.015,
+                'clear': 1.0,
+            },
+            produce_type=HIF_PRODUCE_TYPE,
+            produce_split_type=split_type,
+            split_pair_produce_id=str(produce.get('splitPairProduceId') or ''),
+            checkpoint_steps=checkpoint_steps,
+            hif=hif_config,
         )
 
     def list_supported_scenarios(self) -> list[str]:
         """列出当前训练代码显式支持的场景 id。"""
 
-        return [row['id'] for row in self.produces.rows if row.get('id') in {'produce-001', 'produce-002', 'produce-003', 'produce-004', 'produce-005', 'produce-006'}]
+        supported = {'produce-001', 'produce-002', 'produce-003', 'produce-004', 'produce-005', 'produce-006', HIF_SELECTION_PRODUCE_ID, HIF_FINAL_PRODUCE_ID}
+        return [row['id'] for row in self.produces.rows if row.get('id') in supported]
 
     def _resolve_effect_group_types(self, effect_group_ids: Iterable[str], key: str) -> list[str]:
         values: list[str] = []

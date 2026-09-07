@@ -410,7 +410,7 @@ dump 中形似枚举但 proto 未定义的前缀（多为 id 噪声）：Convert
 
 #### ExamCardStaminaConsumptionChange  — rows=0  UI名=**消費体力変化**
 
-- 语义：消費体力変化。
+- 语义：（proto/描述表定义，dump 无行）改变某卡消耗体力。
 - 说明文（Label_ExamCardStaminaConsumptionChange）：exam_template利用
 - dump 中无 ProduceExamEffect 行。
 
@@ -783,7 +783,7 @@ dump 中形似枚举但 proto 未定义的前缀（多为 id 噪声）：Convert
 
 #### ExamBlockAddDownRestriction  — rows=0  UI名=**不安無効**
 
-- 语义：不安無効。
+- 语义：不安無効（定义，无行）。
 - 说明文（Label_ExamBlockAddDownRestriction）：不安状態にならない
 - dump 中无 ProduceExamEffect 行。
 
@@ -795,7 +795,7 @@ dump 中形似枚举但 proto 未定义的前缀（多为 id 噪声）：Convert
 
 #### ExamStaminaReduceChange  — rows=0  UI名=**体力消費軽減**
 
-- 语义：体力消費軽減。
+- 语义：体力消費軽減（定义，无行）。
 - 说明文（Label_ExamStaminaReduceChange）：以下の消費体力を1にする
 - dump 中无 ProduceExamEffect 行。
 
@@ -2647,7 +2647,7 @@ dump 中形似枚举但 proto 未定义的前缀（多为 id 噪声）：Convert
 | `ExamBlockValueMultiple` | 13 | 9 | ProduceExamEffect.effectType=8; EffectGroup.examEffectTypes=1 | 元気 ×(1+v1‰)。 |
 | `ExamPlayableValueAdd` | 14 | 2068 | ProduceCard.produceDescriptions=353; ProduceCard.produceDescriptions.examEffectType=353; ProduceExamStatusEnchant.produceDescriptions=234; ProduceExamStatusEnchant.produceDescriptions.examEffectType=234 | スキルカード使用数追加 +effectCount（本回合额外出牌次数）。 |
 | `ExamLessonBuffMultiple` | 15 | 116 | ProduceExamEffect.effectType=15; ProduceExamEffect.produceDescriptions=15; ProduceExamEffect.produceDescriptions.examEffectType=15; ProduceExamEffect.customizeProduceDescriptions=15 | 集中強化：集中带来的参数增量 ×(1+v1‰)，effectTurn 回合。 |
-| `ExamCardStaminaConsumptionChange` | 17 | 1 | ProduceDescriptionExamEffect.type=1 | 消費体力変化。 |
+| `ExamCardStaminaConsumptionChange` | 17 | 1 | ProduceDescriptionExamEffect.type=1 | （proto/描述表定义，dump 无行）改变某卡消耗体力。 |
 | `ExamBlockRestriction` | 18 | 170 | ProduceExamStatusEnchant.produceDescriptions=29; ProduceExamStatusEnchant.produceDescriptions.examEffectType=29; ProduceExamGimmickEffectGroup.produceDescriptions=15; ProduceExamGimmickEffectGroup.produceDescriptions.examEffectType=15 | 元気増加無効 effectTurn 回合。 |
 | `ExamLessonDependBlock` | 19 | 87 | ProduceExamEffect.effectType=83; EffectGroup.examEffectTypes=2; EffectGroup.examEffectType=1; ProduceExamTrigger.effectTypes=1 | 元気 ×v1‰ 的パラメータ（v2 为附加倍率）。 |
 | `ExamCardCreateSearch` | 21 | 8 | ProduceExamEffect.effectType=8 | 生成 pickCount 张来自 produceCardSearch（随机池）的卡到 movePositionType；pickCountType=Shortage 时补足到 N 张。 |
@@ -2683,9 +2683,9 @@ dump 中形似枚举但 proto 未定义的前缀（多为 id 噪声）：Convert
 | `ExamStaminaConsumptionAdd` | 69 | 300 | ProduceExamGimmickEffectGroup.produceDescriptions=62; ProduceExamGimmickEffectGroup.produceDescriptions.examEffectType=62; ProduceExamStatusEnchant.produceDescriptions=28; ProduceExamStatusEnchant.produceDescriptions.examEffectType=28 | 消費体力増加 effectTurn 回合（+100%）。 |
 | `ExamThresholdDown` **(dump 中无)** | 70 | 0 | — |  |
 | `ExamBlockAddDown` | 73 | 113 | ProduceExamStatusEnchant.produceDescriptions=16; ProduceExamStatusEnchant.produceDescriptions.examEffectType=16; ProduceExamGimmickEffectGroup.produceDescriptions=10; ProduceExamGimmickEffectGroup.produceDescriptions.examEffectType=10 | 不安 effectTurn 回合（元気获得 -33%）。 |
-| `ExamBlockAddDownRestriction` | 74 | 1 | ProduceDescriptionExamEffect.type=1 | 不安無効。 |
+| `ExamBlockAddDownRestriction` | 74 | 1 | ProduceDescriptionExamEffect.type=1 | 不安無効（定义，无行）。 |
 | `ExamStaminaRecoverAdd` | 76 | 1 | ProduceDescriptionExamEffect.type=1 | 体力回復効果増加（定义，无行）。 |
-| `ExamStaminaReduceChange` | 77 | 1 | ProduceDescriptionExamEffect.type=1 | 体力消費軽減。 |
+| `ExamStaminaReduceChange` | 77 | 1 | ProduceDescriptionExamEffect.type=1 | 体力消費軽減（定义，无行）。 |
 | `ExamPanic` | 78 | 98 | ProduceExamGimmickEffectGroup.produceDescriptions=38; ProduceExamGimmickEffectGroup.produceDescriptions.examEffectType=38; ProduceExamEffect.produceDescriptions=4; ProduceExamEffect.produceDescriptions.examEffectType=4 | 気まぐれ effectTurn 回合：手牌消耗体力随机（候选 ExamSetting.produceExamPanicStaminaCandidates）。 |
 | `ExamLessonChangeSpecifyLessThan` | 81 | 1 | ProduceDescriptionExamEffect.type=1 | パラメータ上昇値変更（定义，无行）。 |
 | `ExamHandHold` | 82 | 1 | ProduceDescriptionExamEffect.type=1 | 手札持ち越し（定义，无行）。 |

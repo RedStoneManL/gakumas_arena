@@ -224,7 +224,6 @@ en("ProduceExamEffectType", {
     "ExamStaminaRecoverMultiple": "最大体力 ×v1‰ 回复。", "ExamStaminaReduce": "最大体力 ×v1‰ 消耗（可为负=回复）。",
     "ExamMoveGrowEffect": "移动成长效果（1 行）。", "ExamGimmickTiredFix": "疲労（仅描述表）。", "ExamPlayableValueHold": "使用回数持ち越し（仅描述表）。", "ExamStaminaThresholdAddRestriction": "消費体力増加無効（仅描述表）。",
     "ExamSearchPlayCardValueBuff": "カード効果増加（仅描述表）。", "ExamEnthusiasticTurnAdd": "熱意回合延长（1 行）。", "ExamFullPowerPointPerSearchCount": "按筛选卡数加全力値（1 行）。", "ExamFullPowerPointDependFullPowerPointGetSum": "按累计全力値加全力値（1 行）。",
-    "ExamStaminaReduceChange": "体力消費軽減。", "ExamBlockAddDownRestriction": "不安無効。", "ExamCardStaminaConsumptionChange": "消費体力変化。",
 })
 
 en("ProduceExamPhaseType", {
